@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CodeU Example Project
 
 This is an example chat application. It's complete and functional, but leaves
@@ -84,3 +85,7 @@ App Engine devserver.
 - Bring the devserver back up by executing `mvn clean appengine:devserver`
 again.
 - Refresh your browser to see your changes!
+=======
+# Google-CodeU-2018
+Team 3's Repo for our Spring 2018 CodeU project. Huzzah!
+>>>>>>> ace4a0dd76d9e8da1bb7dbc9885291597b6c0522
