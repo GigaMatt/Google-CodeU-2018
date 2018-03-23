@@ -58,4 +58,13 @@ public class User {
   public Instant getCreationTime() {
     return creation;
   }
+
+  /** Returns whether or not a user is the same as the other. */
+  public boolean equals(User otherUser) {
+    return (this.id.equals(otherUser.getId()) &&
+            this.name.equals(otherUser.getName()) &&
+            this.password.equals(otherUser.getPassword()) &&
+            this.creation.equals(otherUser.getCreationTime())
+    );
+  }
 }
