@@ -21,6 +21,7 @@ import java.util.UUID;
 public class User {
   private final UUID id;
   private final String name;
+  private final String password;
   private final Instant creation;
 
   /**
@@ -28,11 +29,13 @@ public class User {
    *
    * @param id the ID of this User
    * @param name the username of this User
+   * @param password the password of this User
    * @param creation the creation time of this User
    */
-  public User(UUID id, String name, Instant creation) {
+  public User(UUID id, String name, String password, Instant creation) {
     this.id = id;
     this.name = name;
+    this.password = password;
     this.creation = creation;
   }
 
@@ -46,8 +49,22 @@ public class User {
     return name;
   }
 
+  /** Returns the password of this User. */
+  public String getPassword() {
+    return password;
+  }
+
   /** Returns the creation time of this User. */
   public Instant getCreationTime() {
     return creation;
+  }
+
+  /** Returns whether or not a user is the same as the other. */
+  public boolean equals(User otherUser) {
+    return (this.id.equals(otherUser.getId()) &&
+            this.name.equals(otherUser.getName()) &&
+            this.password.equals(otherUser.getPassword()) &&
+            this.creation.equals(otherUser.getCreationTime())
+    );
   }
 }

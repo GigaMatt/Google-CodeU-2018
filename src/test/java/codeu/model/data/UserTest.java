@@ -25,12 +25,35 @@ public class UserTest {
   public void testCreate() {
     UUID id = UUID.randomUUID();
     String name = "test_username";
+    String password = "test password";
     Instant creation = Instant.now();
 
-    User user = new User(id, name, creation);
+    User user = new User(id, name, password, creation);
 
     Assert.assertEquals(id, user.getId());
     Assert.assertEquals(name, user.getName());
+    Assert.assertEquals(password, user.getPassword());
     Assert.assertEquals(creation, user.getCreationTime());
+  }
+
+  @Test
+  public void testEquals() {
+    UUID id = UUID.randomUUID();
+    String name = "test_username";
+    String password = "test password";
+    Instant creation = Instant.now();
+
+    User user1 = new User(id, name, password, creation);
+    User user2 = new User(id, name, password, creation);
+    User user3 = new User(UUID.randomUUID(), name, password, creation);
+    User user4 = new User(id, "test_username2", password, creation);
+    User user5 = new User(id, name, "test password 2", creation);
+    User user6 = new User(id, name, password, creation.plusSeconds(1));
+
+    Assert.assertTrue(user1.equals(user2));
+    Assert.assertFalse(user1.equals(user3));
+    Assert.assertFalse(user1.equals(user4));
+    Assert.assertFalse(user1.equals(user5));
+    Assert.assertFalse(user1.equals(user6));
   }
 }
