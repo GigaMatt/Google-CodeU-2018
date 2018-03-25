@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class LoginServletTest {
 
@@ -82,7 +83,7 @@ public class LoginServletTest {
 
     UUID id = UUID.randomUUID();
     Instant creation = Instant.now();
-    User fakeUser = new User(id, "test username", "test password", creation);
+    User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()), creation);
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     loginServlet.setUserStore(mockUserStore);
 
@@ -100,7 +101,7 @@ public class LoginServletTest {
 
     UUID id = UUID.randomUUID();
     Instant creation = Instant.now();
-    User fakeUser = new User(id, "test username", "not test password", creation);
+    User fakeUser = new User(id, "test username", BCrypt.hashpw("not test password", BCrypt.gensalt()), creation);
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     loginServlet.setUserStore(mockUserStore);
 
