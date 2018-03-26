@@ -26,7 +26,13 @@ public class RegisterServletTest {
   public void setup() {
     registerServlet = new RegisterServlet();
     mockRequest = Mockito.mock(HttpServletRequest.class);
+    Mockito.when(mockRequest.getParameter("username")).thenReturn("test username");
+    Mockito.when(mockRequest.getParameter("password")).thenReturn("test password");
+
     mockResponse = Mockito.mock(HttpServletResponse.class);
+
+    mockUserStore = Mockito.mock(UserStore.class);
+
     mockRequestDispatcher = Mockito.mock(RequestDispatcher.class);
     Mockito.when(mockRequest.getRequestDispatcher("/WEB-INF/view/register.jsp"))
       .thenReturn(mockRequestDispatcher);
