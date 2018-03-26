@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -78,10 +79,12 @@ public class RegisterServletTest {
     
     registerServlet.doPost(mockRequest, mockResponse);
 
-    Assert.assertEquals(mockUserStore.isUserRegistered("test username"), true);
-
-    User newUser = mockUserStore.getUser("test username");
-    Assert.assertEquals(BCrypt.checkpw("test password", newUser.getPassword()), true);
+    ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+    Mockito.verify(mockUserStore).addUser(userArgumentCaptor.capture());
+    
+    User newUser = userArgumentCaptor.getValue();
+    Assert.assertEquals("test username", newUser.getName());
+    Assert.assertEquals(true, BCrypt.checkpw("test password", newUser.getPassword()));
 
     Mockito.verify(mockResponse).sendRedirect("/login");
   }
