@@ -140,8 +140,13 @@ public class ChatServlet extends HttpServlet {
 
     String messageContent = request.getParameter("message");
 
+
+    // Creates a basic whitelist to allow a few HTML text tags
+    Whitelist whitelist = Whitelist.basic();
+    whitelist.addAttributes("span", "style");
+
     // this removes any HTML from the message content
-    String cleanedMessageContent = Jsoup.clean(messageContent, Whitelist.none());
+    String cleanedMessageContent = Jsoup.clean(messageContent, whitelist);
 
     Message message =
         new Message(
