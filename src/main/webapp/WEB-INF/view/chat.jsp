@@ -69,25 +69,28 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       Quill.register(Quill.import('attributors/style/font'), true);
       Quill.register(Quill.import('attributors/style/size'), true);
 
-      let chatInputEditor = new Quill('#chat-input-editor', {
-        debug: 'info',
-        modules: {
-          toolbar: '#chat-input-toolbar'
-        },
-        placeholder: 'Type your message and press Send',
-        theme: 'snow'
-      });
-
       let chatForm = document.querySelector('#chat-form');
-      chatForm.onsubmit = function() {
-        let chatInputField = chatForm.querySelector('#chat-input-field');
+
+      if(chatForm) {
         let chatInputEditor = chatForm.querySelector('#chat-input-editor');
+        let chatInputToolbar = chatForm.querySelector('#chat-input-toolbar');
 
-        let messageContent = chatInputEditor.querySelector('.ql-editor').firstChild.innerHTML;
+        let chatQuill = new Quill(chatInputEditor, {
+          modules: {
+            toolbar: chatInputToolbar
+          },
+          placeholder: 'Type your message and press Send',
+          theme: 'snow'
+        });
 
-        chatInputField.value = messageContent;
+        chatForm.onsubmit = function() {
+          let chatInputField = chatForm.querySelector('#chat-input-field');
+          chatInputField.value = chatInputEditor.querySelector('.ql-editor').firstChild.innerHTML;
 
-        return true;
+          return true;
+        }
+
+        chatQuill.focus();
       }
     }
 
