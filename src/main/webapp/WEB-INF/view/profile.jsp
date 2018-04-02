@@ -28,9 +28,9 @@
   <body>
 
   <%@ include file="/include/navbar.jsp" %>
-
-<!-- prints the name of the user logged in, or null if no user is logged in-->
+   
    <div id="container">
+    <!-- prints the name of the user logged in, or an error message-->
     <% if(request.getSession().getAttribute("user") != null){ %>
         <h1><a><%= request.getSession().getAttribute("user") %></a></h1>
     <% } else{ %>
