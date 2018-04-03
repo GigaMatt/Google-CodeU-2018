@@ -23,6 +23,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,7 +125,7 @@ public class PersistentDataStore {
     List<Message> messages = new ArrayList<>();
 
     // Retrieve all messages from the datastore.
-    Query query = new Query("chat-messages");
+    Query query = new Query("chat-messages").addSort("creation_time", SortDirection.ASCENDING);
     PreparedQuery results = datastore.prepare(query);
 
     for (Entity entity : results.asIterable()) {
