@@ -29,6 +29,7 @@
 
   <%@ include file="/include/navbar.jsp" %>
    <div id="container">
+
     <!-- prints the name of the user logged in, or an error message-->
     <% if(request.getSession().getAttribute("user") != null){ %>
         <h1><a><%= request.getSession().getAttribute("user") %>'s Profile Page</a></h1>
@@ -37,12 +38,13 @@
     <% } %>
     <hr>
     <br>
+
      <!-- about section --> 
      <h3>About  <%= request.getSession().getAttribute("user") %> </h3>
+     
      <!-- info from datastore -->
      <p> Test Data Here </p>
      <br>
-
      <h3> Edit your About Me (only you can see this)</h3>
      <form>
        <textarea cols="100">
