@@ -14,10 +14,13 @@
 
 package codeu.controller;
 
+import codeu.model.data.User;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
 import java.io.IOException;
+import java.time.Instant;
+import java.util.UUID;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -25,11 +28,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
+import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.Mockito;
 
-public class TestDataServletTest {
+public class AdminServletTest {
 
-  private TestDataServlet testDataServlet;
+  private AdminServlet adminServlet;
   private HttpServletRequest mockRequest;
   private HttpSession mockSession;
   private HttpServletResponse mockResponse;
@@ -40,7 +44,7 @@ public class TestDataServletTest {
 
   @Before
   public void setup() {
-    testDataServlet = new TestDataServlet();
+    adminServlet = new AdminServlet();
 
     mockRequest = Mockito.mock(HttpServletRequest.class);
     mockSession = Mockito.mock(HttpSession.class);
@@ -48,31 +52,74 @@ public class TestDataServletTest {
 
     mockResponse = Mockito.mock(HttpServletResponse.class);
     mockRequestDispatcher = Mockito.mock(RequestDispatcher.class);
-    Mockito.when(mockRequest.getRequestDispatcher("/WEB-INF/view/testdata.jsp"))
+    Mockito.when(mockRequest.getRequestDispatcher("/WEB-INF/view/admin.jsp"))
         .thenReturn(mockRequestDispatcher);
 
     mockConversationStore = Mockito.mock(ConversationStore.class);
-    testDataServlet.setConversationStore(mockConversationStore);
+    adminServlet.setConversationStore(mockConversationStore);
 
     mockMessageStore = Mockito.mock(MessageStore.class);
-    testDataServlet.setMessageStore(mockMessageStore);
+    adminServlet.setMessageStore(mockMessageStore);
 
     mockUserStore = Mockito.mock(UserStore.class);
-    testDataServlet.setUserStore(mockUserStore);
   }
 
   @Test
   public void testDoGet() throws IOException, ServletException {
-    testDataServlet.doGet(mockRequest, mockResponse);
+    adminServlet.doGet(mockRequest, mockResponse);
 
     Mockito.verify(mockRequestDispatcher).forward(mockRequest, mockResponse);
   }
 
   @Test
+  public void testNonLoginAccess() throws IOException, ServletException {
+    Mockito.when(mockSession.getAttribute("user")).thenReturn(null);
+
+    adminServlet.doPost(mockRequest, mockResponse);
+
+    Mockito.verify(mockSession).getAttribute("user");
+    Mockito.verify(mockResponse).sendRedirect("/login");
+  }
+
+  @Test
+  public void testNonAdminAccess() throws IOException, ServletException {
+    Mockito.when(mockSession.getAttribute("role")).thenReturn("member");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test username");
+
+    adminServlet.doPost(mockRequest, mockResponse);
+
+    Mockito.verify(mockSession).getAttribute("role");
+    Mockito.verify(mockResponse).sendRedirect("/login");
+  }
+
+  @Test
+  public void testNonExistentUser() throws IOException, ServletException {
+    Mockito.when(mockSession.getAttribute("role")).thenReturn("admin");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test username");
+    Mockito.when(mockUserStore.getUser("test username")).thenReturn(null);
+    adminServlet.setUserStore(mockUserStore);
+
+    adminServlet.doPost(mockRequest, mockResponse);
+
+    Mockito.verify(mockUserStore).getUser("test username");
+    Mockito.verify(mockResponse).sendRedirect("/login");
+  }
+
+  @Test
   public void testDoPost_Confirm() throws IOException, ServletException {
+    Mockito.when(mockSession.getAttribute("role")).thenReturn("admin");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test username");
+
+    UUID id = UUID.randomUUID();
+    Instant creation = Instant.now();
+    User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
+            "admin", creation);
+    Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
+    adminServlet.setUserStore(mockUserStore);
+
     Mockito.when(mockRequest.getParameter("confirm")).thenReturn("confirm");
 
-    testDataServlet.doPost(mockRequest, mockResponse);
+    adminServlet.doPost(mockRequest, mockResponse);
 
     Mockito.verify(mockUserStore).loadTestData();
     Mockito.verify(mockConversationStore).loadTestData();
@@ -82,10 +129,20 @@ public class TestDataServletTest {
 
   @Test
   public void testDoPost_Cancel() throws IOException, ServletException {
+    Mockito.when(mockSession.getAttribute("role")).thenReturn("admin");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test username");
+
+    UUID id = UUID.randomUUID();
+    Instant creation = Instant.now();
+    User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
+            "admin", creation);
+    Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
+    adminServlet.setUserStore(mockUserStore);
+
     Mockito.when(mockRequest.getParameter("confirm")).thenReturn(null);
     Mockito.when(mockRequest.getParameter("cancel")).thenReturn("cancel");
 
-    testDataServlet.doPost(mockRequest, mockResponse);
+    adminServlet.doPost(mockRequest, mockResponse);
 
     Mockito.verify(mockUserStore, Mockito.never()).loadTestData();
     Mockito.verify(mockConversationStore, Mockito.never()).loadTestData();

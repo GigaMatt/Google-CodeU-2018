@@ -14,6 +14,7 @@
 
 package codeu.controller;
 
+import codeu.model.data.User;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
@@ -24,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /** Servlet class responsible for loading test data. */
-public class TestDataServlet extends HttpServlet {
+public class AdminServlet extends HttpServlet {
 
   /** Store class that gives access to Conversations. */
   private ConversationStore conversationStore;
@@ -69,13 +70,13 @@ public class TestDataServlet extends HttpServlet {
   }
 
   /**
-   * This function fires when a user requests the /testdata URL. It simply forwards the request to
-   * testdata.jsp.
+   * This function fires when a user requests the /admin URL. It simply forwards the request to
+   * admin.jsp.
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException, ServletException {
-    request.getRequestDispatcher("/WEB-INF/view/testdata.jsp").forward(request, response);
+    request.getRequestDispatcher("/WEB-INF/view/admin.jsp").forward(request, response);
   }
 
   /**
@@ -85,6 +86,30 @@ public class TestDataServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException, ServletException {
+
+    String username = (String) request.getSession().getAttribute("user");
+    if (username == null) {
+      // user is not logged in, don't let them utilize the admin page
+      response.sendRedirect("/login");
+      return;
+    }
+
+    String role = (String) request.getSession().getAttribute("role");
+    if (!role.equals("admin")) {
+      // if user is not an admin, don't let them utilize the admin page
+      System.out.println("You do not have access to view this page.");
+      response.sendRedirect("/login");
+      return;
+    }
+
+    User user = userStore.getUser(username);
+    if (user == null) {
+      // user was not found, don't let them utilize the admin page
+      System.out.println("User not found: " + username);
+      response.sendRedirect("/login");
+      return;
+    }
+
     String confirmButton = request.getParameter("confirm");
 
     if (confirmButton != null) {

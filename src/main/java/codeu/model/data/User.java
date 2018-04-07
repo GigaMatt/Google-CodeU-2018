@@ -22,6 +22,7 @@ public class User {
   private final UUID id;
   private final String name;
   private final String password;
+  private final String role;
   private final Instant creation;
 
   /**
@@ -32,10 +33,11 @@ public class User {
    * @param password the password of this User
    * @param creation the creation time of this User
    */
-  public User(UUID id, String name, String password, Instant creation) {
+  public User(UUID id, String name, String password, String role, Instant creation) {
     this.id = id;
     this.name = name;
     this.password = password;
+    this.role = role;
     this.creation = creation;
   }
 
@@ -53,6 +55,9 @@ public class User {
   public String getPassword() {
     return password;
   }
+
+  /** Returns the role (member or admin) of this User. */
+  public String getRole() { return role; }
 
   /** Returns the creation time of this User. */
   public Instant getCreationTime() {
