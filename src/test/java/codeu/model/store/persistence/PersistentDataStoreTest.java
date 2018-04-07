@@ -60,10 +60,10 @@ public class PersistentDataStoreTest {
 
     // confirm that what we saved matches what we loaded
     User resultUserOne = resultUsers.get(0);
-    Assert.assertTrue(idOne.equals(resultUserOne));
+    Assert.assertTrue(inputUserOne.equals(resultUserOne));
 
     User resultUserTwo = resultUsers.get(1);
-    Assert.assertTrue(idTwo.equals(resultUserTwo));
+    Assert.assertTrue(inputUserTwo.equals(resultUserTwo));
   }
 
   @Test
