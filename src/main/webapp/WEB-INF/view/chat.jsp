@@ -85,7 +85,24 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
         chatForm.onsubmit = function() {
           let chatInputField = chatForm.querySelector('#chat-input-field');
-          chatInputField.value = chatInputEditor.querySelector('.ql-editor').firstChild.innerHTML;
+          let qlEditor = chatInputEditor.querySelector('.ql-editor');
+          
+          let qlCursor = qlEditor.querySelector('.ql-cursor');
+          if(qlCursor) {
+            qlCursor.parentNode.removeChild(qlCursor);
+          }
+
+          let firstElement = qlEditor.firstChild;          
+          if(firstElement) {
+            if(firstElement.tagName == 'p' || firstElement.tagName == 'P') {
+              let newFirstElement = document.createElement('span');
+              newFirstElement.innerHTML = firstElement.innerHTML;
+
+              firstElement.parentNode.replaceChild(newFirstElement, firstElement);
+            }
+          }
+
+          chatInputField.value = qlEditor.innerHTML;
 
           return true;
         }
