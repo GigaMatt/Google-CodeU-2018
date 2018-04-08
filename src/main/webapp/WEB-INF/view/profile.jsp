@@ -28,16 +28,35 @@
   <body>
 
   <%@ include file="/include/navbar.jsp" %>
-   
    <div id="container">
+
     <!-- prints the name of the user logged in, or an error message-->
     <% if(request.getSession().getAttribute("user") != null){ %>
-        <h1><a><%= request.getSession().getAttribute("user") %></a></h1>
+        <h1><a><%= request.getSession().getAttribute("user") %>'s Profile Page</a></h1>
     <% } else{ %>
         <h1>You are not logged in!</h1>
     <% } %>
+    <hr>
+    <br>
+
+     <!-- about section --> 
+     <h3>About  <%= request.getSession().getAttribute("user") %> </h3>
      
-     <p>Our User is working!</p>
+     <!-- info from datastore -->
+     <p> Test Data Here </p>
+     <br>
+     <h3> Edit your About Me (only you can see this)</h3>
+     <form>
+       <textarea cols="100">
+         Test Data here
+       </textarea>
+       <br>
+       <button>Submit</button>
+     </form>
+     <hr>
+
+     <!-- messages section -->
+     <h3><%= request.getSession().getAttribute("user") %>'s Sent Messages</h3>
    </div>
   </body>
 </html>
