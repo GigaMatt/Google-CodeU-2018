@@ -24,6 +24,24 @@
   <%@ include file="/include/navbar.jsp" %>
 
   <div id="container">
+      <h1>Statistics</h1>
+      <%
+      int numUsers = 0;
+      int numMessages = 0;
+      int numConvos = 0;
+      List<User> users = (List<User>) request.getAttribute("users");
+      if(users != null){numUsers += users.size();}
+      List<Conversation> conversations = (List<Conversation>) request.getAttribute("conversations");
+      if(conversations != null){numConvos += conversations.size();}
+      List<Message> messages = (List<Message>) request.getAttribute("messages");
+      if(messages != null){numMessages += messages.size();}
+      %>
+      <p> Total number of users: <%=numUsers %> </p>
+      <p> Total number of conversations: <%=numConvos %> </p>
+      <p> Total number of messages: <%=numMessages %> </p>
+  </div>
+
+  <div id="container">
     <h1>Load Test Data</h1>
     <p>This will load a number of users, conversations, and messages for testing
         purposes.</p>

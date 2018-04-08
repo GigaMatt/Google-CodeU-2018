@@ -14,11 +14,14 @@
 
 package codeu.controller;
 
+import codeu.model.data.Conversation;
+import codeu.model.data.Message;
 import codeu.model.data.User;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -76,6 +79,12 @@ public class AdminServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException, ServletException {
+    List<Conversation> conversations = conversationStore.getAllConversations();
+    request.setAttribute("conversations", conversations);
+    List<User> users = userStore.getAllUsers();
+    request.setAttribute("user", users);
+    List<Message> messages = messageStore.getAllMessages();
+    request.setAttribute("messages", messages);
     request.getRequestDispatcher("/WEB-INF/view/admin.jsp").forward(request, response);
   }
 
