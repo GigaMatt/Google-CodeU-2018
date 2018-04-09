@@ -154,6 +154,7 @@ public class PersistentDataStore {
     userEntity.setProperty("uuid", user.getId().toString());
     userEntity.setProperty("username", user.getName());
     userEntity.setProperty("password", user.getPassword());
+    userEntity.setProperty("role", user.getRole());
     userEntity.setProperty("creation_time", user.getCreationTime().toString());
     datastore.put(userEntity);
   }
