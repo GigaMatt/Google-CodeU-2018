@@ -69,6 +69,7 @@ public class User {
     return (this.id.equals(otherUser.getId()) &&
             this.name.equals(otherUser.getName()) &&
             this.password.equals(otherUser.getPassword()) &&
+            this.role.equals(otherUser.getRole()) &&
             this.creation.equals(otherUser.getCreationTime())
     );
   }

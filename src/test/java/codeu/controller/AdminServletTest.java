@@ -14,12 +14,16 @@
 
 package codeu.controller;
 
+import codeu.model.data.Conversation;
+import codeu.model.data.Message;
 import codeu.model.data.User;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -66,8 +70,21 @@ public class AdminServletTest {
 
   @Test
   public void testDoGet() throws IOException, ServletException {
+    adminServlet.setUserStore(mockUserStore);
+    List<User> fakeUserList = new ArrayList<>();
+    Mockito.when(mockUserStore.getAllUsers()).thenReturn(fakeUserList);
+
+    List<Conversation> fakeConversationList = new ArrayList<>();
+    Mockito.when(mockConversationStore.getAllConversations()).thenReturn(fakeConversationList);
+
+    List<Message> fakeMessageList = new ArrayList<>();
+    Mockito.when(mockMessageStore.getAllMessages()).thenReturn(fakeMessageList);
+
     adminServlet.doGet(mockRequest, mockResponse);
 
+    Mockito.verify(mockRequest).setAttribute("conversations", fakeConversationList);
+    Mockito.verify(mockRequest).setAttribute("users", fakeUserList);
+    Mockito.verify(mockRequest).setAttribute("messages", fakeMessageList);
     Mockito.verify(mockRequestDispatcher).forward(mockRequest, mockResponse);
   }
 

@@ -17,7 +17,6 @@
 <html>
 <head>
   <title>Admin Page</title>
-  <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
 
@@ -39,13 +38,14 @@
       <p> Total number of users: <%=numUsers %> </p>
       <p> Total number of conversations: <%=numConvos %> </p>
       <p> Total number of messages: <%=numMessages %> </p>
+      <p> Average number of conversations per user: <%=numConvos/numUsers %> </p>
   </div>
 
   <div id="container">
     <h1>Load Test Data</h1>
     <p>This will load a number of users, conversations, and messages for testing
         purposes.</p>
-    <form action="/testdata" method="POST">
+    <form action="/admin" method="POST">
       <button type="submit" value="confirm" name="confirm">Confirm</button>
       <button type="submit" value="cancel" name="cancel">Do Nothing</button>
     </form>

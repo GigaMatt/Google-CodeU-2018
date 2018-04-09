@@ -27,7 +27,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Servlet class responsible for loading test data. */
+/** Servlet class responsible for administrative tasks (testing,
+ * statistics, adding other admin, etc.). */
+
 public class AdminServlet extends HttpServlet {
 
   /** Store class that gives access to Conversations. */
@@ -82,7 +84,7 @@ public class AdminServlet extends HttpServlet {
     List<Conversation> conversations = conversationStore.getAllConversations();
     request.setAttribute("conversations", conversations);
     List<User> users = userStore.getAllUsers();
-    request.setAttribute("user", users);
+    request.setAttribute("users", users);
     List<Message> messages = messageStore.getAllMessages();
     request.setAttribute("messages", messages);
     request.getRequestDispatcher("/WEB-INF/view/admin.jsp").forward(request, response);
