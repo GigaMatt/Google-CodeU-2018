@@ -34,6 +34,7 @@ public class UserTest {
     Assert.assertEquals(id, user.getId());
     Assert.assertEquals(name, user.getName());
     Assert.assertEquals(password, user.getPassword());
+    Assert.assertEquals(role, user.getRole());
     Assert.assertEquals(creation, user.getCreationTime());
   }
 
@@ -46,7 +47,7 @@ public class UserTest {
     Instant creation = Instant.now();
 
     User user1 = new User(id, name, password, role, creation);
-    User user2 = new User(id, name, password, "test_role2", creation);
+    User user2 = new User(id, name, password, role, creation);
     User user3 = new User(UUID.randomUUID(), name, password, role, creation);
     User user4 = new User(id, "test_username2", password, role, creation);
     User user5 = new User(id, name, "test_password2", role, creation);
