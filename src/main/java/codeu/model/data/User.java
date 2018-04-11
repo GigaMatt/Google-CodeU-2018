@@ -22,6 +22,7 @@ public class User {
   private final UUID id;
   private final String name;
   private final String password;
+  private String description;
   private final Instant creation;
 
   /**
@@ -37,6 +38,7 @@ public class User {
     this.name = name;
     this.password = password;
     this.creation = creation;
+    this.description = "Test description";
   }
 
   /** Returns the ID of this User. */
@@ -57,6 +59,16 @@ public class User {
   /** Returns the creation time of this User. */
   public Instant getCreationTime() {
     return creation;
+  }
+
+  /** Returns the description of the User. */
+  public String getDescription() {
+    return description;
+  }
+
+  /** Updates the description of the User. */
+  public void setDescription(String d) {
+    description = d;
   }
 
   /** Returns whether or not a user is the same as the other. */
