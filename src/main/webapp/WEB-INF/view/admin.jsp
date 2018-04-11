@@ -17,10 +17,15 @@
 <html>
 <head>
   <title>Admin Page</title>
+  <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
 
   <%@ include file="/include/navbar.jsp" %>
+  <%@page import  = "java.util.List"%>
+  <%@page import  = "codeu.model.data.Message"%>
+  <%@page import  = "codeu.model.data.User"%>
+  <%@page import= "codeu.model.data.Conversation" %>
 
   <div id="container">
       <h1>Statistics</h1>

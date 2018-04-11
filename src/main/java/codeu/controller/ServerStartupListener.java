@@ -8,6 +8,7 @@ import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
 import codeu.model.store.persistence.PersistentDataStoreException;
 import codeu.model.store.persistence.PersistentStorageAgent;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.Instant;
 import java.util.List;
@@ -27,7 +28,8 @@ public class ServerStartupListener implements ServletContextListener {
     try {
       List<User> users = PersistentStorageAgent.getInstance().loadUsers();
       //Always have a master administrator
-      User admin = new User(UUID.randomUUID(), "admin", "admin password","admin", Instant.now());
+      User admin = new User(UUID.randomUUID(), "admin",
+              BCrypt.hashpw("admin password", BCrypt.gensalt()), "admin", Instant.now());
       users.add(admin);
       UserStore.getInstance().setUsers(users);
 
