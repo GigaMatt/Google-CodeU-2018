@@ -42,10 +42,10 @@ public class ProfileServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response)
   	throws IOException, ServletException {
       String username = request.getParameter("username");
-      User user =  userStore.getUser(username);
+      //User user =  userStore.getUser(username);
       String description = request.getParameter("description");
   	  	
-      request.getSession().setAttribute("description", username);
+      request.getSession().setAttribute("description", description);
   		response.sendRedirect("/users/");
 	} 
 }
