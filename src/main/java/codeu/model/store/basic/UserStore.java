@@ -104,6 +104,7 @@ public class UserStore {
     persistentStorageAgent.writeThrough(user);
   }
 
+
   /** Return true if the given username is known to the application. */
   public boolean isUserRegistered(String username) {
     for (User user : users) {

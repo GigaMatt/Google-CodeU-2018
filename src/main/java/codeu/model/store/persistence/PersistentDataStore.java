@@ -66,6 +66,7 @@ public class PersistentDataStore {
         UUID uuid = UUID.fromString((String) entity.getProperty("uuid"));
         String userName = (String) entity.getProperty("username");
         String password = (String) entity.getProperty("password");
+        String description = (String) entity.getProperty("description");
         Instant creationTime = Instant.parse((String) entity.getProperty("creation_time"));
         
         User user = new User(uuid, userName, password, creationTime);
@@ -154,6 +155,7 @@ public class PersistentDataStore {
     userEntity.setProperty("uuid", user.getId().toString());
     userEntity.setProperty("username", user.getName());
     userEntity.setProperty("password", user.getPassword());
+    userEntity.setProperty("description", user.getDescription());
     userEntity.setProperty("creation_time", user.getCreationTime().toString());
     datastore.put(userEntity);
   }

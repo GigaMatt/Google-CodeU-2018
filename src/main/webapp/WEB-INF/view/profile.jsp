@@ -43,13 +43,12 @@
      <h3>About  <%= request.getSession().getAttribute("user") %> </h3>
      
      <!-- info from datastore -->
-     <p><%= request.getSession().getAttribute("description")%></p>
+     <p><%=request.getSession().getAttribute("description")%></p>
      <br>
      <h3> Edit your About Me (only you can see this)</h3>
      
      <form action="" method="POST">
-       <textarea cols="100" id="description" name="description">
-       </textarea>
+       <textarea cols="100" id="description" name="description"><%=request.getSession().getAttribute("description")%></textarea>
        <br>
        <button type="submit">Submit</button>
      </form>

@@ -44,8 +44,9 @@ public class ProfileServlet extends HttpServlet {
       String username = request.getParameter("username");
       //User user =  userStore.getUser(username);
       String description = request.getParameter("description");
-  	  	
       request.getSession().setAttribute("description", description);
+      //user.setDescription(description);
+      //persistentStorageAgent.writeThrough(user);
   		response.sendRedirect("/users/");
 	} 
 }
