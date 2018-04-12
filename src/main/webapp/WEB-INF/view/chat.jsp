@@ -28,23 +28,92 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
   <title><%= conversation.getTitle() %></title>
   <link rel="stylesheet" href="/css/main.css" type="text/css">
 
+  <!-- Attaches the Theme Stylesheet for the Quill Editor  -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">   
+  
+  <!-- Includes the Quill Editor Library  -->
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  
   <style>
     #chat {
       background-color: white;
       height: 500px;
       overflow-y: scroll
     }
+
+    div.ql-editor {
+      background-color: white;  
+    }
+
+    div.ql-toolbar {
+      background-color: white;
+    }
   </style>
 
   <script>
+    function onBodyLoaded() {
+      scrollChat();
+      initChatInputEditor();
+    }
+    
     // scroll the chat div to the bottom
     function scrollChat() {
       var chatDiv = document.getElementById('chat');
       chatDiv.scrollTop = chatDiv.scrollHeight;
     };
+
+    // Initialize the Chat Input Editor
+    function initChatInputEditor() {
+      Quill.register(Quill.import('attributors/style/background'), true);
+      Quill.register(Quill.import('attributors/style/color'), true);
+      Quill.register(Quill.import('attributors/style/font'), true);
+      Quill.register(Quill.import('attributors/style/size'), true);
+
+      let chatForm = document.querySelector('#chat-form');
+
+      if(chatForm) {
+        let chatInputEditor = chatForm.querySelector('#chat-input-editor');
+        let chatInputToolbar = chatForm.querySelector('#chat-input-toolbar');
+
+        let chatQuill = new Quill(chatInputEditor, {
+          modules: {
+            toolbar: chatInputToolbar
+          },
+          placeholder: 'Type your message and press Send',
+          theme: 'snow'
+        });
+
+        chatForm.onsubmit = function() {
+          let chatInputField = chatForm.querySelector('#chat-input-field');
+          let qlEditor = chatInputEditor.querySelector('.ql-editor');
+          
+          let qlCursor = qlEditor.querySelector('.ql-cursor');
+          if(qlCursor) {
+            qlCursor.parentNode.removeChild(qlCursor);
+          }
+
+          let firstElement = qlEditor.firstChild;          
+          if(firstElement) {
+            if(firstElement.tagName == 'p' || firstElement.tagName == 'P') {
+              let newFirstElement = document.createElement('span');
+              newFirstElement.innerHTML = firstElement.innerHTML;
+
+              firstElement.parentNode.replaceChild(newFirstElement, firstElement);
+            }
+          }
+
+          chatInputField.value = qlEditor.innerHTML;
+
+          return true;
+        }
+
+        chatQuill.focus();
+      }
+    }
+
   </script>
 </head>
-<body onload="scrollChat()">
+<body onload="onBodyLoaded();">
 
   
   <%@ include file="/include/navbar.jsp" %>
@@ -73,8 +142,41 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     <hr/>
 
     <% if (request.getSession().getAttribute("user") != null) { %>
-    <form action="/chat/<%= conversation.getTitle() %>" method="POST">
-        <input type="text" name="message">
+    <form id="chat-form" action="/chat/<%= conversation.getTitle() %>" method="POST">
+        <input id="chat-input-field" type="hidden" name="message">
+        
+        <div id="chat-input-toolbar">
+          <span class="ql-format">
+            <select class="ql-size">
+                <option value="10px">Small</option>
+                <option selected="">Normal</option>
+                <option value="18px">Large</option>
+                <option value="32px">Huge</option>
+            </select>
+          </span>
+
+          <span class="ql-format">
+            <button class="ql-bold"></button>
+            <button class="ql-italic"></button>
+            <button class="ql-underline"></button>
+          </span>
+
+          <span class="ql-format">
+              <select class="ql-color"></select>
+              <select class="ql-background"></select>
+          </span>
+          
+          <span class="ql-format">
+              <select class="ql-font"></select>
+          </span>
+          
+          <span class="ql-format">
+              <button class="ql-clean"></button>
+          </span>
+        </div>
+        <div id="chat-input-editor">
+
+        </div>
         <br/>
         <button type="submit">Send</button>
     </form>
@@ -85,6 +187,5 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     <hr/>
 
   </div>
-
 </body>
 </html>
