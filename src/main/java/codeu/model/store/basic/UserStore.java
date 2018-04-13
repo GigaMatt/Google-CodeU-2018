@@ -124,6 +124,6 @@ public class UserStore {
   }
   /** Method to update the User with the description. */
   public void updateUser(User user) {
-    persistentStorageAgent.updateBio(user);
+    persistentStorageAgent.writeThrough(user);
   }
 }
