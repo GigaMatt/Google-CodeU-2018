@@ -43,7 +43,7 @@
      <h3>About  <%= request.getSession().getAttribute("user") %> </h3>
      
      <!-- info from datastore -->
-     <p><%=request.getSession().getAttribute("description")%></p>
+     <p><%=request.getAttribute("description")%></p>
      <br>
      <h3> Edit your About Me (only you can see this)</h3>
      

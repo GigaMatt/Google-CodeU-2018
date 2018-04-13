@@ -68,7 +68,7 @@ public class User {
 
   /** Updates the description of the User. */
   public void setDescription(String d) {
-    description = d;
+    this.description = d;
   }
 
   /** Returns whether or not a user is the same as the other. */

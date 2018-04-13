@@ -19,6 +19,14 @@ public class ProfileServlet extends HttpServlet {
 	/**Store class that gives access to Users.*/
 	private UserStore userStore;
 
+
+//  private User user;
+
+   /**
+   * The PersistentStorageAgent responsible for loading Users from and saving Users to Datastore.
+   */
+//private PersistentStorageAgent persistentStorageAgent;
+
 	  /** Store class that gives access to Conversations. */
  	private ConversationStore conversationStore; 
 
@@ -28,6 +36,13 @@ public class ProfileServlet extends HttpServlet {
    */
   void setUserStore(UserStore userStore) {
     this.userStore = userStore;
+  }
+
+@Override
+  public void init() throws ServletException {
+    super.init();
+    setUserStore(UserStore.getInstance());
+
   }
 
  @Override
@@ -42,11 +57,14 @@ public class ProfileServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response)
   	throws IOException, ServletException {
       String username = request.getParameter("username");
-      //User user =  userStore.getUser(username);
-      String description = request.getParameter("description");
-      request.getSession().setAttribute("description", description);
-      //user.setDescription(description);
+      User user =  userStore.getUser(username);
+      String descript = request.getParameter("description");
+      request.getSession().setAttribute("description", descript);
+      request.setAttribute("description", descript);
+      userStore.updateUser(user);
+      //user1.setDescription(descript);
       //persistentStorageAgent.writeThrough(user);
+      //userStore.writeThrough(user);
   		response.sendRedirect("/users/");
 	} 
 }
