@@ -33,12 +33,19 @@ public class User {
    * @param password the password of this User
    * @param creation the creation time of this User
    */
+  public User(UUID id, String name, String password, Instant creation, String description) {
+    this.id = id;
+    this.name = name;
+    this.password = password;
+    this.creation = creation;
+    this.description = description;
+  }
+
   public User(UUID id, String name, String password, Instant creation) {
     this.id = id;
     this.name = name;
     this.password = password;
     this.creation = creation;
-    this.description = "Test description";
   }
 
   /** Returns the ID of this User. */

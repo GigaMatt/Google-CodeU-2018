@@ -53,16 +53,18 @@ public class ProfileServletTest {
     mockResponse = Mockito.mock(HttpServletResponse.class);
 
     mockUserStore = Mockito.mock(UserStore.class);
+    profileServlet.setUserStore(mockUserStore);
 
     mockRequestDispatcher = Mockito.mock(RequestDispatcher.class);
     Mockito.when(mockRequest.getRequestDispatcher("/WEB-INF/view/profile.jsp"))
         .thenReturn(mockRequestDispatcher);
   }
 
-  @Test
+ @Test
   public void testDoGet() throws IOException, ServletException {
+    
     profileServlet.doGet(mockRequest, mockResponse);
     Mockito.verify(mockRequestDispatcher).forward(mockRequest, mockResponse);
-  }
+  } 
 
 }

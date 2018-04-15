@@ -48,7 +48,7 @@
      <h3> Edit your About Me (only you can see this)</h3>
      
      <form action="" method="POST">
-       <textarea cols="100" id="description" name="description"><%=request.getSession().getAttribute("description")%></textarea>
+       <textarea cols="100" id="description" name="description"><%=request.getAttribute("description")%></textarea>
        <br>
        <button type="submit">Submit</button>
      </form>

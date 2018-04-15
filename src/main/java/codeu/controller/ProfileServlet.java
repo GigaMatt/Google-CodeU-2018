@@ -48,19 +48,27 @@ public class ProfileServlet extends HttpServlet {
  @Override
  public void doGet(HttpServletRequest request, HttpServletResponse response)
      throws IOException, ServletException {
-
-   request.getRequestDispatcher("/WEB-INF/view/profile.jsp").forward(request, response);
+    //User user = request.getSession().getAttribute("user");
+    String username = (String)request.getSession().getAttribute("user");
+    if(username == null){
+      response.sendRedirect("/login/");
+    }else {
+      User user =  userStore.getUser(username);
+      String descript = user.getDescription();
+      //request.getSession().setAttribute("description", descript);
+      request.setAttribute("description", descript);
+      request.getRequestDispatcher("/WEB-INF/view/profile.jsp").forward(request, response);
+  }
  }
 
 
 @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)
   	throws IOException, ServletException {
-      String username = request.getParameter("username");
-      User user =  userStore.getUser(username);
       String descript = request.getParameter("description");
-      request.getSession().setAttribute("description", descript);
-      request.setAttribute("description", descript);
+      String username = (String)request.getSession().getAttribute("user");
+      User user =  userStore.getUser(username);
+      user.setDescription(descript);
       userStore.updateUser(user);
       //user1.setDescription(descript);
       //persistentStorageAgent.writeThrough(user);
