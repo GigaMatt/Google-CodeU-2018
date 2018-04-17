@@ -41,12 +41,6 @@ public class User {
     this.description = description;
   }
 
-  public User(UUID id, String name, String password, Instant creation) {
-    this.id = id;
-    this.name = name;
-    this.password = password;
-    this.creation = creation;
-  }
 
   /** Returns the ID of this User. */
   public UUID getId() {
@@ -83,7 +77,8 @@ public class User {
     return (this.id.equals(otherUser.getId()) &&
             this.name.equals(otherUser.getName()) &&
             this.password.equals(otherUser.getPassword()) &&
-            this.creation.equals(otherUser.getCreationTime())
+            this.creation.equals(otherUser.getCreationTime()) &&
+            this.description.equals(otherUser.getDescription())
     );
   }
 }

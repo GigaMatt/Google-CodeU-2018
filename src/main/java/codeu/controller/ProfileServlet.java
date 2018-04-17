@@ -51,7 +51,7 @@ public class ProfileServlet extends HttpServlet {
     //User user = request.getSession().getAttribute("user");
     String username = (String)request.getSession().getAttribute("user");
     if(username == null){
-      response.sendRedirect("/login/");
+      response.sendRedirect("/login");
     }else {
       User user =  userStore.getUser(username);
       String descript = user.getDescription();
