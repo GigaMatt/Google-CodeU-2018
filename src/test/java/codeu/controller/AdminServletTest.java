@@ -30,9 +30,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mindrot.jbcrypt.BCrypt;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 public class AdminServletTest {
@@ -145,7 +148,7 @@ public class AdminServletTest {
   }
 
   @Test
-  public void testDoPost_Cancel() throws IOException, ServletException {
+  public void testDoPost_CreateValidAdmin() throws IOException, ServletException {
     Mockito.when(mockSession.getAttribute("role")).thenReturn("admin");
     Mockito.when(mockSession.getAttribute("user")).thenReturn("test username");
 
@@ -157,13 +160,92 @@ public class AdminServletTest {
     adminServlet.setUserStore(mockUserStore);
 
     Mockito.when(mockRequest.getParameter("confirm")).thenReturn(null);
-    Mockito.when(mockRequest.getParameter("cancel")).thenReturn("cancel");
+    Mockito.when(mockRequest.getParameter("create")).thenReturn("create");
+    Mockito.when(mockRequest.getParameter("admin name")).thenReturn("new admin");
+    Mockito.when(mockRequest.getParameter("admin password")).thenReturn("new admin password");
 
     adminServlet.doPost(mockRequest, mockResponse);
 
-    Mockito.verify(mockUserStore, Mockito.never()).loadTestData();
-    Mockito.verify(mockConversationStore, Mockito.never()).loadTestData();
-    Mockito.verify(mockMessageStore, Mockito.never()).loadTestData();
+    ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+
+    Mockito.verify(mockUserStore).addUser(userArgumentCaptor.capture());
+
+    User newUser = userArgumentCaptor.getValue();
+    Assert.assertEquals("new admin", newUser.getName());
+    Assert.assertEquals(true, BCrypt.checkpw("new admin password", newUser.getPassword()));
+
     Mockito.verify(mockResponse).sendRedirect("/");
+  }
+
+  @Test
+  public void testDoPost_CreateInvalidAdmin1() throws IOException, ServletException {
+    Mockito.when(mockSession.getAttribute("role")).thenReturn("admin");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test username");
+
+    UUID id = UUID.randomUUID();
+    Instant creation = Instant.now();
+    User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
+            "admin", creation);
+    Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
+    adminServlet.setUserStore(mockUserStore);
+
+    Mockito.when(mockRequest.getParameter("confirm")).thenReturn(null);
+    Mockito.when(mockRequest.getParameter("create")).thenReturn("create");
+    Mockito.when(mockRequest.getParameter("admin name")).thenReturn("new admin");
+    Mockito.when(mockRequest.getParameter("admin password")).thenReturn(null);
+
+    adminServlet.doPost(mockRequest, mockResponse);
+
+    Mockito.verify(mockRequest).setAttribute("admin error", "Incomplete request: missing fields.");
+    Mockito.verify(mockRequestDispatcher).forward(mockRequest, mockResponse);
+  }
+
+  @Test
+  public void testDoPost_CreateInvalidAdmin2() throws IOException, ServletException {
+    Mockito.when(mockSession.getAttribute("role")).thenReturn("admin");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test username");
+
+    UUID id = UUID.randomUUID();
+    Instant creation = Instant.now();
+    User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
+            "admin", creation);
+    Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
+    adminServlet.setUserStore(mockUserStore);
+
+    Mockito.when(mockRequest.getParameter("confirm")).thenReturn(null);
+    Mockito.when(mockRequest.getParameter("create")).thenReturn("create");
+    Mockito.when(mockRequest.getParameter("admin name")).thenReturn("&@#$%^&*()");
+    Mockito.when(mockRequest.getParameter("admin password")).thenReturn("test password");
+
+    adminServlet.doPost(mockRequest, mockResponse);
+
+
+    Mockito.verify(mockRequest).setAttribute("admin error",
+            "Please enter only letters, numbers, and spaces for the username.");
+    Mockito.verify(mockRequestDispatcher).forward(mockRequest, mockResponse);
+  }
+
+  @Test
+  public void testDoPost_CreateInvalidAdmin3() throws IOException, ServletException {
+    Mockito.when(mockSession.getAttribute("role")).thenReturn("admin");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test username");
+
+    UUID id = UUID.randomUUID();
+    Instant creation = Instant.now();
+    User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
+            "admin", creation);
+    Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
+    Mockito.when(mockUserStore.isUserRegistered("test username")).thenReturn(true);
+    adminServlet.setUserStore(mockUserStore);
+
+    Mockito.when(mockRequest.getParameter("confirm")).thenReturn(null);
+    Mockito.when(mockRequest.getParameter("create")).thenReturn("create");
+    Mockito.when(mockRequest.getParameter("admin name")).thenReturn("test username");
+    Mockito.when(mockRequest.getParameter("admin password")).thenReturn("test password");
+
+    adminServlet.doPost(mockRequest, mockResponse);
+
+    Mockito.verify(mockRequest).setAttribute("admin error", "That username is already taken.");
+    Mockito.verify(mockRequestDispatcher).forward(mockRequest, mockResponse);
   }
 }

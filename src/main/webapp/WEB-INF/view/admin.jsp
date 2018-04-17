@@ -47,12 +47,31 @@
   </div>
 
   <div id="container">
+      <h1>Make an Admin!</h1>
+      <p>This will create a user with administrative privileges.</p>
+      <% if(request.getAttribute("admin error") != null){ %>
+            <h2 style="color:red"><%= request.getAttribute("admin error") %></h2>
+      <% } %>
+      <form action="/admin" method="POST">
+        <label for="admin name">Username: </label>
+        <input type="text" name="admin name" id="admin name">
+        <br/>
+        <label for="admin password">Password: </label>
+        <input type="text" name="admin password" id="admin password">
+        <br/>
+        <button type="submit" value="create" name="create">Submit</button>
+      </form>
+   </div>
+
+  <div id="container">
     <h1>Load Test Data</h1>
     <p>This will load a number of users, conversations, and messages for testing
         purposes.</p>
+    <% if(request.getAttribute("test data error") != null){ %>
+            <h2 style="color:red"><%= request.getAttribute("test data error") %></h2>
+    <% } %>
     <form action="/admin" method="POST">
       <button type="submit" value="confirm" name="confirm">Confirm</button>
-      <button type="submit" value="cancel" name="cancel">Do Nothing</button>
     </form>
   </div>
 </body>
