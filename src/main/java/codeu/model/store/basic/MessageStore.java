@@ -82,6 +82,19 @@ public class MessageStore {
     return loaded;
   }
 
+  /** Load a set of given Message objects. */
+  public boolean loadTestData(List<Message> messageList) {
+    boolean loaded = false;
+    try {
+      messages.addAll(messageList);
+      loaded = true;
+    } catch (Exception e) {
+      loaded = false;
+      System.out.println("ERROR: Unable to establish initial store (messages).");
+    }
+    return loaded;
+  }
+
   /** Add a new message to the current set of messages known to the application. */
   public void addMessage(Message message) {
     messages.add(message);

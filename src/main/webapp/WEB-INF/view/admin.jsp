@@ -43,7 +43,7 @@
       <p> Total number of users: <%=numUsers %> </p>
       <p> Total number of conversations: <%=numConvos %> </p>
       <p> Total number of messages: <%=numMessages %> </p>
-      <p> Average number of conversations per user: <%=numConvos/numUsers %> </p>
+      <p> Average number of conversations per user: <%=(double)numConvos/numUsers %> </p>
   </div>
 
   <div id="container">
@@ -66,12 +66,13 @@
   <div id="container">
     <h1>Load Test Data</h1>
     <p>This will load a number of users, conversations, and messages for testing
-        purposes.</p>
-    <% if(request.getAttribute("test data error") != null){ %>
-            <h2 style="color:red"><%= request.getAttribute("test data error") %></h2>
-    <% } %>
+        purposes. Select preferred population method: </p>
     <form action="/admin" method="POST">
-      <button type="submit" value="confirm" name="confirm">Confirm</button>
+        <select name="method">
+        <option value="rj">Romeo and Juliet</option>
+        <option value="random">Random</option>
+        </select>
+        <button type="submit" value="populate" name="populate">Select</button>
     </form>
   </div>
 </body>

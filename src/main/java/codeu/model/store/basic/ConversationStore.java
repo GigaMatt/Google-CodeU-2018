@@ -81,6 +81,18 @@ public class ConversationStore {
     return loaded;
   }
 
+  /** Load a set of given Conversation objects. */
+  public boolean loadTestData(List<Conversation> convoList) {
+    boolean loaded = false;
+    try {
+      conversations.addAll(convoList);
+    } catch (Exception e) {
+      loaded = false;
+      System.err.println("ERROR: Unable to establish initial store (conversations).");
+    }
+    return loaded;
+  }
+
   /** Access the current set of conversations known to the application. */
   public List<Conversation> getAllConversations() {
     return conversations;

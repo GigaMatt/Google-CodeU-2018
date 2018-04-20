@@ -69,6 +69,11 @@ public class UserStore {
     users.addAll(DefaultDataStore.getInstance().getAllUsers());
   }
 
+  /** Load a set of given Message objects. */
+  public void loadTestData(List<User> userList) {
+    users.addAll(userList);
+  }
+
   /**
    * Access the User object with the given name.
    *

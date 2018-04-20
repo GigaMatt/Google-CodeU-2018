@@ -17,6 +17,7 @@ package codeu.controller;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
+import codeu.model.data.DataParse;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
@@ -125,10 +126,19 @@ public class AdminServlet extends HttpServlet {
       return;
     }
 
-    if (request.getParameter("confirm") != null) {
-      userStore.loadTestData();
-      conversationStore.loadTestData();
-      messageStore.loadTestData();
+    if (request.getParameter("populate") != null) {
+      String method = request.getParameter("method");
+      if (method.equals("rj")) {
+        DataParse parsedData = new DataParse("Romeo_and_Juliet");
+        parsedData.parse();
+        parsedData.allUsers.values().parallelStream().forEach(x -> userStore.addUser(x));
+        conversationStore.loadTestData(parsedData.allConversations);
+        messageStore.loadTestData(parsedData.allMessages);
+      } else {
+        userStore.loadTestData();
+        conversationStore.loadTestData();
+        messageStore.loadTestData();
+      }
     } else if (request.getParameter("create") != null){
       String adminName = request.getParameter("admin name");
       String adminPassword = request.getParameter("admin password");
@@ -156,6 +166,6 @@ public class AdminServlet extends HttpServlet {
       userStore.addUser(newAdmin);
     }
 
-    response.sendRedirect("/");
+    response.sendRedirect("/admin");
   }
 }

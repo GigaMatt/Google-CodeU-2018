@@ -17,6 +17,7 @@ package codeu.controller;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
+import codeu.model.data.DataParse;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
@@ -36,7 +37,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 
 public class AdminServletTest {
 
@@ -48,6 +54,13 @@ public class AdminServletTest {
   private ConversationStore mockConversationStore;
   private MessageStore mockMessageStore;
   private UserStore mockUserStore;
+
+  @Captor
+  ArgumentCaptor<ArrayList<Conversation>> cArgumentCaptor;
+
+  @Captor
+  ArgumentCaptor<ArrayList<Message>> mArgumentCaptor;
+
 
   @Before
   public void setup() {
@@ -126,7 +139,7 @@ public class AdminServletTest {
   }
 
   @Test
-  public void testDoPost_Confirm() throws IOException, ServletException {
+  public void testRandomPopulate() throws IOException, ServletException {
     Mockito.when(mockSession.getAttribute("role")).thenReturn("admin");
     Mockito.when(mockSession.getAttribute("user")).thenReturn("test username");
 
@@ -137,14 +150,48 @@ public class AdminServletTest {
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     adminServlet.setUserStore(mockUserStore);
 
-    Mockito.when(mockRequest.getParameter("confirm")).thenReturn("confirm");
+    Mockito.when(mockRequest.getParameter("method")).thenReturn("random");
+    Mockito.when(mockRequest.getParameter("populate")).thenReturn("populate");
 
     adminServlet.doPost(mockRequest, mockResponse);
 
     Mockito.verify(mockUserStore).loadTestData();
     Mockito.verify(mockConversationStore).loadTestData();
     Mockito.verify(mockMessageStore).loadTestData();
-    Mockito.verify(mockResponse).sendRedirect("/");
+    Mockito.verify(mockResponse).sendRedirect("/admin");
+  }
+
+  @Test
+  public void testRJPopulate() throws IOException, ServletException {
+    MockitoAnnotations.initMocks(this);
+    Mockito.when(mockSession.getAttribute("role")).thenReturn("admin");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test username");
+
+    UUID id = UUID.randomUUID();
+    Instant creation = Instant.now();
+    User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
+            "admin", creation);
+    Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
+    adminServlet.setUserStore(mockUserStore);
+
+    Mockito.when(mockRequest.getParameter("populate")).thenReturn("populate");
+    Mockito.when(mockRequest.getParameter("method")).thenReturn("rj");
+
+    adminServlet.doPost(mockRequest, mockResponse);
+
+    DataParse dp = new DataParse("Romeo_and_Juliet");
+    dp.parse();
+    List<User> u = new ArrayList<User>(dp.allUsers.values());
+    List<Conversation> c = dp.allConversations;
+    List<Message> m = dp.allMessages;
+
+    Mockito.verify(mockUserStore, times(28)).addUser(any(User.class));
+    Mockito.verify(mockConversationStore).loadTestData(cArgumentCaptor.capture());
+    Assert.assertEquals(22, cArgumentCaptor.getValue().size());
+    Mockito.verify(mockMessageStore).loadTestData(mArgumentCaptor.capture());
+    Assert.assertEquals(698, mArgumentCaptor.getValue().size());
+
+    Mockito.verify(mockResponse).sendRedirect("/admin");
   }
 
   @Test
@@ -159,7 +206,7 @@ public class AdminServletTest {
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     adminServlet.setUserStore(mockUserStore);
 
-    Mockito.when(mockRequest.getParameter("confirm")).thenReturn(null);
+    Mockito.when(mockRequest.getParameter("populate")).thenReturn(null);
     Mockito.when(mockRequest.getParameter("create")).thenReturn("create");
     Mockito.when(mockRequest.getParameter("admin name")).thenReturn("new admin");
     Mockito.when(mockRequest.getParameter("admin password")).thenReturn("new admin password");
@@ -174,8 +221,9 @@ public class AdminServletTest {
     Assert.assertEquals("new admin", newUser.getName());
     Assert.assertEquals(true, BCrypt.checkpw("new admin password", newUser.getPassword()));
 
-    Mockito.verify(mockResponse).sendRedirect("/");
+    Mockito.verify(mockResponse).sendRedirect("/admin");
   }
+
 
   @Test
   public void testDoPost_CreateInvalidAdmin1() throws IOException, ServletException {
@@ -189,7 +237,7 @@ public class AdminServletTest {
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     adminServlet.setUserStore(mockUserStore);
 
-    Mockito.when(mockRequest.getParameter("confirm")).thenReturn(null);
+    Mockito.when(mockRequest.getParameter("populate")).thenReturn(null);
     Mockito.when(mockRequest.getParameter("create")).thenReturn("create");
     Mockito.when(mockRequest.getParameter("admin name")).thenReturn("new admin");
     Mockito.when(mockRequest.getParameter("admin password")).thenReturn(null);
@@ -212,7 +260,7 @@ public class AdminServletTest {
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     adminServlet.setUserStore(mockUserStore);
 
-    Mockito.when(mockRequest.getParameter("confirm")).thenReturn(null);
+    Mockito.when(mockRequest.getParameter("populate")).thenReturn(null);
     Mockito.when(mockRequest.getParameter("create")).thenReturn("create");
     Mockito.when(mockRequest.getParameter("admin name")).thenReturn("&@#$%^&*()");
     Mockito.when(mockRequest.getParameter("admin password")).thenReturn("test password");
@@ -238,7 +286,7 @@ public class AdminServletTest {
     Mockito.when(mockUserStore.isUserRegistered("test username")).thenReturn(true);
     adminServlet.setUserStore(mockUserStore);
 
-    Mockito.when(mockRequest.getParameter("confirm")).thenReturn(null);
+    Mockito.when(mockRequest.getParameter("populate")).thenReturn(null);
     Mockito.when(mockRequest.getParameter("create")).thenReturn("create");
     Mockito.when(mockRequest.getParameter("admin name")).thenReturn("test username");
     Mockito.when(mockRequest.getParameter("admin password")).thenReturn("test password");
