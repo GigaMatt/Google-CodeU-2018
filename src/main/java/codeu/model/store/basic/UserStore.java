@@ -122,8 +122,14 @@ public class UserStore {
   public void setUsers(List<User> users) {
     this.users = users;
   }
+
   /** Method to update the User with the description. */
   public void updateUser(User user) {
     persistentStorageAgent.writeThrough(user);
+  }
+
+  /** Access all users known to the application. */
+  public List<User> getAllUsers() {
+    return users;
   }
 }

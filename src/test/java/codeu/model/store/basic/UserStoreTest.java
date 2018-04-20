@@ -17,11 +17,14 @@ public class UserStoreTest {
   private PersistentStorageAgent mockPersistentStorageAgent;
 
   private final User USER_ONE =
-      new User(UUID.randomUUID(), "test_username_one", "password one", Instant.ofEpochMilli(1000), "test description");
+      new User(UUID.randomUUID(), "test_username_one", "password one", "member",
+              Instant.ofEpochMilli(1000), "test description");
   private final User USER_TWO =
-      new User(UUID.randomUUID(), "test_username_two", "password two", Instant.ofEpochMilli(2000), "test description");
+      new User(UUID.randomUUID(), "test_username_two", "password two", "member",
+              Instant.ofEpochMilli(2000), "test description");
   private final User USER_THREE =
-      new User(UUID.randomUUID(), "test_username_three", "password three", Instant.ofEpochMilli(3000), "test description");
+      new User(UUID.randomUUID(), "test_username_three", "password three", "member",
+              Instant.ofEpochMilli(3000), "test description");
 
   @Before
   public void setup() {
@@ -39,14 +42,14 @@ public class UserStoreTest {
   public void testGetUser_byUsername_found() {
     User resultUser = userStore.getUser(USER_ONE.getName());
 
-    assertEquals(USER_ONE, resultUser);
+    Assert.assertTrue(USER_ONE.equals(resultUser));
   }
 
   @Test
   public void testGetUser_byId_found() {
     User resultUser = userStore.getUser(USER_ONE.getId());
 
-    assertEquals(USER_ONE, resultUser);
+    Assert.assertTrue(USER_ONE.equals(resultUser));
   }
 
   @Test
@@ -65,12 +68,13 @@ public class UserStoreTest {
 
   @Test
   public void testAddUser() {
-    User inputUser = new User(UUID.randomUUID(), "test_username", "test password", Instant.now(), "test description");
+    User inputUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
+            Instant.now(), "test description");
 
     userStore.addUser(inputUser);
     User resultUser = userStore.getUser("test_username");
 
-    assertEquals(inputUser, resultUser);
+    Assert.assertTrue(inputUser.equals(resultUser));
     Mockito.verify(mockPersistentStorageAgent).writeThrough(inputUser);
   }
 
@@ -84,10 +88,4 @@ public class UserStoreTest {
     Assert.assertFalse(userStore.isUserRegistered("fake username"));
   }
 
-  private void assertEquals(User expectedUser, User actualUser) {
-    Assert.assertEquals(expectedUser.getId(), actualUser.getId());
-    Assert.assertEquals(expectedUser.getName(), actualUser.getName());
-    Assert.assertEquals(expectedUser.getPassword(), actualUser.getPassword());
-    Assert.assertEquals(expectedUser.getCreationTime(), actualUser.getCreationTime());
-  }
 }

@@ -44,7 +44,6 @@ public class RegisterServlet extends HttpServlet {
   }
 
   @Override
-
   public void doPost(HttpServletRequest request, HttpServletResponse response)
   	throws IOException, ServletException {
       
@@ -64,7 +63,7 @@ public class RegisterServlet extends HttpServlet {
   			return;
   		}
 
-  		User user = new User(UUID.randomUUID(), username, passwordHash, Instant.now(), "test");
+  		User user = new User(UUID.randomUUID(), username, passwordHash, "member", Instant.now(), "test");
   		userStore.addUser(user);
 
   		response.sendRedirect("/login");
