@@ -33,8 +33,8 @@ public class DataParse {
     UUID convID = null;
     Pattern p = Pattern.compile("(\\b[A-Z]{3,}\\b\\s?)+"); //Matches all-uppercase names
 
-    try (Scanner scanner = new Scanner(new File("/Users/stephanieyang/IdeaProjects/" +
-            "GoogleCodeU/src/main/java/codeu/model/data/" + tf))) {
+    String dir = System.getProperty("user.dir");
+    try (Scanner scanner = new Scanner(new File(dir + "/src/main/java/codeu/model/data/" + tf))) {
       scanner.useDelimiter("\n");
       while (scanner.hasNext()) {
         String token = scanner.next();
