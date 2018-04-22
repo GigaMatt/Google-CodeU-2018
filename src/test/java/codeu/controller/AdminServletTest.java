@@ -130,7 +130,7 @@ public class AdminServletTest {
     UUID id = UUID.randomUUID();
     Instant creation = Instant.now();
     User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
-            "admin", creation);
+            "admin", creation, "test description");
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     adminServlet.setUserStore(mockUserStore);
 
@@ -152,7 +152,7 @@ public class AdminServletTest {
     UUID id = UUID.randomUUID();
     Instant creation = Instant.now();
     User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
-            "admin", creation);
+            "admin", creation, "description");
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     adminServlet.setUserStore(mockUserStore);
 

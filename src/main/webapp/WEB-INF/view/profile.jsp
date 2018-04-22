@@ -54,9 +54,9 @@
      </form>
      <hr>
 
-     <!-- messages section -->
+     <!-- messages section 
      <h3><%= request.getSession().getAttribute("user") %>'s Sent Messages</h3>
-
+      -->
    </div>
   </body>
 </html>
