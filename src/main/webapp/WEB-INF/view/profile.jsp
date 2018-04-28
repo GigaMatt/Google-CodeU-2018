@@ -43,20 +43,20 @@
      <h3>About  <%= request.getSession().getAttribute("user") %> </h3>
      
      <!-- info from datastore -->
-     <p> Test Data Here </p>
+     <p><%=request.getAttribute("description")%></p>
      <br>
      <h3> Edit your About Me (only you can see this)</h3>
-     <form>
-       <textarea cols="100">
-         Test Data here
-       </textarea>
+     
+     <form action="" method="POST">
+       <textarea cols="100" id="description" name="description"><%=request.getAttribute("description")%></textarea>
        <br>
-       <button>Submit</button>
+       <button type="submit">Submit</button>
      </form>
      <hr>
 
-     <!-- messages section -->
+     <!-- messages section 
      <h3><%= request.getSession().getAttribute("user") %>'s Sent Messages</h3>
+      -->
    </div>
   </body>
 </html>

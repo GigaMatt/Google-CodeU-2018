@@ -25,15 +25,17 @@ public class UserTest {
   public void testCreate() {
     UUID id = UUID.randomUUID();
     String name = "test_username";
-    String password = "test_password";
+    String password = "test password";
     String role = "test_role";
+    String description = "test description";
     Instant creation = Instant.now();
 
-    User user = new User(id, name, password, role, creation);
+    User user = new User(id, name, password, role, creation, description);
 
     Assert.assertEquals(id, user.getId());
     Assert.assertEquals(name, user.getName());
     Assert.assertEquals(password, user.getPassword());
+    Assert.assertEquals(description, user.getDescription());
     Assert.assertEquals(role, user.getRole());
     Assert.assertEquals(creation, user.getCreationTime());
   }
@@ -42,16 +44,17 @@ public class UserTest {
   public void testEquals() {
     UUID id = UUID.randomUUID();
     String name = "test_username";
-    String password = "test_password";
+    String password = "test password";
     String role = "test_role";
+    String description = "test description";
     Instant creation = Instant.now();
-
-    User user1 = new User(id, name, password, role, creation);
-    User user2 = new User(id, name, password, role, creation);
-    User user3 = new User(UUID.randomUUID(), name, password, role, creation);
-    User user4 = new User(id, "test_username2", password, role, creation);
-    User user5 = new User(id, name, "test_password2", role, creation);
-    User user6 = new User(id, name, password, role, creation.plusSeconds(1));
+    
+    User user1 = new User(id, name, password, role, creation, description);
+    User user2 = new User(id, name, password, role, creation, description);
+    User user3 = new User(UUID.randomUUID(), name, password, role, creation, description);
+    User user4 = new User(id, "test_username2", password, role, creation, description);
+    User user5 = new User(id, name, "test_password2", role, creation, description);
+    User user6 = new User(id, name, password, role, creation.plusSeconds(1), description);
 
     Assert.assertTrue(user1.equals(user2));
     Assert.assertFalse(user1.equals(user3));

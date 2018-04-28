@@ -22,6 +22,7 @@ public class User {
   private final UUID id;
   private final String name;
   private final String password;
+  private String description;
   private final String role;
   private final Instant creation;
 
@@ -33,13 +34,15 @@ public class User {
    * @param password the password of this User
    * @param creation the creation time of this User
    */
-  public User(UUID id, String name, String password, String role, Instant creation) {
+  public User(UUID id, String name, String password, String role, Instant creation, String description) {
     this.id = id;
     this.name = name;
     this.password = password;
     this.role = role;
     this.creation = creation;
+    this.description = description;
   }
+
 
   /** Returns the ID of this User. */
   public UUID getId() {
@@ -64,11 +67,22 @@ public class User {
     return creation;
   }
 
+  /** Returns the description of the User. */
+  public String getDescription() {
+    return description;
+  }
+
+  /** Updates the description of the User. */
+  public void setDescription(String d) {
+    this.description = d;
+  }
+
   /** Returns whether or not a user is the same as the other. */
   public boolean equals(User otherUser) {
     return (this.id.equals(otherUser.getId()) &&
             this.name.equals(otherUser.getName()) &&
             this.password.equals(otherUser.getPassword()) &&
+            this.description.equals(otherUser.getDescription()) &&
             this.role.equals(otherUser.getRole()) &&
             this.creation.equals(otherUser.getCreationTime())
     );

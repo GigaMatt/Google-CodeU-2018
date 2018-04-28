@@ -100,7 +100,7 @@ public class DefaultDataStore {
 
     for (int i = 0; i < DEFAULT_USER_COUNT; i++) {
       User user = new User(UUID.randomUUID(), randomUsernames.get(i),
-              BCrypt.hashpw("password", BCrypt.gensalt()), "member", Instant.now());
+              BCrypt.hashpw("password", BCrypt.gensalt()), "member", Instant.now(), "test");
       PersistentStorageAgent.getInstance().writeThrough(user);
       users.add(user);
     }
