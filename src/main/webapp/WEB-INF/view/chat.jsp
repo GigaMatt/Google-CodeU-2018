@@ -150,8 +150,6 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     }
 
     function checkForNewMessages() {
-      console.log("Checking for new messages..");
-
       let chatDiv = document.querySelector('#chat');
       if(!chatDiv) {
         return;
@@ -169,12 +167,22 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
       axios.post("/chat/<%= conversation.getTitle() %>", createPostString(postData))
         .then(function (response) {
-          console.log(response);
+          if (response.data.success) {
+            if (response.data.foundNewMessages) {
+              loadNewMessages();
+            }
+          } else {
+            // TODO (Azee): Show an error message
+          }
         })
         .catch(function (error) {
-          console.log(error);
-          console.log(error.response);
+          // TODO (Azee): Show an error message
         });
+    }
+
+    function loadNewMessages() {
+      // TODO (Azee): Load the new messages without forcing a reload (Asynchronously maybe?)
+      window.location.reload();
     }
 
   </script>

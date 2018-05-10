@@ -166,12 +166,26 @@ public class ChatServlet extends HttpServlet {
       // redirect to a GET request
       response.sendRedirect("/chat/" + conversationTitle);
     } else if (action.equals("check-new-messages")) {
-      String lastMessageTime = request.getParameter("lastMessageTime");
-
-
       JsonObject responseData = new JsonObject();
-      responseData.addProperty("success", true);
-      responseData.addProperty("data", false);
+
+      String lastMessageTime = request.getParameter("lastMessageTime");
+      Instant lastMessageInstant = Instant.parse(lastMessageTime);
+      
+      List<Message> messageList = messageStore.getMessagesInConversation(conversation.getId());
+      if(messageList.size() == 0) {
+        responseData.addProperty("success", true);
+        responseData.addProperty("foundNewMessages", false);
+      }
+      else {
+        Message latestMessage = messageList.get(messageList.size()-1);
+        if(latestMessage.getCreationTime().compareTo(lastMessageInstant) > 0) {
+          responseData.addProperty("success", true);
+          responseData.addProperty("foundNewMessages", true);
+        } else {  
+          responseData.addProperty("success", true);
+          responseData.addProperty("foundNewMessages", false);
+        }
+      }
 
       response.getOutputStream().print(responseData.toString());
     }
