@@ -59,6 +59,8 @@ public class PersistentDataStore {
 
     // Retrieve all users from the datastore.
     Query query = new Query("chat-users");
+    query.addSort("creation_time", SortDirection.ASCENDING);  
+
     PreparedQuery results = datastore.prepare(query);
 
     for (Entity entity : results.asIterable()) {
@@ -151,7 +153,7 @@ public class PersistentDataStore {
 
   /** Write a User object to the Datastore service. */
   public void writeThrough(User user) {
-    Entity userEntity = new Entity("chat-users");
+    Entity userEntity = new Entity("chat-users", user.getId().toString());
     userEntity.setProperty("uuid", user.getId().toString());
     userEntity.setProperty("username", user.getName());
     userEntity.setProperty("password", user.getPassword());
