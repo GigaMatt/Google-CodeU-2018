@@ -27,7 +27,7 @@
     <div
       style="width:75%; margin-left:auto; margin-right:auto; margin-top: 50px;">
 
-      <h1>About the CodeU Chat App</h1>
+      <h1>About the Incodables CodeU Chat App</h1>
       <p>
         This is an example chat application designed to be a starting point
         for your CodeU project team work. Here's some stuff to think about:
@@ -48,13 +48,13 @@
           internationalization.</li>
       </ul>
 
-      <p>
-        This is your code now. Get familiar with it and get comfortable
-        working with your team to plan and make changes. Start by updating the
-        homepage and this about page to tell your users more about your team.
-        This page should also be used to describe the features and improvements
-        you've added.
-      </p>
+      <h1>About the Incodables Team</h1>
+       <ul>
+        <li><strong>Stepahnie:</strong> put description here </li>
+        <li><strong>Azee:</strong> put description here </li>
+        <li><strong>Hannah:</strong> is a rising junior cs major at St. Olaf College. 
+        In her free time she likes to bike, visit farmers markets, and start tech projects.</li>
+      </ul>
     </div>
   </div>
 </body>
