@@ -28,6 +28,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.appengine.repackaged.com.google.gson.JsonObject;
+
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
@@ -138,27 +141,39 @@ public class ChatServlet extends HttpServlet {
       return;
     }
 
-    String messageContent = request.getParameter("message");
+    String action = request.getParameter("action");
+    
+    if (action.equals("send-message")) {
+      String messageContent = request.getParameter("message");
+
+      // Creates a basic whitelist to allow a few HTML text tags
+      Whitelist whitelist = Whitelist.basic();
+      whitelist.addAttributes(":all", "style");
+
+      // this removes any HTML from the message content
+      String cleanedMessageContent = Jsoup.clean(messageContent, whitelist);
+
+      Message message =
+          new Message(
+              UUID.randomUUID(),
+              conversation.getId(),
+              user.getId(),
+              cleanedMessageContent,
+              Instant.now());
+
+      messageStore.addMessage(message);
+
+      // redirect to a GET request
+      response.sendRedirect("/chat/" + conversationTitle);
+    } else if (action.equals("check-new-messages")) {
+      String lastMessageTime = request.getParameter("lastMessageTime");
 
 
-    // Creates a basic whitelist to allow a few HTML text tags
-    Whitelist whitelist = Whitelist.basic();
-    whitelist.addAttributes(":all", "style");
+      JsonObject responseData = new JsonObject();
+      responseData.addProperty("success", true);
+      responseData.addProperty("data", false);
 
-    // this removes any HTML from the message content
-    String cleanedMessageContent = Jsoup.clean(messageContent, whitelist);
-
-    Message message =
-        new Message(
-            UUID.randomUUID(),
-            conversation.getId(),
-            user.getId(),
-            cleanedMessageContent,
-            Instant.now());
-
-    messageStore.addMessage(message);
-
-    // redirect to a GET request
-    response.sendRedirect("/chat/" + conversationTitle);
+      response.getOutputStream().print(responseData.toString());
+    }
   }
 }

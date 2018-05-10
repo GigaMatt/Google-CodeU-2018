@@ -50,10 +50,17 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     }
   </style>
 
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
   <script>
+    // We will check for new messages using this interval in milliseconds.
+    var MESSAGE_POLL_INTERVAL = 3000;
+
     function onBodyLoaded() {
       scrollChat();
       initChatInputEditor();
+
+      initMessagePolling();
     }
     
     // scroll the chat div to the bottom
@@ -111,6 +118,65 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       }
     }
 
+    function createPostString(postData) {
+      let str = "", first = true;
+      for (let key in postData) {
+        // skip loop if the property is from prototype
+        if (!postData.hasOwnProperty(key)) continue;
+    
+        let val = postData[key];
+        
+        if (first) {
+            first = false;
+        }
+        else {
+            str += '&';
+        }
+
+        key = encodeURIComponent(key);
+        val = encodeURIComponent(val);
+
+        str += key + "=" + val;
+      }
+
+      return str;
+    }
+
+    // Initializes Message Polling
+    function initMessagePolling() {
+      setInterval(function () {
+        checkForNewMessages();  
+      }, MESSAGE_POLL_INTERVAL);
+    }
+
+    function checkForNewMessages() {
+      console.log("Checking for new messages..");
+
+      let chatDiv = document.querySelector('#chat');
+      if(!chatDiv) {
+        return;
+      }
+
+      let lastMessageItem = chatDiv.querySelector('.message-item:last-child');
+      if(!lastMessageItem) {
+        return;
+      }
+
+      let postData = {
+        action: "check-new-messages",
+        lastMessageTime: lastMessageItem.getAttribute("creation-time"),
+      };
+
+      axios.post("/chat/<%= conversation.getTitle() %>", createPostString(postData))
+        .then(function (response) {
+          console.log(response);
+        })
+        .catch(function (error) {
+          console.log(error);
+          console.log(error.response);
+        });
+    }
+
   </script>
 </head>
 <body onload="onBodyLoaded();">
@@ -132,7 +198,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         String author = UserStore.getInstance()
           .getUser(message.getAuthorId()).getName();
     %>
-      <li><strong><%= author %>:</strong> <%= message.getContent() %></li>
+      <li class="message-item" creation-time="<%= message.getCreationTime() %>"><strong><%= author %>:</strong> <%= message.getContent() %></li>
     <%
       }
     %>
@@ -143,6 +209,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
     <% if (request.getSession().getAttribute("user") != null) { %>
     <form id="chat-form" action="/chat/<%= conversation.getTitle() %>" method="POST">
+        <input type="hidden" name="action" value="send-message">
         <input id="chat-input-field" type="hidden" name="message">
         
         <div id="chat-input-toolbar">
