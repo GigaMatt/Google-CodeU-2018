@@ -203,7 +203,7 @@ public class ChatServlet extends HttpServlet {
               JSONObject messageJsonObject = new JSONObject();
 
               JSONObject authorJsonObject = new JSONObject();
-              authorJsonObject.put("id", message.getAuthorId());
+              authorJsonObject.put("id", message.getAuthorId().toString());
               authorJsonObject.put("name", userStore.getUser(message.getAuthorId()).getName());
 
               messageJsonObject.put("author", authorJsonObject);
