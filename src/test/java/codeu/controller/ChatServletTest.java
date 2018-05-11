@@ -263,8 +263,10 @@ public class ChatServletTest {
     Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
         .thenReturn(fakeConversation);
 
+    Instant currentInstant = Instant.now();
+
     Mockito.when(mockRequest.getParameter("action")).thenReturn("check-new-messages");
-    Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(Instant.now().minusSeconds(10).toString());
+    Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(currentInstant.minusSeconds(10).toString());
 
     List<Message> fakeMessageList = new ArrayList<>();
     
@@ -274,7 +276,7 @@ public class ChatServletTest {
         fakeConversation.getId(),
         fakeUser.getId(),
         "test message 0",
-        Instant.now().minusSeconds(10));
+        currentInstant.minusSeconds(10));
                                 
     // Should be added in the response
     Message actualMessage1 = new Message(
@@ -282,7 +284,7 @@ public class ChatServletTest {
         fakeConversation.getId(),
         fakeUser.getId(),
         "test message 1",
-        Instant.now().minusSeconds(5));
+        currentInstant.minusSeconds(5));
         
     // Should be added in the response
     Message actualMessage2 = new Message(
@@ -290,7 +292,7 @@ public class ChatServletTest {
         fakeConversation.getId(),
         fakeUser.getId(),
         "test message 2",
-        Instant.now());
+        currentInstant);
     
     fakeMessageList.add(actualMessage0);
     fakeMessageList.add(actualMessage1);
@@ -342,9 +344,11 @@ public class ChatServletTest {
         new Conversation(UUID.randomUUID(), UUID.randomUUID(), "test_conversation", Instant.now());
     Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
         .thenReturn(fakeConversation);
+        
+    Instant currentInstant = Instant.now();
 
     Mockito.when(mockRequest.getParameter("action")).thenReturn("check-new-messages");
-    Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(Instant.now().toString());
+    Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(currentInstant.toString());
 
     List<Message> fakeMessageList = new ArrayList<>();
     fakeMessageList.add(
@@ -353,7 +357,7 @@ public class ChatServletTest {
             fakeConversation.getId(),
             fakeUser.getId(),
             "test message",
-            Instant.now()));
+            currentInstant));
     Mockito.when(mockMessageStore.getMessagesInConversation(fakeConversation.getId()))
         .thenReturn(fakeMessageList);
 
