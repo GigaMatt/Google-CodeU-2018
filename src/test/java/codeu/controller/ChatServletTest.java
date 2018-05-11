@@ -268,6 +268,7 @@ public class ChatServletTest {
 
     List<Message> fakeMessageList = new ArrayList<>();
     
+    // Should not be added in the response
     Message actualMessage0 = new Message(
         UUID.randomUUID(),
         fakeConversation.getId(),
@@ -275,6 +276,7 @@ public class ChatServletTest {
         "test message 0",
         Instant.now().minusSeconds(10));
                                 
+    // Should be added in the response
     Message actualMessage1 = new Message(
         UUID.randomUUID(),
         fakeConversation.getId(),
@@ -282,6 +284,7 @@ public class ChatServletTest {
         "test message 1",
         Instant.now().minusSeconds(5));
         
+    // Should be added in the response
     Message actualMessage2 = new Message(
         UUID.randomUUID(),
         fakeConversation.getId(),

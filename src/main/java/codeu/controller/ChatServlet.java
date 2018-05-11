@@ -143,6 +143,7 @@ public class ChatServlet extends HttpServlet {
       return;
     }
 
+    // This action is used  to determine the purpose of this request 
     String action = request.getParameter("action");
     
     if (action.equals("send-message")) {
@@ -168,11 +169,13 @@ public class ChatServlet extends HttpServlet {
       // redirect to a GET request
       response.sendRedirect("/chat/" + conversationTitle);
     } else if (action.equals("check-new-messages")) {
+      // This will represent the data being sent in the response
       JSONObject responseData = new JSONObject();
 
       String lastMessageTime = request.getParameter("lastMessageTime");
       Instant lastMessageInstant;
       if (lastMessageTime.equals("0")) {
+        // If there was no last message (i.e, there was no message at all)
         lastMessageInstant = Instant.MIN;
       } else {
         lastMessageInstant = Instant.parse(lastMessageTime);
@@ -182,12 +185,17 @@ public class ChatServlet extends HttpServlet {
 
       try {
         if(messageList.size() == 0) {
+          // There is no message in the message store.
           responseData.put("success", true);
           responseData.put("foundNewMessages", false);
         }
         else {
           Message latestMessage = messageList.get(messageList.size()-1);
+
+          // Checks if the latest message in message store was created after the last available message
           if(latestMessage.getCreationTime().compareTo(lastMessageInstant) > 0) {
+            // Traversing back the message list as long as the message is created after the last available message.
+            // Helps prevent traversing through the whole list.
             int startId = messageList.size() - 1;
             for (; startId >= 0; startId--) {
               if (messageList.get(startId).getCreationTime().compareTo(lastMessageInstant) <= 0) {
@@ -227,6 +235,7 @@ public class ChatServlet extends HttpServlet {
         return;
       }
       
+      // This will send the data back in JSON format
       response.getOutputStream().print(responseData.toString());
     }
   }
