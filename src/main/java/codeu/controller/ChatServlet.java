@@ -28,6 +28,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
@@ -138,27 +141,60 @@ public class ChatServlet extends HttpServlet {
       return;
     }
 
-    String messageContent = request.getParameter("message");
+    String action = request.getParameter("action");
+    
+    if (action.equals("send-message")) {
+      String messageContent = request.getParameter("message");
 
+      // Creates a basic whitelist to allow a few HTML text tags
+      Whitelist whitelist = Whitelist.basic();
+      whitelist.addAttributes(":all", "style");
 
-    // Creates a basic whitelist to allow a few HTML text tags
-    Whitelist whitelist = Whitelist.basic();
-    whitelist.addAttributes(":all", "style");
+      // this removes any HTML from the message content
+      String cleanedMessageContent = Jsoup.clean(messageContent, whitelist);
 
-    // this removes any HTML from the message content
-    String cleanedMessageContent = Jsoup.clean(messageContent, whitelist);
+      Message message =
+          new Message(
+              UUID.randomUUID(),
+              conversation.getId(),
+              user.getId(),
+              cleanedMessageContent,
+              Instant.now());
 
-    Message message =
-        new Message(
-            UUID.randomUUID(),
-            conversation.getId(),
-            user.getId(),
-            cleanedMessageContent,
-            Instant.now());
+      messageStore.addMessage(message);
 
-    messageStore.addMessage(message);
+      // redirect to a GET request
+      response.sendRedirect("/chat/" + conversationTitle);
+    } else if (action.equals("check-new-messages")) {
+      JSONObject responseData = new JSONObject();
 
-    // redirect to a GET request
-    response.sendRedirect("/chat/" + conversationTitle);
+      String lastMessageTime = request.getParameter("lastMessageTime");
+      Instant lastMessageInstant = Instant.parse(lastMessageTime);
+      
+      List<Message> messageList = messageStore.getMessagesInConversation(conversation.getId());
+
+      try {
+        if(messageList.size() == 0) {
+          responseData.put("success", true);
+          responseData.put("foundNewMessages", false);
+        }
+        else {
+          Message latestMessage = messageList.get(messageList.size()-1);
+          if(latestMessage.getCreationTime().compareTo(lastMessageInstant) > 0) {
+            responseData.put("success", true);
+            responseData.put("foundNewMessages", true);
+          } else {  
+            responseData.put("success", true);
+            responseData.put("foundNewMessages", false);
+          }
+        }
+      } catch (JSONException e) {
+        response.setStatus(500);
+        response.getOutputStream().print("Unexpected JSONException Occurred");
+        return;
+      }
+      
+      response.getOutputStream().print(responseData.toString());
+    }
   }
 }
