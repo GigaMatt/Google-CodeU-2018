@@ -22,6 +22,7 @@ import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 import javax.servlet.ServletException;
@@ -29,6 +30,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -141,6 +143,7 @@ public class ChatServlet extends HttpServlet {
       return;
     }
 
+    // This action is used to determine the purpose of this request 
     String action = request.getParameter("action");
     
     if (action.equals("send-message")) {
@@ -166,23 +169,61 @@ public class ChatServlet extends HttpServlet {
       // redirect to a GET request
       response.sendRedirect("/chat/" + conversationTitle);
     } else if (action.equals("check-new-messages")) {
+      // This will represent the data being sent in the response
       JSONObject responseData = new JSONObject();
 
       String lastMessageTime = request.getParameter("lastMessageTime");
-      Instant lastMessageInstant = Instant.parse(lastMessageTime);
-      
+      Instant lastMessageInstant;
+      if (lastMessageTime.equals("0")) {
+        // If there was no last message (i.e, there was no message at all)
+        lastMessageInstant = Instant.MIN;
+      } else {
+        lastMessageInstant = Instant.parse(lastMessageTime);
+      }
+
       List<Message> messageList = messageStore.getMessagesInConversation(conversation.getId());
 
       try {
         if(messageList.size() == 0) {
+          // There is no message in the message store.
           responseData.put("success", true);
           responseData.put("foundNewMessages", false);
         }
         else {
           Message latestMessage = messageList.get(messageList.size()-1);
+
+          // Checks if the latest message in message store was created after the last available message
           if(latestMessage.getCreationTime().compareTo(lastMessageInstant) > 0) {
+            // Traversing back the message list as long as the message is created after the last available message.
+            // Helps prevent traversing through the whole list.
+            int startId = messageList.size() - 1;
+            for (; startId >= 0; startId--) {
+              if (messageList.get(startId).getCreationTime().compareTo(lastMessageInstant) <= 0) {
+                break;
+              }
+            }
+            startId++;
+
+            JSONArray messageJsonArray = new JSONArray();
+            for (int i = startId; i < messageList.size(); i++) {
+              Message message = messageList.get(i);
+
+              JSONObject messageJsonObject = new JSONObject();
+
+              JSONObject authorJsonObject = new JSONObject();
+              authorJsonObject.put("id", message.getAuthorId().toString());
+              authorJsonObject.put("name", userStore.getUser(message.getAuthorId()).getName());
+
+              messageJsonObject.put("author", authorJsonObject);
+              messageJsonObject.put("creationTime", message.getCreationTime().toString());
+              messageJsonObject.put("content", message.getContent());
+
+              messageJsonArray.put(messageJsonObject);
+            }
+
             responseData.put("success", true);
             responseData.put("foundNewMessages", true);
+            responseData.put("messages", messageJsonArray);
           } else {  
             responseData.put("success", true);
             responseData.put("foundNewMessages", false);
@@ -194,6 +235,7 @@ public class ChatServlet extends HttpServlet {
         return;
       }
       
+      // This will send the data back in JSON format
       response.getOutputStream().print(responseData.toString());
     }
   }

@@ -54,7 +54,10 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
   <script>
     // We will check for new messages using this interval in milliseconds.
-    var MESSAGE_POLL_INTERVAL = 3000;
+    const MESSAGE_POLL_INTERVAL = 3000;
+
+    // Controls message polling (Only one active poll at a time). Will be set to false when a poll is in progress, and back to true when the poll has ended.
+    var canPollForMessages = true;
 
     function onBodyLoaded() {
       scrollChat();
@@ -84,9 +87,19 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
         let chatQuill = new Quill(chatInputEditor, {
           modules: {
-            toolbar: chatInputToolbar
+            toolbar: chatInputToolbar,
+            keyboard: {
+              bindings: {
+                custom: {
+                  key: 'enter',
+                  handler: function(range, context) {
+                    chatForm.querySelector('button[type="submit"]').click();
+                  }
+                },
+              }
+            }
           },
-          placeholder: 'Type your message and press Send',
+          placeholder: 'Type your message and press Send or hit Enter',
           theme: 'snow'
         });
 
@@ -118,6 +131,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       }
     }
 
+    // Helper function to create the URL Encoded Post String to be used for Post Requests
     function createPostString(postData) {
       let str = "", first = true;
       for (let key in postData) {
@@ -147,42 +161,76 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       setInterval(function () {
         checkForNewMessages();  
       }, MESSAGE_POLL_INTERVAL);
+      checkForNewMessages();
     }
 
+    // Asynchronously checks for any new messages
     function checkForNewMessages() {
-      let chatDiv = document.querySelector('#chat');
-      if(!chatDiv) {
+      if(!canPollForMessages) {
         return;
       }
 
-      let lastMessageItem = chatDiv.querySelector('.message-item:last-child');
-      if(!lastMessageItem) {
+      let chatList = document.querySelector('#chat-list');
+      if(!chatList) {
         return;
+      }
+
+      let lastMessageItem = chatList.querySelector('.message-item:last-child');
+
+      // By default, set to "0". The Server identifies "0" as an empty message list and sends back all available messages.
+      let lastMessageTime = "0";
+      if(lastMessageItem) {
+        lastMessageTime = lastMessageItem.getAttribute("creation-time");
       }
 
       let postData = {
         action: "check-new-messages",
-        lastMessageTime: lastMessageItem.getAttribute("creation-time"),
+        lastMessageTime: lastMessageTime,
       };
 
+      // Disabling polling temporarily
+      canPollForMessages = false;
+
+      // Sending HTTP Request asynchronously
       axios.post("/chat/<%= conversation.getTitle() %>", createPostString(postData))
         .then(function (response) {
           if (response.data.success) {
             if (response.data.foundNewMessages) {
-              loadNewMessages();
+              loadNewMessages(response.data.messages);
             }
           } else {
             // TODO (Azee): Show an error message
           }
+          
+          // Enabling polling back
+          canPollForMessages = true;
         })
         .catch(function (error) {
           // TODO (Azee): Show an error message
+          
+          // Enabling polling back
+          canPollForMessages = true;
         });
     }
 
-    function loadNewMessages() {
-      // TODO (Azee): Load the new messages without forcing a reload (Asynchronously maybe?)
-      window.location.reload();
+    // Adds the new messages to the chat list
+    function loadNewMessages(newMessages) {     
+      let chatList = document.querySelector('#chat-list');
+      if(!chatList) {
+        return;
+      }
+
+      newMessages.forEach(function (newMessage) {
+        let messageItem = document.createElement("li");
+        messageItem.classList.add('message-item');
+        messageItem.setAttribute('creation-time', newMessage.creationTime);
+        messageItem.innerHTML = '<strong>' + newMessage.author.name + ': </strong>' + newMessage.content;
+
+        chatList.appendChild(messageItem);
+      });
+
+      // Scroll to the bottom after adding the new messages
+      scrollChat();
     }
 
   </script>
@@ -200,16 +248,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     <hr/>
 
     <div id="chat">
-      <ul>
-    <%
-      for (Message message : messages) {
-        String author = UserStore.getInstance()
-          .getUser(message.getAuthorId()).getName();
-    %>
-      <li class="message-item" creation-time="<%= message.getCreationTime() %>"><strong><%= author %>:</strong> <%= message.getContent() %></li>
-    <%
-      }
-    %>
+      <ul id="chat-list">
+    
       </ul>
     </div>
 

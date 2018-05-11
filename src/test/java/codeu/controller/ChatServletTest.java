@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -255,23 +256,48 @@ public class ChatServletTest {
     User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
             Instant.now(), "test description");
     Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
+    Mockito.when(mockUserStore.getUser(fakeUser.getId())).thenReturn(fakeUser);
 
     Conversation fakeConversation =
         new Conversation(UUID.randomUUID(), UUID.randomUUID(), "test_conversation", Instant.now());
     Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
         .thenReturn(fakeConversation);
 
+    Instant currentInstant = Instant.now();
+
     Mockito.when(mockRequest.getParameter("action")).thenReturn("check-new-messages");
-    Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(Instant.now().minusSeconds(10).toString());
+    Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(currentInstant.minusSeconds(10).toString());
 
     List<Message> fakeMessageList = new ArrayList<>();
-    fakeMessageList.add(
-        new Message(
-            UUID.randomUUID(),
-            fakeConversation.getId(),
-            UUID.randomUUID(),
-            "test message",
-            Instant.now()));
+    
+    // Should not be added in the response
+    Message actualMessage0 = new Message(
+        UUID.randomUUID(),
+        fakeConversation.getId(),
+        fakeUser.getId(),
+        "test message 0",
+        currentInstant.minusSeconds(10));
+                                
+    // Should be added in the response
+    Message actualMessage1 = new Message(
+        UUID.randomUUID(),
+        fakeConversation.getId(),
+        fakeUser.getId(),
+        "test message 1",
+        currentInstant.minusSeconds(5));
+        
+    // Should be added in the response
+    Message actualMessage2 = new Message(
+        UUID.randomUUID(),
+        fakeConversation.getId(),
+        fakeUser.getId(),
+        "test message 2",
+        currentInstant);
+    
+    fakeMessageList.add(actualMessage0);
+    fakeMessageList.add(actualMessage1);
+    fakeMessageList.add(actualMessage2);
+
     Mockito.when(mockMessageStore.getMessagesInConversation(fakeConversation.getId()))
         .thenReturn(fakeMessageList);
 
@@ -284,6 +310,22 @@ public class ChatServletTest {
 		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
         Assert.assertEquals(true, responseData.getBoolean("success"));
         Assert.assertEquals(true, responseData.getBoolean("foundNewMessages"));
+        
+        JSONArray messageJsonArray = responseData.getJSONArray("messages");
+        JSONObject messageJsonObject1 = messageJsonArray.getJSONObject(0);
+        JSONObject messageJsonObject2 = messageJsonArray.getJSONObject(1);
+
+        Assert.assertEquals(2, messageJsonArray.length());
+
+        Assert.assertEquals(actualMessage1.getAuthorId().toString(), messageJsonObject1.getJSONObject("author").getString("id"));
+        Assert.assertEquals(mockUserStore.getUser(actualMessage1.getAuthorId()).getName(), messageJsonObject1.getJSONObject("author").getString("name"));
+        Assert.assertEquals(actualMessage1.getCreationTime().toString(), messageJsonObject1.getString("creationTime"));
+        Assert.assertEquals(actualMessage1.getContent(), messageJsonObject1.getString("content"));
+        
+        Assert.assertEquals(actualMessage2.getAuthorId().toString(), messageJsonObject2.getJSONObject("author").getString("id"));
+        Assert.assertEquals(mockUserStore.getUser(actualMessage2.getAuthorId()).getName(), messageJsonObject2.getJSONObject("author").getString("name"));
+        Assert.assertEquals(actualMessage2.getCreationTime().toString(), messageJsonObject2.getString("creationTime"));
+        Assert.assertEquals(actualMessage2.getContent(), messageJsonObject2.getString("content"));
 	} catch (JSONException e) {
         Mockito.doThrow(e);
 	} 
@@ -296,23 +338,26 @@ public class ChatServletTest {
     User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
             Instant.now(), "test description");
     Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
+    Mockito.when(mockUserStore.getUser(fakeUser.getId())).thenReturn(fakeUser);
 
     Conversation fakeConversation =
         new Conversation(UUID.randomUUID(), UUID.randomUUID(), "test_conversation", Instant.now());
     Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
         .thenReturn(fakeConversation);
+        
+    Instant currentInstant = Instant.now();
 
     Mockito.when(mockRequest.getParameter("action")).thenReturn("check-new-messages");
-    Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(Instant.now().toString());
+    Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(currentInstant.toString());
 
     List<Message> fakeMessageList = new ArrayList<>();
     fakeMessageList.add(
         new Message(
             UUID.randomUUID(),
             fakeConversation.getId(),
-            UUID.randomUUID(),
+            fakeUser.getId(),
             "test message",
-            Instant.now()));
+            currentInstant));
     Mockito.when(mockMessageStore.getMessagesInConversation(fakeConversation.getId()))
         .thenReturn(fakeMessageList);
 
