@@ -29,8 +29,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.repackaged.com.google.gson.JsonObject;
-
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
@@ -166,27 +166,34 @@ public class ChatServlet extends HttpServlet {
       // redirect to a GET request
       response.sendRedirect("/chat/" + conversationTitle);
     } else if (action.equals("check-new-messages")) {
-      JsonObject responseData = new JsonObject();
+      JSONObject responseData = new JSONObject();
 
       String lastMessageTime = request.getParameter("lastMessageTime");
       Instant lastMessageInstant = Instant.parse(lastMessageTime);
       
       List<Message> messageList = messageStore.getMessagesInConversation(conversation.getId());
-      if(messageList.size() == 0) {
-        responseData.addProperty("success", true);
-        responseData.addProperty("foundNewMessages", false);
-      }
-      else {
-        Message latestMessage = messageList.get(messageList.size()-1);
-        if(latestMessage.getCreationTime().compareTo(lastMessageInstant) > 0) {
-          responseData.addProperty("success", true);
-          responseData.addProperty("foundNewMessages", true);
-        } else {  
-          responseData.addProperty("success", true);
-          responseData.addProperty("foundNewMessages", false);
-        }
-      }
 
+      try {
+        if(messageList.size() == 0) {
+          responseData.put("success", true);
+          responseData.put("foundNewMessages", false);
+        }
+        else {
+          Message latestMessage = messageList.get(messageList.size()-1);
+          if(latestMessage.getCreationTime().compareTo(lastMessageInstant) > 0) {
+            responseData.put("success", true);
+            responseData.put("foundNewMessages", true);
+          } else {  
+            responseData.put("success", true);
+            responseData.put("foundNewMessages", false);
+          }
+        }
+      } catch (JSONException e) {
+        response.setStatus(500);
+        response.getOutputStream().print("Unexpected JSONException Occurred");
+        return;
+      }
+      
       response.getOutputStream().print(responseData.toString());
     }
   }
