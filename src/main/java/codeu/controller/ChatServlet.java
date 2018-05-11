@@ -143,7 +143,7 @@ public class ChatServlet extends HttpServlet {
       return;
     }
 
-    // This action is used  to determine the purpose of this request 
+    // This action is used to determine the purpose of this request 
     String action = request.getParameter("action");
     
     if (action.equals("send-message")) {
