@@ -27,9 +27,13 @@ import java.util.List;
 import java.util.UUID;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +47,7 @@ public class ChatServletTest {
   private HttpSession mockSession;
   private HttpServletResponse mockResponse;
   private RequestDispatcher mockRequestDispatcher;
+  private ServletOutputStream mockOutputStream;
   private ConversationStore mockConversationStore;
   private MessageStore mockMessageStore;
   private UserStore mockUserStore;
@@ -59,6 +64,14 @@ public class ChatServletTest {
     mockRequestDispatcher = Mockito.mock(RequestDispatcher.class);
     Mockito.when(mockRequest.getRequestDispatcher("/WEB-INF/view/chat.jsp"))
         .thenReturn(mockRequestDispatcher);
+
+    mockOutputStream = Mockito.mock(ServletOutputStream.class);
+    try {
+		Mockito.when(mockResponse.getOutputStream()).thenReturn(mockOutputStream);
+	} catch (IOException e) {
+        Mockito.doThrow(e);
+	}
+    
 
     mockConversationStore = Mockito.mock(ConversationStore.class);
     chatServlet.setConversationStore(mockConversationStore);
@@ -201,5 +214,119 @@ public class ChatServletTest {
         "Contains bad html  and  content.", messageArgumentCaptor.getValue().getContent());
 
     Mockito.verify(mockResponse).sendRedirect("/chat/test_conversation");
+  }
+
+  @Test
+  public void testDoPost_checkNewMessage_EmptyList() throws IOException, ServletException {
+    Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/test_conversation");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
+    User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
+            Instant.now(), "test description");
+    Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
+
+    Conversation fakeConversation =
+        new Conversation(UUID.randomUUID(), UUID.randomUUID(), "test_conversation", Instant.now());
+    Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
+        .thenReturn(fakeConversation);
+
+    Mockito.when(mockRequest.getParameter("action")).thenReturn("check-new-messages");
+    Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(Instant.now().toString());
+
+    Mockito.when(mockMessageStore.getMessagesInConversation(fakeConversation.getId())).thenReturn(new ArrayList<>());
+
+    chatServlet.doPost(mockRequest, mockResponse);
+
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
+    
+	try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(true, responseData.getBoolean("success"));
+        Assert.assertEquals(false, responseData.getBoolean("foundNewMessages"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+	} 
+  }
+
+  @Test
+  public void testDoPost_checkNewMessage_Found() throws IOException, ServletException {
+    Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/test_conversation");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
+    User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
+            Instant.now(), "test description");
+    Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
+
+    Conversation fakeConversation =
+        new Conversation(UUID.randomUUID(), UUID.randomUUID(), "test_conversation", Instant.now());
+    Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
+        .thenReturn(fakeConversation);
+
+    Mockito.when(mockRequest.getParameter("action")).thenReturn("check-new-messages");
+    Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(Instant.now().minusSeconds(10).toString());
+
+    List<Message> fakeMessageList = new ArrayList<>();
+    fakeMessageList.add(
+        new Message(
+            UUID.randomUUID(),
+            fakeConversation.getId(),
+            UUID.randomUUID(),
+            "test message",
+            Instant.now()));
+    Mockito.when(mockMessageStore.getMessagesInConversation(fakeConversation.getId()))
+        .thenReturn(fakeMessageList);
+
+    chatServlet.doPost(mockRequest, mockResponse);
+
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
+    
+	try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(true, responseData.getBoolean("success"));
+        Assert.assertEquals(true, responseData.getBoolean("foundNewMessages"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+	} 
+  }
+
+  @Test
+  public void testDoPost_checkNewMessage_NotFound() throws IOException, ServletException {
+    Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/test_conversation");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
+    User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
+            Instant.now(), "test description");
+    Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
+
+    Conversation fakeConversation =
+        new Conversation(UUID.randomUUID(), UUID.randomUUID(), "test_conversation", Instant.now());
+    Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
+        .thenReturn(fakeConversation);
+
+    Mockito.when(mockRequest.getParameter("action")).thenReturn("check-new-messages");
+    Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(Instant.now().toString());
+
+    List<Message> fakeMessageList = new ArrayList<>();
+    fakeMessageList.add(
+        new Message(
+            UUID.randomUUID(),
+            fakeConversation.getId(),
+            UUID.randomUUID(),
+            "test message",
+            Instant.now()));
+    Mockito.when(mockMessageStore.getMessagesInConversation(fakeConversation.getId()))
+        .thenReturn(fakeMessageList);
+
+    chatServlet.doPost(mockRequest, mockResponse);
+
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
+    
+	try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(true, responseData.getBoolean("success"));
+        Assert.assertEquals(false, responseData.getBoolean("foundNewMessages"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+	} 
   }
 }
