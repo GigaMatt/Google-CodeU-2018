@@ -86,9 +86,19 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
         let chatQuill = new Quill(chatInputEditor, {
           modules: {
-            toolbar: chatInputToolbar
+            toolbar: chatInputToolbar,
+            keyboard: {
+              bindings: {
+                custom: {
+                  key: 'enter',
+                  handler: function(range, context) {
+                    chatForm.querySelector('button[type="submit"]').click();
+                  }
+                },
+              }
+            }
           },
-          placeholder: 'Type your message and press Send',
+          placeholder: 'Type your message and press Send or hit Enter',
           theme: 'snow'
         });
 
@@ -207,6 +217,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
         chatList.appendChild(messageItem);
       });
+
+      scrollChat();
     }
 
   </script>
