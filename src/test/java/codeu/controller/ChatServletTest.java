@@ -255,6 +255,7 @@ public class ChatServletTest {
     User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
             Instant.now(), "test description");
     Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
+    Mockito.when(mockUserStore.getUser(fakeUser.getId())).thenReturn(fakeUser);
 
     Conversation fakeConversation =
         new Conversation(UUID.randomUUID(), UUID.randomUUID(), "test_conversation", Instant.now());
@@ -269,7 +270,7 @@ public class ChatServletTest {
         new Message(
             UUID.randomUUID(),
             fakeConversation.getId(),
-            UUID.randomUUID(),
+            fakeUser.getId(),
             "test message",
             Instant.now()));
     Mockito.when(mockMessageStore.getMessagesInConversation(fakeConversation.getId()))
@@ -296,6 +297,7 @@ public class ChatServletTest {
     User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
             Instant.now(), "test description");
     Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
+    Mockito.when(mockUserStore.getUser(fakeUser.getId())).thenReturn(fakeUser);
 
     Conversation fakeConversation =
         new Conversation(UUID.randomUUID(), UUID.randomUUID(), "test_conversation", Instant.now());
@@ -310,7 +312,7 @@ public class ChatServletTest {
         new Message(
             UUID.randomUUID(),
             fakeConversation.getId(),
-            UUID.randomUUID(),
+            fakeUser.getId(),
             "test message",
             Instant.now()));
     Mockito.when(mockMessageStore.getMessagesInConversation(fakeConversation.getId()))

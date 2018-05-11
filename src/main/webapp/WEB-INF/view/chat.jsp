@@ -54,7 +54,9 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
   <script>
     // We will check for new messages using this interval in milliseconds.
-    var MESSAGE_POLL_INTERVAL = 3000;
+    const MESSAGE_POLL_INTERVAL = 3000;
+
+    var canPollForMessages = true;
 
     function onBodyLoaded() {
       scrollChat();
@@ -147,42 +149,64 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       setInterval(function () {
         checkForNewMessages();  
       }, MESSAGE_POLL_INTERVAL);
+      checkForNewMessages();
     }
 
     function checkForNewMessages() {
-      let chatDiv = document.querySelector('#chat');
-      if(!chatDiv) {
+      if(!canPollForMessages) {
         return;
       }
 
-      let lastMessageItem = chatDiv.querySelector('.message-item:last-child');
-      if(!lastMessageItem) {
+      let chatList = document.querySelector('#chat-list');
+      if(!chatList) {
         return;
+      }
+
+      let lastMessageItem = chatList.querySelector('.message-item:last-child');
+      let lastMessageTime = "0";
+      if(lastMessageItem) {
+        lastMessageTime = lastMessageItem.getAttribute("creation-time");
       }
 
       let postData = {
         action: "check-new-messages",
-        lastMessageTime: lastMessageItem.getAttribute("creation-time"),
+        lastMessageTime: lastMessageTime,
       };
 
+      canPollForMessages = false;
       axios.post("/chat/<%= conversation.getTitle() %>", createPostString(postData))
         .then(function (response) {
           if (response.data.success) {
             if (response.data.foundNewMessages) {
-              loadNewMessages();
+              loadNewMessages(response.data.messages);
             }
           } else {
             // TODO (Azee): Show an error message
           }
+          
+          canPollForMessages = true;
         })
         .catch(function (error) {
           // TODO (Azee): Show an error message
+          
+          canPollForMessages = true;
         });
     }
 
-    function loadNewMessages() {
-      // TODO (Azee): Load the new messages without forcing a reload (Asynchronously maybe?)
-      window.location.reload();
+    function loadNewMessages(newMessages) {     
+      let chatList = document.querySelector('#chat-list');
+      if(!chatList) {
+        return;
+      }
+
+      newMessages.forEach(function (newMessage) {
+        let messageItem = document.createElement("li");
+        messageItem.classList.add('message-item');
+        messageItem.setAttribute('creation-time', newMessage.creationTime);
+        messageItem.innerHTML = '<strong>' + newMessage.author.name + ': </strong>' + newMessage.content;
+
+        chatList.appendChild(messageItem);
+      });
     }
 
   </script>
@@ -200,16 +224,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     <hr/>
 
     <div id="chat">
-      <ul>
-    <%
-      for (Message message : messages) {
-        String author = UserStore.getInstance()
-          .getUser(message.getAuthorId()).getName();
-    %>
-      <li class="message-item" creation-time="<%= message.getCreationTime() %>"><strong><%= author %>:</strong> <%= message.getContent() %></li>
-    <%
-      }
-    %>
+      <ul id="chat-list">
+    
       </ul>
     </div>
 
