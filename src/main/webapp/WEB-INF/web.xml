@@ -77,6 +77,16 @@
   </servlet-mapping>
 
   <servlet>
+    <servlet-name>ChatPollServlet</servlet-name>
+    <servlet-class>codeu.controller.chat.ChatPollServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>ChatPollServlet</servlet-name>
+    <url-pattern>/chat/poll/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
     <servlet-name>AdminServlet</servlet-name>
     <servlet-class>codeu.controller.AdminServlet</servlet-class>
   </servlet>

@@ -184,7 +184,6 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       }
 
       let postData = {
-        action: "check-new-messages",
         lastMessageTime: lastMessageTime,
       };
 
@@ -192,7 +191,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       canPollForMessages = false;
 
       // Sending HTTP Request asynchronously
-      axios.post("/chat/<%= conversation.getTitle() %>", createPostString(postData))
+      axios.post("/chat/poll/<%= conversation.getTitle() %>", createPostString(postData))
         .then(function (response) {
           if (response.data.success) {
             if (response.data.foundNewMessages) {
@@ -257,7 +256,6 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
     <% if (request.getSession().getAttribute("user") != null) { %>
     <form id="chat-form" action="/chat/<%= conversation.getTitle() %>" method="POST">
-        <input type="hidden" name="action" value="send-message">
         <input id="chat-input-field" type="hidden" name="message">
         
         <div id="chat-input-toolbar">
