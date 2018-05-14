@@ -3,6 +3,7 @@
     <a href="/conversations">Conversations</a>
     <% if(request.getSession().getAttribute("user") != null){ %>
         <a href="/users">Hello <%= request.getSession().getAttribute("user") %>!</a>
+        <a href="/logout">Log Out</a>
         <%
       if(request.getSession().getAttribute("role").equals("admin"))  {
         %>
