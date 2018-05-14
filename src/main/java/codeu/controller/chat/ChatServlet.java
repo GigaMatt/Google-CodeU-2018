@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package codeu.controller;
+package codeu.controller.chat;
 
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
@@ -22,7 +22,6 @@ import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
 import java.io.IOException;
 import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 import javax.servlet.ServletException;

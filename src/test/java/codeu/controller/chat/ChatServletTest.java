@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package codeu.controller;
+package codeu.controller.chat;
 
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
