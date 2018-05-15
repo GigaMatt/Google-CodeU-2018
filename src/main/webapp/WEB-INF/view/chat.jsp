@@ -45,6 +45,27 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     div.ql-toolbar {
       background-color: white;
     }
+    
+    #youtube-player-container {
+      position: fixed;
+      pointer-events: none;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 999;
+    }
+
+    #youtube-player-wrapper {
+      display: none;
+      position: absolute;
+      pointer-events: all;
+      background: rgba(0, 128, 128, 0.8);
+      padding-left: 10px; 
+      padding-right: 10px; 
+      padding-top: 10px; 
+      padding-bottom: 100px;
+    }
   </style>
 </head>
 <body onload="onBodyLoaded();">
@@ -52,14 +73,21 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
   
   <%@ include file="/include/navbar.jsp" %>
 
+  <div id="youtube-player-container">
+    <div style="position: relative; width: 100%; height:100%">
+        
+      <div id="youtube-player-wrapper" style="width: 640px; height: 400px">
+        <div id="youtube-player"></div>
+      </div>
+  </div>
+  </div>
+
   <div id="container">
 
     <h1><%= conversation.getTitle() %>
       <a href="" style="float: right">&#8635;</a></h1>
 
     <hr/>
-
-    <div id="youtube-player"></div>
 
     <div id="chat">
       <ul id="chat-list">
@@ -124,11 +152,20 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
   <!-- Includes the Axios Async HTTP Request Library  -->
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   
+  <!-- Includes the Interact Library  -->
+  <script src="/js/interact.min.js"></script>
+  
   <script>
     insertYoutubeAPI();
 
     // We will check for new messages using this interval in milliseconds.
     const MESSAGE_POLL_INTERVAL = 3000;
+    const YOUTUBE_PLAYER_WRAPPER_PADDING = {
+      left: 10,
+      right: 10,
+      top: 10,
+      bottom: 100,
+    }
 
     // Controls message polling (Only one active poll at a time). Will be set to false when a poll is in progress, and back to true when the poll has ended.
     var canPollForMessages = true;
@@ -139,6 +176,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     function onBodyLoaded() {
       scrollChat();
       initChatInputEditor();
+      initYoutubePlayerInteraction();
 
       initMessagePolling();
     }
@@ -309,6 +347,87 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       scrollChat();
     }
 
+    // Makes the Youtube Player Floatable
+    function initYoutubePlayerInteraction() {
+      interact('#youtube-player-wrapper')
+        .draggable({
+          // enable inertial throwing
+          inertia: true,
+          // keep the element within the area of it's parent
+          restrict: {
+            restriction: "parent",
+            endOnly: true,
+            elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+          },
+          // enable autoScroll
+          autoScroll: true,
+
+          // call this function on every dragmove event
+          onmove: function (event) {
+            let target = event.target,
+                // keep the dragged position in the data-x/data-y attributes
+                x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+                y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+        
+            // translate the element
+            target.style.webkitTransform =
+            target.style.transform =
+              'translate(' + x + 'px, ' + y + 'px)';
+        
+            // update the posiion attributes
+            target.setAttribute('data-x', x);
+            target.setAttribute('data-y', y);
+          },
+          // call this function on every dragend event
+          onend: function (event) {
+            
+          }
+        })
+        .resizable({
+          // resize from all edges and corners
+          edges: { left: true, right: true, bottom: true, top: true },
+      
+          // keep the edges inside the parent
+          restrictEdges: {
+            outer: 'parent',
+            endOnly: true,
+          },
+      
+          // minimum size
+          restrictSize: {
+            min: { width: 250 + YOUTUBE_PLAYER_WRAPPER_PADDING.left + YOUTUBE_PLAYER_WRAPPER_PADDING.right, 
+              height: 150 + YOUTUBE_PLAYER_WRAPPER_PADDING.top + YOUTUBE_PLAYER_WRAPPER_PADDING.bottom },
+          },
+      
+          inertia: true,
+        })
+        .on('resizemove', function (event) {
+          let target = event.target,
+              x = (parseFloat(target.getAttribute('data-x')) || 0),
+              y = (parseFloat(target.getAttribute('data-y')) || 0);
+      
+          let width = event.rect.width - (YOUTUBE_PLAYER_WRAPPER_PADDING.left + YOUTUBE_PLAYER_WRAPPER_PADDING.right);
+          let height = event.rect.height - (YOUTUBE_PLAYER_WRAPPER_PADDING.top + YOUTUBE_PLAYER_WRAPPER_PADDING.bottom);
+
+          // update the element's style
+          target.style.width  = width + 'px';
+          target.style.height = height + 'px';
+      
+          // translate when resizing from top or left edges
+          x += event.deltaRect.left;
+          y += event.deltaRect.top;
+      
+          target.style.webkitTransform = target.style.transform =
+              'translate(' + x + 'px,' + y + 'px)';
+      
+          target.setAttribute('data-x', x);
+          target.setAttribute('data-y', y);
+
+          youtubePlayer.setSize(width, height);
+        });
+
+    }
+
     // Adds the youtube api script to the document asynchronously
     function insertYoutubeAPI() {  
       let youtubeAPIScriptTag = document.createElement('script');
@@ -323,9 +442,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
   <% if (request.getSession().getAttribute("user") != null) { %>
   <script>
     function onYouTubeIframeAPIReady() {
-      player = new YT.Player('youtube-player', {
-        height: '390',
-        width: '100%',
+      youtubePlayer = new YT.Player('youtube-player', {
         videoId: 'ogfYd705cRs',
         events: {
           'onReady': onYoutubePlayerReady,
@@ -341,6 +458,13 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     }
 
     function onYoutubePlayerReady(event) {
+      let youtubePlayerWrapper = document.querySelector("#youtube-player-wrapper");
+      youtubePlayerWrapper.style.display = "block";
+
+      let width = +youtubePlayerWrapper.style.width.replace(" ", "").replace("px", "");
+      let height = +youtubePlayerWrapper.style.height.replace(" ", "").replace("px", "");
+
+      event.target.setSize(width, height);
       event.target.playVideo();
     }
 
