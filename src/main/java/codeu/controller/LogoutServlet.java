@@ -38,32 +38,22 @@ public class LogoutServlet extends HttpServlet {
 
 
   /**
-   * This function fires when a user requests the /logout URL. It simply forwards the request to
-   * login.jsp.
+   * This function fires when a user requests to logout. It simply forwards the request to
+   * index.jsp.
    */
 
    @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException, ServletException {
-    //request.getRequestDispatcher("/WEB-INF/view/logout.jsp").forward(request, response);
-
-    HttpSession session = request.getSession(false);
-    if(session != null)
-      session.invalidate();
-    request.getRequestDispatcher("/index.jsp").forward(request,response);
-
-  }
-
-
-  /*@Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response)
-      throws IOException, ServletException {
   
+
     HttpSession session = request.getSession(false);
     if(session != null)
       session.invalidate();
     request.getRequestDispatcher("/index.jsp").forward(request,response);
+
   }
-  */
+
+
   
 }
