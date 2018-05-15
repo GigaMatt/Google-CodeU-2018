@@ -29,55 +29,32 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
 /** Servlet class responsible for the chat page. */
 public class ChatServlet extends HttpServlet {
 
-  /** Store class that gives access to Conversations. */
-  private ConversationStore conversationStore;
+  private ChatServletAgent chatServletAgent;
 
-  /** Store class that gives access to Messages. */
-  private MessageStore messageStore;
-
-  /** Store class that gives access to Users. */
-  private UserStore userStore;
+  public ChatServlet() {
+    chatServletAgent = new ChatServletAgent();
+  }
 
   /** Set up state for handling chat requests. */
   @Override
   public void init() throws ServletException {
     super.init();
-    setConversationStore(ConversationStore.getInstance());
-    setMessageStore(MessageStore.getInstance());
-    setUserStore(UserStore.getInstance());
+    chatServletAgent.setConversationStore(ConversationStore.getInstance());
+    chatServletAgent.setMessageStore(MessageStore.getInstance());
+    chatServletAgent.setUserStore(UserStore.getInstance());
   }
 
   /**
-   * Sets the ConversationStore used by this servlet. This function provides a common setup method
-   * for use by the test framework or the servlet's init() function.
+   * @return the chatServletAgent
    */
-  void setConversationStore(ConversationStore conversationStore) {
-    this.conversationStore = conversationStore;
-  }
-
-  /**
-   * Sets the MessageStore used by this servlet. This function provides a common setup method for
-   * use by the test framework or the servlet's init() function.
-   */
-  void setMessageStore(MessageStore messageStore) {
-    this.messageStore = messageStore;
-  }
-
-  /**
-   * Sets the UserStore used by this servlet. This function provides a common setup method for use
-   * by the test framework or the servlet's init() function.
-   */
-  void setUserStore(UserStore userStore) {
-    this.userStore = userStore;
+  public ChatServletAgent getChatServletAgent() {
+    return chatServletAgent;
   }
 
   /**
@@ -91,7 +68,7 @@ public class ChatServlet extends HttpServlet {
     String requestUrl = request.getRequestURI();
     String conversationTitle = requestUrl.substring("/chat/".length());
 
-    Conversation conversation = conversationStore.getConversationWithTitle(conversationTitle);
+    Conversation conversation = chatServletAgent.getConversationStore().getConversationWithTitle(conversationTitle);
     if (conversation == null) {
       // couldn't find conversation, redirect to conversation list
       System.out.println("Conversation was null: " + conversationTitle);
@@ -101,7 +78,7 @@ public class ChatServlet extends HttpServlet {
 
     UUID conversationId = conversation.getId();
 
-    List<Message> messages = messageStore.getMessagesInConversation(conversationId);
+    List<Message> messages = chatServletAgent.getMessageStore().getMessagesInConversation(conversationId);
 
     request.setAttribute("conversation", conversation);
     request.setAttribute("messages", messages);
@@ -125,7 +102,7 @@ public class ChatServlet extends HttpServlet {
       return;
     }
 
-    User user = userStore.getUser(username);
+    User user = chatServletAgent.getUserStore().getUser(username);
     if (user == null) {
       // user was not found, don't let them add a message
       response.sendRedirect("/login");
@@ -135,107 +112,33 @@ public class ChatServlet extends HttpServlet {
     String requestUrl = request.getRequestURI();
     String conversationTitle = requestUrl.substring("/chat/".length());
 
-    Conversation conversation = conversationStore.getConversationWithTitle(conversationTitle);
+    Conversation conversation = chatServletAgent.getConversationStore().getConversationWithTitle(conversationTitle);
     if (conversation == null) {
       // couldn't find conversation, redirect to conversation list
       response.sendRedirect("/conversations");
       return;
     }
 
-    // This action is used to determine the purpose of this request 
-    String action = request.getParameter("action");
-    
-    if (action.equals("send-message")) {
-      String messageContent = request.getParameter("message");
+    String messageContent = request.getParameter("message");
 
-      // Creates a basic whitelist to allow a few HTML text tags
-      Whitelist whitelist = Whitelist.basic();
-      whitelist.addAttributes(":all", "style");
+    // Creates a basic whitelist to allow a few HTML text tags
+    Whitelist whitelist = Whitelist.basic();
+    whitelist.addAttributes(":all", "style");
 
-      // this removes any HTML from the message content
-      String cleanedMessageContent = Jsoup.clean(messageContent, whitelist);
+    // this removes any HTML from the message content
+    String cleanedMessageContent = Jsoup.clean(messageContent, whitelist);
 
-      Message message =
-          new Message(
-              UUID.randomUUID(),
-              conversation.getId(),
-              user.getId(),
-              cleanedMessageContent,
-              Instant.now());
+    Message message =
+        new Message(
+            UUID.randomUUID(),
+            conversation.getId(),
+            user.getId(),
+            cleanedMessageContent,
+            Instant.now());
 
-      messageStore.addMessage(message);
+    chatServletAgent.getMessageStore().addMessage(message);
 
-      // redirect to a GET request
-      response.sendRedirect("/chat/" + conversationTitle);
-    } else if (action.equals("check-new-messages")) {
-      // This will represent the data being sent in the response
-      JSONObject responseData = new JSONObject();
-
-      String lastMessageTime = request.getParameter("lastMessageTime");
-      Instant lastMessageInstant;
-      if (lastMessageTime.equals("0")) {
-        // If there was no last message (i.e, there was no message at all)
-        lastMessageInstant = Instant.MIN;
-      } else {
-        lastMessageInstant = Instant.parse(lastMessageTime);
-      }
-
-      List<Message> messageList = messageStore.getMessagesInConversation(conversation.getId());
-
-      try {
-        if(messageList.size() == 0) {
-          // There is no message in the message store.
-          responseData.put("success", true);
-          responseData.put("foundNewMessages", false);
-        }
-        else {
-          Message latestMessage = messageList.get(messageList.size()-1);
-
-          // Checks if the latest message in message store was created after the last available message
-          if(latestMessage.getCreationTime().compareTo(lastMessageInstant) > 0) {
-            // Traversing back the message list as long as the message is created after the last available message.
-            // Helps prevent traversing through the whole list.
-            int startId = messageList.size() - 1;
-            for (; startId >= 0; startId--) {
-              if (messageList.get(startId).getCreationTime().compareTo(lastMessageInstant) <= 0) {
-                break;
-              }
-            }
-            startId++;
-
-            JSONArray messageJsonArray = new JSONArray();
-            for (int i = startId; i < messageList.size(); i++) {
-              Message message = messageList.get(i);
-
-              JSONObject messageJsonObject = new JSONObject();
-
-              JSONObject authorJsonObject = new JSONObject();
-              authorJsonObject.put("id", message.getAuthorId().toString());
-              authorJsonObject.put("name", userStore.getUser(message.getAuthorId()).getName());
-
-              messageJsonObject.put("author", authorJsonObject);
-              messageJsonObject.put("creationTime", message.getCreationTime().toString());
-              messageJsonObject.put("content", message.getContent());
-
-              messageJsonArray.put(messageJsonObject);
-            }
-
-            responseData.put("success", true);
-            responseData.put("foundNewMessages", true);
-            responseData.put("messages", messageJsonArray);
-          } else {  
-            responseData.put("success", true);
-            responseData.put("foundNewMessages", false);
-          }
-        }
-      } catch (JSONException e) {
-        response.setStatus(500);
-        response.getOutputStream().print("Unexpected JSONException Occurred");
-        return;
-      }
-      
-      // This will send the data back in JSON format
-      response.getOutputStream().print(responseData.toString());
-    }
+    // redirect to a GET request
+    response.sendRedirect("/chat/" + conversationTitle);
   }
 }
