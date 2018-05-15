@@ -60,12 +60,28 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       display: none;
       position: absolute;
       pointer-events: all;
+      border-radius: 5px;
       background: rgba(0, 128, 128, 0.8);
       padding-left: 10px; 
       padding-right: 10px; 
       padding-top: 10px; 
       padding-bottom: 100px;
     }
+
+    #youtube-player-tools {
+      width: 100%;
+    }
+
+    #youtube-player-videoid-input {
+      width: calc(100% - 70px);
+      float: left;
+    }
+    
+    #youtube-player-videoid-input-submit {
+      width: 60px;
+      float: right;
+    }
+
   </style>
 </head>
 <body onload="onBodyLoaded();">
@@ -78,6 +94,11 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         
       <div id="youtube-player-wrapper" style="width: 640px; height: 400px">
         <div id="youtube-player"></div>
+        <br/>
+        <div id="youtube-player-tools">
+          <input id="youtube-player-videoid-input" type="url" placeholder="Enter a Youtube Video's ID" onkeypress="onEnterPressed(event, onYoutubeURLSubmitted)"/>
+          <input id="youtube-player-videoid-input-submit" type="button" value="Load" onclick="onYoutubeURLSubmitted()" />
+        </div>
       </div>
   </div>
   </div>
@@ -134,7 +155,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
         </div>
         <br/>
-        <button type="submit">Send</button>
+        <button type="submit" style="float: right">Send</button>
+        <br/>
     </form>
 
     <% } else { %>
@@ -347,6 +369,14 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       scrollChat();
     }
 
+
+    function onEnterPressed(e, callback) {
+      if (e.keyCode == 13) {
+        callback();
+      }
+    }
+
+
     // Makes the Youtube Player Floatable
     function initYoutubePlayerInteraction() {
       interact('#youtube-player-wrapper')
@@ -395,7 +425,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       
           // minimum size
           restrictSize: {
-            min: { width: 250 + YOUTUBE_PLAYER_WRAPPER_PADDING.left + YOUTUBE_PLAYER_WRAPPER_PADDING.right, 
+            min: { width: 300 + YOUTUBE_PLAYER_WRAPPER_PADDING.left + YOUTUBE_PLAYER_WRAPPER_PADDING.right, 
               height: 150 + YOUTUBE_PLAYER_WRAPPER_PADDING.top + YOUTUBE_PLAYER_WRAPPER_PADDING.bottom },
           },
       
@@ -470,6 +500,16 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
     function onYoutubePlayerStateChange(event) {
       console.log(event);
+    }
+
+    function onYoutubeURLSubmitted() {
+      console.log(youtubePlayer);
+      let videoIdInput = document.querySelector("#youtube-player-videoid-input");
+      let videoId = videoIdInput.value.trim();
+      if(videoId != "") {
+        youtubePlayer.loadVideoById(videoId);
+        videoIdInput.value = "";
+      }
     }
   </script>
   <% } %>
