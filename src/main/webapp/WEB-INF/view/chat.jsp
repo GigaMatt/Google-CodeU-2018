@@ -53,12 +53,17 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
   <script>
+    insertYoutubeAPI();
+
     // We will check for new messages using this interval in milliseconds.
     const MESSAGE_POLL_INTERVAL = 3000;
 
     // Controls message polling (Only one active poll at a time). Will be set to false when a poll is in progress, and back to true when the poll has ended.
     var canPollForMessages = true;
 
+    var youtubePlayer;
+
+    // This function is called when the page had finished loading
     function onBodyLoaded() {
       scrollChat();
       initChatInputEditor();
@@ -232,6 +237,42 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       scrollChat();
     }
 
+    // Adds the youtube api script to the document asynchronously
+    function insertYoutubeAPI() {  
+      let youtubeAPIScriptTag = document.createElement('script');
+      youtubeAPIScriptTag.src = "https://www.youtube.com/iframe_api";
+
+      let firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(youtubeAPIScriptTag, firstScriptTag);
+    }
+  
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('youtube-player', {
+        height: '390',
+        width: '100%',
+        videoId: 'ogfYd705cRs',
+        events: {
+          'onReady': onYoutubePlayerReady,
+          'onStateChange': onYoutubePlayerStateChange
+        },
+        playerVars: {
+          disablekb: 1,
+          enablejsapi: 1,
+          fs: 0,
+          rel: 0,
+        }
+      });
+    }
+
+    function onYoutubePlayerReady(event) {
+      event.target.playVideo();
+    }
+
+    function onYoutubePlayerStateChange(event) {
+      console.log(event);
+    }
+
   </script>
 </head>
 <body onload="onBodyLoaded();">
@@ -245,6 +286,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       <a href="" style="float: right">&#8635;</a></h1>
 
     <hr/>
+
+    <div id="youtube-player"></div>
 
     <div id="chat">
       <ul id="chat-list">
@@ -293,6 +336,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         <br/>
         <button type="submit">Send</button>
     </form>
+
     <% } else { %>
       <p><a href="/login">Login</a> to send a message.</p>
     <% } %>
