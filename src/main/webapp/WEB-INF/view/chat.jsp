@@ -31,9 +31,6 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
   <!-- Attaches the Theme Stylesheet for the Quill Editor  -->
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">   
   
-  <!-- Includes the Quill Editor Library  -->
-  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-  
   <style>
     #chat {
       background-color: white;
@@ -49,9 +46,84 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       background-color: white;
     }
   </style>
+</head>
+<body onload="onBodyLoaded();">
 
+  
+  <%@ include file="/include/navbar.jsp" %>
+
+  <div id="container">
+
+    <h1><%= conversation.getTitle() %>
+      <a href="" style="float: right">&#8635;</a></h1>
+
+    <hr/>
+
+    <div id="youtube-player"></div>
+
+    <div id="chat">
+      <ul id="chat-list">
+    
+      </ul>
+    </div>
+
+    <hr/>
+
+    <% if (request.getSession().getAttribute("user") != null) { %>
+    <form id="chat-form" action="/chat/<%= conversation.getTitle() %>" method="POST">
+        <input id="chat-input-field" type="hidden" name="message">
+        
+        <div id="chat-input-toolbar">
+          <span class="ql-format">
+            <select class="ql-size">
+                <option value="10px">Small</option>
+                <option selected="">Normal</option>
+                <option value="18px">Large</option>
+                <option value="32px">Huge</option>
+            </select>
+          </span>
+
+          <span class="ql-format">
+            <button class="ql-bold"></button>
+            <button class="ql-italic"></button>
+            <button class="ql-underline"></button>
+          </span>
+
+          <span class="ql-format">
+              <select class="ql-color"></select>
+              <select class="ql-background"></select>
+          </span>
+          
+          <span class="ql-format">
+              <select class="ql-font"></select>
+          </span>
+          
+          <span class="ql-format">
+              <button class="ql-clean"></button>
+          </span>
+        </div>
+        <div id="chat-input-editor">
+
+        </div>
+        <br/>
+        <button type="submit">Send</button>
+    </form>
+
+    <% } else { %>
+      <p><a href="/login">Login</a> to send a message.</p>
+    <% } %>
+
+    <hr/>
+
+  </div>
+
+
+  <!-- Includes the Quill Editor Library  -->
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  
+  <!-- Includes the Axios Async HTTP Request Library  -->
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
+  
   <script>
     insertYoutubeAPI();
 
@@ -245,8 +317,11 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       let firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(youtubeAPIScriptTag, firstScriptTag);
     }
-  
 
+  </script>
+
+  <% if (request.getSession().getAttribute("user") != null) { %>
+  <script>
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('youtube-player', {
         height: '390',
@@ -272,77 +347,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     function onYoutubePlayerStateChange(event) {
       console.log(event);
     }
-
   </script>
-</head>
-<body onload="onBodyLoaded();">
-
-  
-  <%@ include file="/include/navbar.jsp" %>
-
-  <div id="container">
-
-    <h1><%= conversation.getTitle() %>
-      <a href="" style="float: right">&#8635;</a></h1>
-
-    <hr/>
-
-    <div id="youtube-player"></div>
-
-    <div id="chat">
-      <ul id="chat-list">
-    
-      </ul>
-    </div>
-
-    <hr/>
-
-    <% if (request.getSession().getAttribute("user") != null) { %>
-    <form id="chat-form" action="/chat/<%= conversation.getTitle() %>" method="POST">
-        <input id="chat-input-field" type="hidden" name="message">
-        
-        <div id="chat-input-toolbar">
-          <span class="ql-format">
-            <select class="ql-size">
-                <option value="10px">Small</option>
-                <option selected="">Normal</option>
-                <option value="18px">Large</option>
-                <option value="32px">Huge</option>
-            </select>
-          </span>
-
-          <span class="ql-format">
-            <button class="ql-bold"></button>
-            <button class="ql-italic"></button>
-            <button class="ql-underline"></button>
-          </span>
-
-          <span class="ql-format">
-              <select class="ql-color"></select>
-              <select class="ql-background"></select>
-          </span>
-          
-          <span class="ql-format">
-              <select class="ql-font"></select>
-          </span>
-          
-          <span class="ql-format">
-              <button class="ql-clean"></button>
-          </span>
-        </div>
-        <div id="chat-input-editor">
-
-        </div>
-        <br/>
-        <button type="submit">Send</button>
-    </form>
-
-    <% } else { %>
-      <p><a href="/login">Login</a> to send a message.</p>
-    <% } %>
-
-    <hr/>
-
-  </div>
+  <% } %>
 </body>
 </html>
