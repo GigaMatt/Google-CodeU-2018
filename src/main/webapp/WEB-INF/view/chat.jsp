@@ -27,6 +27,9 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 <head>
   <title><%= conversation.getTitle() %></title>
   <link rel="stylesheet" href="/css/main.css" type="text/css">
+  
+  <!-- Attaches the Material Icons  -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <!-- Attaches the Theme Stylesheet for the Quill Editor  -->
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">   
@@ -82,6 +85,19 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       float: right;
     }
 
+    #youtube-player-display-toggle {
+      pointer-events: all;
+      position: absolute;
+      right: 25px;
+      bottom: 25px;
+      width: 30px;
+      height: 30px;
+      padding: 14px 7px 7px 14px;
+      cursor: pointer;
+      background-color: teal;
+      border-radius: 50px;
+    }
+
   </style>
 </head>
 <body onload="onBodyLoaded();">
@@ -92,7 +108,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
   <div id="youtube-player-container">
     <div style="position: relative; width: 100%; height:100%">
         
-      <div id="youtube-player-wrapper" style="width: 640px; height: 400px">
+      <div id="youtube-player-wrapper" style="width: 640px; height: 400px; display: none;">
         <div id="youtube-player"></div>
         <br/>
         <div id="youtube-player-tools">
@@ -100,7 +116,11 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
           <input id="youtube-player-videoid-input-submit" type="button" value="Load" onclick="onYoutubeURLSubmitted()" />
         </div>
       </div>
-  </div>
+
+      <div id="youtube-player-display-toggle" onclick="toggleYoutubePlayerDisplay()">
+          <i class="material-icons" style="color: white">videocam</i>
+      </div>
+    </div>
   </div>
 
   <div id="container">
@@ -467,13 +487,23 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       firstScriptTag.parentNode.insertBefore(youtubeAPIScriptTag, firstScriptTag);
     }
 
+    function toggleYoutubePlayerDisplay() {
+      let youtubePlayerWrapper = document.querySelector("#youtube-player-wrapper");
+      let youtubePlayerDisplayToggle = document.querySelector("#youtube-player-display-toggle");
+      if(youtubePlayerWrapper.style.display != "block") {
+        youtubePlayerWrapper.style.display = "block";
+        youtubePlayerDisplayToggle.querySelector('.material-icons').innerHTML = "videocam_off";
+      } else {
+        youtubePlayerWrapper.style.display = "none";
+        youtubePlayerDisplayToggle.querySelector('.material-icons').innerHTML = "videocam";
+      }
+    }
   </script>
 
   <% if (request.getSession().getAttribute("user") != null) { %>
   <script>
     function onYouTubeIframeAPIReady() {
       youtubePlayer = new YT.Player('youtube-player', {
-        videoId: 'ogfYd705cRs',
         events: {
           'onReady': onYoutubePlayerReady,
           'onStateChange': onYoutubePlayerStateChange
@@ -495,7 +525,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       let height = +youtubePlayerWrapper.style.height.replace(" ", "").replace("px", "");
 
       event.target.setSize(width, height);
-      event.target.playVideo();
+      
+      youtubePlayerWrapper.style.display = "none";
     }
 
     function onYoutubePlayerStateChange(event) {
