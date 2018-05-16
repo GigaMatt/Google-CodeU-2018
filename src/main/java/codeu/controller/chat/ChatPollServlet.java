@@ -59,10 +59,8 @@ public class ChatPollServlet extends HttpServlet {
   }
 
   /**
-   * This function fires when a user submits the form on the chat page. It gets the logged-in
-   * username from the session, the conversation title from the URL, and the chat message from the
-   * submitted form data. It creates a new Message from that data, adds it to the model, and then
-   * redirects back to the chat page.
+   * This function fires regularly when the user is on the chat screen, and this function writes back a JSON String 
+   * that tells if there is any new message available, and if so, the JSON data also carries the new messages.
    */
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response)
