@@ -71,6 +71,10 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       padding-bottom: 100px;
     }
 
+    #youtube-player {
+      border-radius: 6px;
+    }
+
     #youtube-player-tools {
       width: 100%;
     }
@@ -78,11 +82,13 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     #youtube-player-videoid-input {
       width: calc(100% - 70px);
       float: left;
+      border-radius: 6px;
     }
     
     #youtube-player-videoid-input-submit {
       width: 60px;
       float: right;
+      border-radius: 6px;
     }
 
     #youtube-player-display-toggle {
@@ -112,21 +118,24 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         <div id="youtube-player"></div>
         <br/>
         <div id="youtube-player-tools">
-          <input id="youtube-player-videoid-input" type="url" placeholder="Enter a Youtube Video's ID" onkeypress="onEnterPressed(event, onYoutubeURLSubmitted)"/>
-          <input id="youtube-player-videoid-input-submit" type="button" value="Load" onclick="onYoutubeURLSubmitted()" />
+          <input id="youtube-player-videoid-input" type="url" placeholder="Enter a Youtube Video's ID" onkeypress="onEnterPressed(event, onYoutubeVideoIdSubmitted)"/>
+          <input id="youtube-player-videoid-input-submit" type="button" value="Load" onclick="onYoutubeVideoIdSubmitted()" />
         </div>
       </div>
 
+      <% if (request.getSession().getAttribute("user") != null) { %>
       <div id="youtube-player-display-toggle" onclick="toggleYoutubePlayerDisplay()">
           <i class="material-icons" style="color: white">videocam</i>
       </div>
+      <% } %>
     </div>
   </div>
 
   <div id="container">
 
     <h1><%= conversation.getTitle() %>
-      <a href="" style="float: right">&#8635;</a></h1>
+      <a style="float: right; cursor: pointer; background: blue; padding: 0 15px; border-radius: 50px; color: white;" onclick="checkForNewMessages()">&#8635;</a>
+    </h1>
 
     <hr/>
 
@@ -281,7 +290,13 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
           chatInputField.value = qlEditor.innerHTML;
 
-          return true;
+          sendMessage(chatInputField.value);
+
+          chatInputField.value = "";
+          chatQuill.setText('');
+
+          // Prevents the default form submit action since the message is instead sent asynchronously.
+          return false;
         }
 
         chatQuill.focus();
@@ -316,13 +331,13 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     // Initializes Message Polling
     function initMessagePolling() {
       setInterval(function () {
-        checkForNewMessages();  
+        checkForNewMessages(true);  
       }, MESSAGE_POLL_INTERVAL);
       checkForNewMessages();
     }
 
     // Asynchronously checks for any new messages
-    function checkForNewMessages() {
+    function checkForNewMessages(silent = false) {
       if(!canPollForMessages) {
         return;
       }
@@ -355,15 +370,19 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
               loadNewMessages(response.data.messages);
             }
           } else {
-            // TODO (Azee): Show an error message
+            if (!silent && response.data.message) {
+              alert(response.data.message);
+            }
           }
           
           // Enabling polling back
           canPollForMessages = true;
         })
         .catch(function (error) {
-          // TODO (Azee): Show an error message
-          
+          if (!silent) {
+            alert("Unexpected error! Please try again!");
+          }
+
           // Enabling polling back
           canPollForMessages = true;
         });
@@ -389,7 +408,33 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       scrollChat();
     }
 
+    // Send the message asynchronously
+    function sendMessage(message) {
+      message = message.trim();
+      if(message == '') {
+        return;
+      }
 
+      let postData = {
+        message: message
+      };
+
+      axios.post("/chat/<%= conversation.getTitle() %>", createPostString(postData))
+        .then(function (response) {
+          if (response.data.success) {
+            checkForNewMessages();
+          } else {
+            if (response.data.message) {
+              alert(response.data.message);
+            }
+          }
+        })
+        .catch(function (error) {
+          alert("Unexpected error! Please try again!");
+        });
+    }
+
+    // For a key event, checks if Enter key was pressed, and if so, calls the given callback
     function onEnterPressed(e, callback) {
       if (e.keyCode == 13) {
         callback();
@@ -434,6 +479,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
           }
         })
         .resizable({
+          margin: 12,
+
           // resize from all edges and corners
           edges: { left: true, right: true, bottom: true, top: true },
       
@@ -487,6 +534,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       firstScriptTag.parentNode.insertBefore(youtubeAPIScriptTag, firstScriptTag);
     }
 
+    // Shows/Hides the Youtube Player
     function toggleYoutubePlayerDisplay() {
       let youtubePlayerWrapper = document.querySelector("#youtube-player-wrapper");
       let youtubePlayerDisplayToggle = document.querySelector("#youtube-player-display-toggle");
@@ -502,7 +550,10 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
   <% if (request.getSession().getAttribute("user") != null) { %>
   <script>
+    // Called automatically by the Youtube API once it is loaded
     function onYouTubeIframeAPIReady() {
+
+      // Initializing the youtube player
       youtubePlayer = new YT.Player('youtube-player', {
         events: {
           'onReady': onYoutubePlayerReady,
@@ -517,6 +568,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       });
     }
 
+    // Called once the youtube player is ready
     function onYoutubePlayerReady(event) {
       let youtubePlayerWrapper = document.querySelector("#youtube-player-wrapper");
       youtubePlayerWrapper.style.display = "block";
@@ -529,12 +581,14 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       youtubePlayerWrapper.style.display = "none";
     }
 
+    // Called every time the youtube player's state changes
     function onYoutubePlayerStateChange(event) {
       console.log(event);
     }
 
-    function onYoutubeURLSubmitted() {
-      console.log(youtubePlayer);
+    // Loads a youtube video using the entered videoId
+    function onYoutubeVideoIdSubmitted() {
+      //console.log(youtubePlayer);
       let videoIdInput = document.querySelector("#youtube-player-videoid-input");
       let videoId = videoIdInput.value.trim();
       if(videoId != "") {
