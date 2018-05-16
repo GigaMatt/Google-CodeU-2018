@@ -21,6 +21,19 @@ import codeu.model.store.persistence.PersistentDataStore;
 import codeu.model.store.persistence.PersistentDataStoreImpl;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
+/**
+ * The dependency injector for the entire app.
+ *
+ * <p>Instead of using static instance variables, every instance in the app is being created in
+ * this class. It can either create objects using their constructors (... if it's up to us to
+ * create them), or, if they're created e.g. by the framework, it can set (inject) their
+ * dependencies.</p>
+ *
+ * <p>This one class is still a global static singleton.</p>
+ *
+ * <p>For testing, you can just create the instances directly by passing in mocks; you don't
+ * have to use this class.</p>
+ */
 public class AppInjector {
   private static AppInjector instance;
 
@@ -33,6 +46,11 @@ public class AppInjector {
   private ChatRequestValidator chatRequestValidator;
   private VideoEventStore videoEventStore;
 
+  /**
+   * Fetches (... and, if needed, creates) the main object instance.
+   *
+   * <p>Actual app objects will be only created on-demand though.</p>
+   */
   public static AppInjector getInstance() {
     if (instance == null) {
       instance = new AppInjector();
@@ -40,6 +58,17 @@ public class AppInjector {
 
     return instance;
   }
+
+  // Each of these methods is a kind of "recipe" for creating each of the objects. E.g. "to make
+  // a default data store, we'd need a persistent storage object, and then we can just create one".
+
+  // For a more fancy example, see makeChatServletAgent (demonstrating that we can configure objects
+  // in more complicated ways than just calling their constructors).
+
+  // The null checks are there so that each object is only created once.
+
+  // Keep these private; the point is that the injector will give you things for you (say, by
+  // passing it in the constructor); you don't have to explicitly ask for it.
 
   private DefaultDataStore makeDefaultDataStore() {
     if (defaultDataStore == null) {
@@ -109,6 +138,12 @@ public class AppInjector {
     return videoEventStore;
   }
 
+  // For objects that we don't create ourselves, we let the injector give us all the dependencies
+  // we need. Call this from each such object (e.g. servlet classes) before doing anything with
+  // them.
+  //
+  // This way it's still obvious what we're passing in (... and we can rely on the injector
+  // creating all the things it _can_ create).
   public void inject(AdminServlet servlet) {
     servlet.setConversationStore(makeConversationStore());
     servlet.setMessageStore(makeMessageStore());

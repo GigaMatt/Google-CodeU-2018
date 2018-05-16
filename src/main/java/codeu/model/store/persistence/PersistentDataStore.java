@@ -14,6 +14,13 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Interface for PersistentDataStore.
+ *
+ * <p>Keeping it an interface so that we can pass in mock versions of it. (... it'd probably
+ * still work if it was only a class, but it's still a bit easier to mock interfaces than
+ * classes; also, if we ever wanted to swap out the implementation, this'd make it easier).</p>
+ */
 public interface PersistentDataStore {
 
   /**
