@@ -27,10 +27,13 @@ import java.util.List;
 import java.util.UUID;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +47,7 @@ public class ChatServletTest {
   private HttpSession mockSession;
   private HttpServletResponse mockResponse;
   private RequestDispatcher mockRequestDispatcher;
+  private ServletOutputStream mockOutputStream;
   private ConversationStore mockConversationStore;
   private MessageStore mockMessageStore;
   private UserStore mockUserStore;
@@ -60,6 +64,13 @@ public class ChatServletTest {
     mockRequestDispatcher = Mockito.mock(RequestDispatcher.class);
     Mockito.when(mockRequest.getRequestDispatcher("/WEB-INF/view/chat.jsp"))
         .thenReturn(mockRequestDispatcher);    
+        
+    mockOutputStream = Mockito.mock(ServletOutputStream.class);
+    try {
+		Mockito.when(mockResponse.getOutputStream()).thenReturn(mockOutputStream);
+	} catch (IOException e) {
+        Mockito.doThrow(e);
+	}
 
     mockConversationStore = Mockito.mock(ConversationStore.class);
     chatServlet.getChatServletAgent().setConversationStore(mockConversationStore);
@@ -117,7 +128,17 @@ public class ChatServletTest {
     chatServlet.doPost(mockRequest, mockResponse);
 
     Mockito.verify(mockMessageStore, Mockito.never()).addMessage(Mockito.any(Message.class));
-    Mockito.verify(mockResponse).sendRedirect("/login");
+    
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
+
+    try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(false, responseData.getBoolean("success"));
+        Assert.assertEquals("User not logged in!", responseData.getString("message"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+    }
   }
 
   @Test
@@ -128,7 +149,17 @@ public class ChatServletTest {
     chatServlet.doPost(mockRequest, mockResponse);
 
     Mockito.verify(mockMessageStore, Mockito.never()).addMessage(Mockito.any(Message.class));
-    Mockito.verify(mockResponse).sendRedirect("/login");
+    
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
+
+    try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(false, responseData.getBoolean("success"));
+        Assert.assertEquals("User not found!", responseData.getString("message"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+    }
   }
 
   @Test
@@ -147,7 +178,17 @@ public class ChatServletTest {
     chatServlet.doPost(mockRequest, mockResponse);
 
     Mockito.verify(mockMessageStore, Mockito.never()).addMessage(Mockito.any(Message.class));
-    Mockito.verify(mockResponse).sendRedirect("/conversations");
+    
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
+
+    try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(false, responseData.getBoolean("success"));
+        Assert.assertEquals("Conversation not found!", responseData.getString("message"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+    }
   }
 
   @Test
@@ -172,8 +213,16 @@ public class ChatServletTest {
     ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
     Mockito.verify(mockMessageStore).addMessage(messageArgumentCaptor.capture());
     Assert.assertEquals("Test message.", messageArgumentCaptor.getValue().getContent());
+    
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
 
-    Mockito.verify(mockResponse).sendRedirect("/chat/test_conversation");
+    try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(true, responseData.getBoolean("success"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+    }
   }
 
   @Test
@@ -198,7 +247,15 @@ public class ChatServletTest {
     Mockito.verify(mockMessageStore).addMessage(messageArgumentCaptor.capture());
     Assert.assertEquals(
         "Contains bad html  and  content.", messageArgumentCaptor.getValue().getContent());
+        
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
 
-    Mockito.verify(mockResponse).sendRedirect("/chat/test_conversation");
+    try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(true, responseData.getBoolean("success"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+    }
   }
 }

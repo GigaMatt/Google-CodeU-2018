@@ -29,6 +29,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
@@ -95,50 +97,68 @@ public class ChatServlet extends HttpServlet {
   public void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException, ServletException {
 
-    String username = (String) request.getSession().getAttribute("user");
-    if (username == null) {
-      // user is not logged in, don't let them add a message
-      response.sendRedirect("/login");
+    // This will represent the data being sent in the response
+    JSONObject responseData = new JSONObject();
+    
+    try {
+      String username = (String) request.getSession().getAttribute("user");
+      if (username == null) {
+          // user is not logged in
+          responseData.put("success", false);
+          responseData.put("message", "User not logged in!");
+          response.getOutputStream().print(responseData.toString());
+          return;
+      }
+
+      User user = chatServletAgent.getUserStore().getUser(username);
+      if (user == null) {
+        // user was not found
+        responseData.put("success", false);
+        responseData.put("message", "User not found!");
+        response.getOutputStream().print(responseData.toString());
+        return;
+      }
+
+      String requestUrl = request.getRequestURI();
+      String conversationTitle = requestUrl.substring("/chat/".length());
+
+      Conversation conversation = chatServletAgent.getConversationStore().getConversationWithTitle(conversationTitle);
+      if (conversation == null) {
+        // couldn't find conversation
+        responseData.put("success", false);
+        responseData.put("message", "Conversation not found!");
+        response.getOutputStream().print(responseData.toString());
+        return;
+      }
+
+      String messageContent = request.getParameter("message");
+
+      // Creates a basic whitelist to allow a few HTML text tags
+      Whitelist whitelist = Whitelist.basic();
+      whitelist.addAttributes(":all", "style");
+
+      // this removes any HTML from the message content
+      String cleanedMessageContent = Jsoup.clean(messageContent, whitelist);
+
+      Message message =
+          new Message(
+              UUID.randomUUID(),
+              conversation.getId(),
+              user.getId(),
+              cleanedMessageContent,
+              Instant.now());
+
+      chatServletAgent.getMessageStore().addMessage(message);
+
+      responseData.put("success", true);
+      
+    } catch (JSONException e) {
+      response.setStatus(500);
+      response.getOutputStream().print("Unexpected JSONException Occurred");
       return;
     }
-
-    User user = chatServletAgent.getUserStore().getUser(username);
-    if (user == null) {
-      // user was not found, don't let them add a message
-      response.sendRedirect("/login");
-      return;
-    }
-
-    String requestUrl = request.getRequestURI();
-    String conversationTitle = requestUrl.substring("/chat/".length());
-
-    Conversation conversation = chatServletAgent.getConversationStore().getConversationWithTitle(conversationTitle);
-    if (conversation == null) {
-      // couldn't find conversation, redirect to conversation list
-      response.sendRedirect("/conversations");
-      return;
-    }
-
-    String messageContent = request.getParameter("message");
-
-    // Creates a basic whitelist to allow a few HTML text tags
-    Whitelist whitelist = Whitelist.basic();
-    whitelist.addAttributes(":all", "style");
-
-    // this removes any HTML from the message content
-    String cleanedMessageContent = Jsoup.clean(messageContent, whitelist);
-
-    Message message =
-        new Message(
-            UUID.randomUUID(),
-            conversation.getId(),
-            user.getId(),
-            cleanedMessageContent,
-            Instant.now());
-
-    chatServletAgent.getMessageStore().addMessage(message);
-
-    // redirect to a GET request
-    response.sendRedirect("/chat/" + conversationTitle);
+    
+    // This will send the data back in JSON format
+    response.getOutputStream().print(responseData.toString());
   }
 }
