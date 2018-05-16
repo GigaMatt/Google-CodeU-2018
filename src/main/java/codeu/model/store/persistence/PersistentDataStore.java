@@ -17,6 +17,7 @@ package codeu.model.store.persistence;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
+import codeu.model.data.Video;
 import codeu.model.store.persistence.PersistentDataStoreException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -151,6 +152,40 @@ public class PersistentDataStore {
     return messages;
   }
 
+  /**
+   * Loads all Video objects from the Datastore service and returns them in a List.
+   *
+   * @throws PersistentDataStoreException if an error was detected during the load from the
+   *     Datastore service
+   */
+  public List<Video> loadVideos() throws PersistentDataStoreException {
+
+    List<Video> videos = new ArrayList<>();
+
+    // Retrieve all videos from the datastore.
+    Query query = new Query("chat-videos").addSort("creation_time", SortDirection.DESCENDING);
+    PreparedQuery results = datastore.prepare(query);
+
+    for (Entity entity : results.asIterable()) {
+      try {
+        UUID uuid = UUID.fromString((String) entity.getProperty("uuid"));
+        UUID conversationUuid = UUID.fromString((String) entity.getProperty("conv_uuid"));
+        UUID authorUuid = UUID.fromString((String) entity.getProperty("author_uuid"));
+        Instant creationTime = Instant.parse((String) entity.getProperty("creation_time"));
+        String videoId = (String) entity.getProperty("video_id");
+        Video video = new Video(uuid, conversationUuid, authorUuid, videoId, creationTime);
+        videos.add(video);
+      } catch (Exception e) {
+        // In a production environment, errors should be very rare. Errors which may
+        // occur include network errors, Datastore service errors, authorization errors,
+        // database entity definition mismatches, or service mismatches.
+        throw new PersistentDataStoreException(e);
+      }
+    }
+
+    return videos;
+  }
+
   /** Write a User object to the Datastore service. */
   public void writeThrough(User user) {
     Entity userEntity = new Entity("chat-users", user.getId().toString());
@@ -172,6 +207,17 @@ public class PersistentDataStore {
     messageEntity.setProperty("content", message.getContent());
     messageEntity.setProperty("creation_time", message.getCreationTime().toString());
     datastore.put(messageEntity);
+  }
+  
+  /** Write a Message object to the Datastore service. */
+  public void writeThrough(Video video) {
+    Entity videoEntity = new Entity("chat-videos");
+    videoEntity.setProperty("uuid", video.getId().toString());
+    videoEntity.setProperty("conv_uuid", video.getConversationId().toString());
+    videoEntity.setProperty("author_uuid", video.getAuthorId().toString());
+    videoEntity.setProperty("video_id", video.getVideoId());
+    videoEntity.setProperty("creation_time", video.getCreationTime().toString());
+    datastore.put(videoEntity);
   }
 
   /** Write a Conversation object to the Datastore service. */
