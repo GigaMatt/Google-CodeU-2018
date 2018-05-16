@@ -14,28 +14,21 @@
 
 package codeu.controller.chat;
 
-import codeu.model.data.Conversation;
+import codeu.injection.AppInjector;
 import codeu.model.data.Message;
-import codeu.model.data.User;
-import codeu.model.store.basic.ConversationStore;
-import codeu.model.store.basic.MessageStore;
-import codeu.model.store.basic.UserStore;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /** Servlet class responsible for the chat page. */
 public class ChatPollServlet extends HttpServlet {
-
   private ChatServletAgent chatServletAgent;
   private ChatRequestValidator chatRequestValidator;
 
@@ -43,24 +36,7 @@ public class ChatPollServlet extends HttpServlet {
   @Override
   public void init() throws ServletException {
     super.init();
-
-    ChatServletAgent chatServletAgent = new ChatServletAgent();
-    chatServletAgent.setConversationStore(ConversationStore.getInstance());
-    chatServletAgent.setMessageStore(MessageStore.getInstance());
-    chatServletAgent.setUserStore(UserStore.getInstance());
-
-    ChatRequestValidator chatRequestValidator = new ChatRequestValidator(chatServletAgent);
-
-    setChatServletAgent(chatServletAgent);
-    setChatRequestValidator(chatRequestValidator);
-  }
-
-  public void setChatServletAgent(ChatServletAgent chatServletAgent) {
-    this.chatServletAgent = chatServletAgent;
-  }
-
-  public ChatServletAgent getChatServletAgent() {
-    return chatServletAgent;
+    AppInjector.getInstance().inject(this);
   }
 
   public void setChatRequestValidator(ChatRequestValidator chatRequestValidator) {
@@ -72,7 +48,7 @@ public class ChatPollServlet extends HttpServlet {
   }
 
   /**
-   * This function fires regularly when the user is on the chat screen, and this function writes back a JSON String 
+   * This function fires regularly when the user is on the chat screen, and this function writes back a JSON String
    * that tells if there is any new message available, and if so, the JSON data also carries the new messages.
    */
   @Override
@@ -100,7 +76,7 @@ public class ChatPollServlet extends HttpServlet {
         return;
       }
 
-      
+
       String lastMessageTime = request.getParameter("lastMessageTime");
       Instant lastMessageInstant;
       if (lastMessageTime.equals("0")) {
@@ -152,7 +128,7 @@ public class ChatPollServlet extends HttpServlet {
           responseData.put("success", true);
           responseData.put("foundNewMessages", true);
           responseData.put("messages", messageJsonArray);
-        } else {  
+        } else {
           responseData.put("success", true);
           responseData.put("foundNewMessages", false);
         }
@@ -162,8 +138,12 @@ public class ChatPollServlet extends HttpServlet {
       response.getOutputStream().print("Unexpected JSONException Occurred");
       return;
     }
-    
+
     // This will send the data back in JSON format
     response.getOutputStream().print(responseData.toString());
+  }
+
+  public void setChatServletAgent(ChatServletAgent chatServletAgent) {
+    this.chatServletAgent = chatServletAgent;
   }
 }

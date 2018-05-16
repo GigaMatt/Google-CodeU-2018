@@ -7,7 +7,7 @@ import codeu.model.store.basic.VideoEventStore;
 
 
 /* Stores all the common data used by most Chat Servlets */
-class ChatServletAgent {
+public class ChatServletAgent {
 
   /** Store class that gives access to Conversations. */
   private ConversationStore conversationStore;
@@ -25,7 +25,7 @@ class ChatServletAgent {
    * Sets the ConversationStore used by this servlet. This function provides a common setup method
    * for use by the test framework or the servlet's init() function.
    */
-  void setConversationStore(ConversationStore conversationStore) {
+  public void setConversationStore(ConversationStore conversationStore) {
     this.conversationStore = conversationStore;
   }
 
@@ -33,7 +33,7 @@ class ChatServletAgent {
    * Sets the MessageStore used by this servlet. This function provides a common setup method for
    * use by the test framework or the servlet's init() function.
    */
-  void setMessageStore(MessageStore messageStore) {
+  public void setMessageStore(MessageStore messageStore) {
     this.messageStore = messageStore;
   }
 
@@ -49,7 +49,7 @@ class ChatServletAgent {
    * Sets the UserStore used by this servlet. This function provides a common setup method for use
    * by the test framework or the servlet's init() function.
    */
-  void setUserStore(UserStore userStore) {
+  public void setUserStore(UserStore userStore) {
     this.userStore = userStore;
   }
 

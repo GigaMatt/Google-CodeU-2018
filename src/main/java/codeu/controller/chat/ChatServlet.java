@@ -14,6 +14,7 @@
 
 package codeu.controller.chat;
 
+import codeu.injection.AppInjector;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
@@ -37,7 +38,6 @@ import org.jsoup.safety.Whitelist;
 
 /** Servlet class responsible for the chat page. */
 public class ChatServlet extends HttpServlet {
-
   private ChatServletAgent chatServletAgent;
   private ChatRequestValidator chatRequestValidator;
 
@@ -45,24 +45,7 @@ public class ChatServlet extends HttpServlet {
   @Override
   public void init() throws ServletException {
     super.init();
-
-    ChatServletAgent chatServletAgent = new ChatServletAgent();
-    chatServletAgent.setConversationStore(ConversationStore.getInstance());
-    chatServletAgent.setMessageStore(MessageStore.getInstance());
-    chatServletAgent.setUserStore(UserStore.getInstance());
-
-    ChatRequestValidator chatRequestValidator = new ChatRequestValidator(chatServletAgent);
-
-    setChatServletAgent(chatServletAgent);
-    setChatRequestValidator(chatRequestValidator);
-  }
-
-  public void setChatServletAgent(ChatServletAgent chatServletAgent) {
-    this.chatServletAgent = chatServletAgent;
-  }
-
-  public ChatServletAgent getChatServletAgent() {
-    return chatServletAgent;
+    AppInjector.getInstance().inject(this);
   }
 
   public void setChatRequestValidator(ChatRequestValidator chatRequestValidator) {
@@ -114,7 +97,7 @@ public class ChatServlet extends HttpServlet {
 
     // This will represent the data being sent in the response
     JSONObject responseData = new JSONObject();
-    
+
     try {
       chatRequestValidator.validateRequest(request, "/chat/");
 
@@ -153,14 +136,18 @@ public class ChatServlet extends HttpServlet {
       chatServletAgent.getMessageStore().addMessage(message);
 
       responseData.put("success", true);
-      
+
     } catch (JSONException e) {
       response.setStatus(500);
       response.getOutputStream().print("Unexpected JSONException Occurred");
       return;
     }
-    
+
     // This will send the data back in JSON format
     response.getOutputStream().print(responseData.toString());
+  }
+
+  public void setChatServletAgent(ChatServletAgent chatServletAgent) {
+    this.chatServletAgent = chatServletAgent;
   }
 }

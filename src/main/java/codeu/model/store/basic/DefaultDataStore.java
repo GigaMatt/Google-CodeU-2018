@@ -17,7 +17,7 @@ package codeu.model.store.basic;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
-import codeu.model.store.persistence.PersistentStorageAgent;
+import codeu.model.store.persistence.PersistentDataStore;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,18 +54,15 @@ public class DefaultDataStore {
    */
   private int DEFAULT_MESSAGE_COUNT = 100;
 
-  private static DefaultDataStore instance = new DefaultDataStore();
-
-  public static DefaultDataStore getInstance() {
-    return instance;
-  }
+  private PersistentDataStore dataStore;
 
   private List<User> users;
   private List<Conversation> conversations;
   private List<Message> messages;
 
-  /** This class is a singleton, so its constructor is private. Call getInstance() instead. */
-  private DefaultDataStore() {
+  /** Creates an instance. */
+  public DefaultDataStore(PersistentDataStore dataStore) {
+    this.dataStore = dataStore;
     users = new ArrayList<>();
     conversations = new ArrayList<>();
     messages = new ArrayList<>();
@@ -101,7 +98,7 @@ public class DefaultDataStore {
     for (int i = 0; i < DEFAULT_USER_COUNT; i++) {
       User user = new User(UUID.randomUUID(), randomUsernames.get(i),
               BCrypt.hashpw("password", BCrypt.gensalt()), "member", Instant.now(), "test");
-      PersistentStorageAgent.getInstance().writeThrough(user);
+      dataStore.writeThrough(user);
       users.add(user);
     }
   }
@@ -112,7 +109,7 @@ public class DefaultDataStore {
       String title = "Conversation_" + i;
       Conversation conversation =
           new Conversation(UUID.randomUUID(), user.getId(), title, Instant.now());
-      PersistentStorageAgent.getInstance().writeThrough(conversation);
+      dataStore.writeThrough(conversation);
       conversations.add(conversation);
     }
   }
@@ -126,7 +123,7 @@ public class DefaultDataStore {
       Message message =
           new Message(
               UUID.randomUUID(), conversation.getId(), author.getId(), content, Instant.now());
-      PersistentStorageAgent.getInstance().writeThrough(message);
+      dataStore.writeThrough(message);
       messages.add(message);
     }
   }
