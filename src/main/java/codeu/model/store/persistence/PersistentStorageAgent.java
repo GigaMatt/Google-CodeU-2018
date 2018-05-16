@@ -17,7 +17,7 @@ package codeu.model.store.persistence;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
-import codeu.model.data.Video;
+import codeu.model.data.VideoEvent;
 import codeu.model.store.persistence.PersistentDataStore;
 import java.util.List;
 
@@ -91,13 +91,13 @@ public class PersistentStorageAgent {
   }
 
   /**
-   * Retrieve all Video objects from the Datastore service. The returned list may be empty.
+   * Retrieve all VideoEvent objects from the Datastore service. The returned list may be empty.
    *
    * @throws PersistentDataStoreException if an error was detected during the load from the
    *     Datastore service
    */
-  public List<Video> loadVideos() throws PersistentDataStoreException {
-    return persistentDataStore.loadVideos();
+  public List<VideoEvent> loadVideoEvents() throws PersistentDataStoreException {
+    return persistentDataStore.loadVideoEvents();
   }
 
   /** Write a User object to the Datastore service. */
@@ -110,9 +110,9 @@ public class PersistentStorageAgent {
     persistentDataStore.writeThrough(conversation);
   }
 
-  /** Write a Video object to the Datastore service. */
-  public void writeThrough(Video video) {
-    persistentDataStore.writeThrough(video);
+  /** Write a VideoEvent object to the Datastore service. */
+  public void writeThrough(VideoEvent videoEvent) {
+    persistentDataStore.writeThrough(videoEvent);
   }
 
   /** Write a Conversation object to the Datastore service. */

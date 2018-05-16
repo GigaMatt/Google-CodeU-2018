@@ -3,11 +3,11 @@ package codeu.controller;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
-import codeu.model.data.Video;
+import codeu.model.data.VideoEvent;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
-import codeu.model.store.basic.VideoStore;
+import codeu.model.store.basic.VideoEventStore;
 import codeu.model.store.persistence.PersistentDataStoreException;
 import codeu.model.store.persistence.PersistentStorageAgent;
 import org.mindrot.jbcrypt.BCrypt;
@@ -41,8 +41,8 @@ public class ServerStartupListener implements ServletContextListener {
       List<Message> messages = PersistentStorageAgent.getInstance().loadMessages();
       MessageStore.getInstance().setMessages(messages);
       
-      List<Video> videos = PersistentStorageAgent.getInstance().loadVideos();
-      VideoStore.getInstance().setVideos(videos);
+      List<VideoEvent> videos = PersistentStorageAgent.getInstance().loadVideoEvents();
+      VideoEventStore.getInstance().setVideoEvents(videos);
 
     } catch (PersistentDataStoreException e) {
       System.err.println("Server didn't start correctly. An error occurred during Datastore load!");

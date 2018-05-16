@@ -3,7 +3,7 @@ package codeu.model.store.persistence;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
-import codeu.model.data.Video;
+import codeu.model.data.VideoEvent;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -47,9 +47,9 @@ public class PersistentStorageAgentTest {
   }
   
   @Test
-  public void testLoadVideos() throws PersistentDataStoreException {
-    persistentStorageAgent.loadVideos();
-    Mockito.verify(mockPersistentDataStore).loadVideos();
+  public void testLoadVideoEvents() throws PersistentDataStoreException {
+    persistentStorageAgent.loadVideoEvents();
+    Mockito.verify(mockPersistentDataStore).loadVideoEvents();
   }
 
   @Test
@@ -79,11 +79,11 @@ public class PersistentStorageAgentTest {
   }
   
   @Test
-  public void testWriteThroughVideo() {
-    Video video =
-        new Video(
+  public void testWriteThroughVideoEvent() {
+    VideoEvent videoEvent =
+        new VideoEvent(
             UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "test video id", Instant.now());
-    persistentStorageAgent.writeThrough(video);
-    Mockito.verify(mockPersistentDataStore).writeThrough(video);
+    persistentStorageAgent.writeThrough(videoEvent);
+    Mockito.verify(mockPersistentDataStore).writeThrough(videoEvent);
   }
 }

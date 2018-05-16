@@ -97,12 +97,12 @@
   </servlet-mapping>
 
   <servlet>
-    <servlet-name>VideoPollServlet</servlet-name>
-    <servlet-class>codeu.controller.chat.VideoPollServlet</servlet-class>
+    <servlet-name>VideoEventPollServlet</servlet-name>
+    <servlet-class>codeu.controller.chat.VideoEventPollServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>VideoPollServlet</servlet-name>
+    <servlet-name>VideoEventPollServlet</servlet-name>
     <url-pattern>/chat/video/poll/*</url-pattern>
   </servlet-mapping>
   

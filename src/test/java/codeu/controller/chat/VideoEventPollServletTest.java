@@ -20,7 +20,7 @@ import codeu.model.data.User;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
-import codeu.model.store.basic.VideoStore;
+import codeu.model.store.basic.VideoEventStore;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -42,20 +42,20 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-public class VideoPollServletTest {
+public class VideoEventPollServletTest {
 
-  private VideoPollServlet videoPollServlet;
+  private VideoEventPollServlet videoEventPollServlet;
   private HttpServletRequest mockRequest;
   private HttpSession mockSession;
   private HttpServletResponse mockResponse;
   private ServletOutputStream mockOutputStream;
   private ConversationStore mockConversationStore;
-  private VideoStore mockVideoStore;
+  private VideoEventStore mockVideoEventStore;
   private UserStore mockUserStore;
 
   @Before
   public void setup() {
-    videoPollServlet = new VideoPollServlet();
+    videoEventPollServlet = new VideoEventPollServlet();
 
     mockRequest = Mockito.mock(HttpServletRequest.class);
     mockSession = Mockito.mock(HttpSession.class);
@@ -71,20 +71,20 @@ public class VideoPollServletTest {
 	}
 
     mockConversationStore = Mockito.mock(ConversationStore.class);
-    videoPollServlet.getChatServletAgent().setConversationStore(mockConversationStore);
+    videoEventPollServlet.getChatServletAgent().setConversationStore(mockConversationStore);
 
-    mockVideoStore = Mockito.mock(VideoStore.class);
-    videoPollServlet.getChatServletAgent().setVideoStore(mockVideoStore);
+    mockVideoEventStore = Mockito.mock(VideoEventStore.class);
+    videoEventPollServlet.getChatServletAgent().setVideoEventStore(mockVideoEventStore);
 
     mockUserStore = Mockito.mock(UserStore.class);
-    videoPollServlet.getChatServletAgent().setUserStore(mockUserStore);
+    videoEventPollServlet.getChatServletAgent().setUserStore(mockUserStore);
   }
 
   @Test
   public void testDoPost_UserNotLoggedIn() throws IOException, ServletException {
     Mockito.when(mockSession.getAttribute("user")).thenReturn(null);
 
-    videoPollServlet.doPost(mockRequest, mockResponse);
+    videoEventPollServlet.doPost(mockRequest, mockResponse);
 
     ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
@@ -103,7 +103,7 @@ public class VideoPollServletTest {
     Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
     Mockito.when(mockUserStore.getUser("test_username")).thenReturn(null);
 
-    videoPollServlet.doPost(mockRequest, mockResponse);
+    videoEventPollServlet.doPost(mockRequest, mockResponse);
     
     ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
@@ -130,7 +130,7 @@ public class VideoPollServletTest {
     Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
         .thenReturn(null);
 
-    videoPollServlet.doPost(mockRequest, mockResponse);
+    videoEventPollServlet.doPost(mockRequest, mockResponse);
 
     ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());

@@ -1,6 +1,6 @@
 package codeu.model.store.basic;
 
-import codeu.model.data.Video;
+import codeu.model.data.VideoEvent;
 import codeu.model.store.persistence.PersistentStorageAgent;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -14,26 +14,26 @@ import org.mockito.Mockito;
 
 public class VideoStoreTest {
 
-  private VideoStore videoStore;
+  private VideoEventStore videoEventStore;
   private PersistentStorageAgent mockPersistentStorageAgent;
 
   private final UUID CONVERSATION_ID_ONE = UUID.randomUUID();
-  private final Video VIDEO_ONE =
-      new Video(
+  private final VideoEvent VIDEO_EVENT_ONE =
+      new VideoEvent(
           UUID.randomUUID(),
           CONVERSATION_ID_ONE,
           UUID.randomUUID(),
           "video id one",
           Instant.ofEpochMilli(1000));
-  private final Video VIDEO_TWO =
-      new Video(
+  private final VideoEvent VIDEO_EVENT_TWO =
+      new VideoEvent(
           UUID.randomUUID(),
           CONVERSATION_ID_ONE,
           UUID.randomUUID(),
           "video id two",
           Instant.ofEpochMilli(2000));
-  private final Video VIDEO_THREE =
-      new Video(
+  private final VideoEvent VIDEO_EVENT_THREE =
+      new VideoEvent(
           UUID.randomUUID(),
           UUID.randomUUID(),
           UUID.randomUUID(),
@@ -43,47 +43,47 @@ public class VideoStoreTest {
   @Before
   public void setup() {
     mockPersistentStorageAgent = Mockito.mock(PersistentStorageAgent.class);
-    videoStore = VideoStore.getTestInstance(mockPersistentStorageAgent);
+    videoEventStore = VideoEventStore.getTestInstance(mockPersistentStorageAgent);
 
-    final List<Video> videoList = new ArrayList<>();
-    videoList.add(VIDEO_ONE);
-    videoList.add(VIDEO_TWO);
-    videoList.add(VIDEO_THREE);
-    videoStore.setVideos(videoList);
+    final List<VideoEvent> videoEventList = new ArrayList<>();
+    videoEventList.add(VIDEO_EVENT_ONE);
+    videoEventList.add(VIDEO_EVENT_TWO);
+    videoEventList.add(VIDEO_EVENT_THREE);
+    videoEventStore.setVideoEvents(videoEventList);
   }
 
   @Test
-  public void testGetVideosInConversation() {
-    List<Video> resultVideos = videoStore.getVideosInConversation(CONVERSATION_ID_ONE);
+  public void testGetVideoEventsInConversation() {
+    List<VideoEvent> resultVideoEvents = videoEventStore.getVideoEventInConversation(CONVERSATION_ID_ONE);
 
-    Assert.assertEquals(2, resultVideos.size());
-    assertEquals(VIDEO_ONE, resultVideos.get(0));
-    assertEquals(VIDEO_TWO, resultVideos.get(1));
+    Assert.assertEquals(2, resultVideoEvents.size());
+    assertEquals(VIDEO_EVENT_ONE, resultVideoEvents.get(0));
+    assertEquals(VIDEO_EVENT_TWO, resultVideoEvents.get(1));
   }
 
   @Test
-  public void testAddVideo() {
+  public void testAddVideoEvent() {
     UUID inputConversationId = UUID.randomUUID();
-    Video inputVideo =
-        new Video(
+    VideoEvent inputVideoEvent =
+        new VideoEvent(
             UUID.randomUUID(),
             inputConversationId,
             UUID.randomUUID(),
             "test video id",
             Instant.now());
 
-    videoStore.addVideo(inputVideo);
-    Video resultVideo = videoStore.getVideosInConversation(inputConversationId).get(0);
+    videoEventStore.addVideoEvent(inputVideoEvent);
+    VideoEvent resultVideoEvent = videoEventStore.getVideoEventInConversation(inputConversationId).get(0);
 
-    assertEquals(inputVideo, resultVideo);
-    Mockito.verify(mockPersistentStorageAgent).writeThrough(inputVideo);
+    assertEquals(inputVideoEvent, resultVideoEvent);
+    Mockito.verify(mockPersistentStorageAgent).writeThrough(inputVideoEvent);
   }
 
-  private void assertEquals(Video expectedVideo, Video actualVideo) {
-    Assert.assertEquals(expectedVideo.getId(), actualVideo.getId());
-    Assert.assertEquals(expectedVideo.getConversationId(), actualVideo.getConversationId());
-    Assert.assertEquals(expectedVideo.getAuthorId(), actualVideo.getAuthorId());
-    Assert.assertEquals(expectedVideo.getVideoId(), actualVideo.getVideoId());
-    Assert.assertEquals(expectedVideo.getCreationTime(), actualVideo.getCreationTime());
+  private void assertEquals(VideoEvent expectedVideoEvent, VideoEvent actualVideoEvent) {
+    Assert.assertEquals(expectedVideoEvent.getId(), actualVideoEvent.getId());
+    Assert.assertEquals(expectedVideoEvent.getConversationId(), actualVideoEvent.getConversationId());
+    Assert.assertEquals(expectedVideoEvent.getAuthorId(), actualVideoEvent.getAuthorId());
+    Assert.assertEquals(expectedVideoEvent.getVideoId(), actualVideoEvent.getVideoId());
+    Assert.assertEquals(expectedVideoEvent.getCreationTime(), actualVideoEvent.getCreationTime());
   }
 }

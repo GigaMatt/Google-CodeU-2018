@@ -17,7 +17,7 @@ package codeu.model.store.persistence;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
-import codeu.model.data.Video;
+import codeu.model.data.VideoEvent;
 import codeu.model.store.persistence.PersistentDataStoreException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -153,16 +153,16 @@ public class PersistentDataStore {
   }
 
   /**
-   * Loads all Video objects from the Datastore service and returns them in a List.
+   * Loads all Video Event objects from the Datastore service and returns them in a List.
    *
    * @throws PersistentDataStoreException if an error was detected during the load from the
    *     Datastore service
    */
-  public List<Video> loadVideos() throws PersistentDataStoreException {
+  public List<VideoEvent> loadVideoEvents() throws PersistentDataStoreException {
 
-    List<Video> videos = new ArrayList<>();
+    List<VideoEvent> videoEvents = new ArrayList<>();
 
-    // Retrieve all videos from the datastore.
+    // Retrieve all video events from the datastore.
     Query query = new Query("chat-videos").addSort("creation_time", SortDirection.DESCENDING);
     PreparedQuery results = datastore.prepare(query);
 
@@ -173,8 +173,8 @@ public class PersistentDataStore {
         UUID authorUuid = UUID.fromString((String) entity.getProperty("author_uuid"));
         Instant creationTime = Instant.parse((String) entity.getProperty("creation_time"));
         String videoId = (String) entity.getProperty("video_id");
-        Video video = new Video(uuid, conversationUuid, authorUuid, videoId, creationTime);
-        videos.add(video);
+        VideoEvent videoEvent = new VideoEvent(uuid, conversationUuid, authorUuid, videoId, creationTime);
+        videoEvents.add(videoEvent);
       } catch (Exception e) {
         // In a production environment, errors should be very rare. Errors which may
         // occur include network errors, Datastore service errors, authorization errors,
@@ -183,7 +183,7 @@ public class PersistentDataStore {
       }
     }
 
-    return videos;
+    return videoEvents;
   }
 
   /** Write a User object to the Datastore service. */
@@ -209,14 +209,14 @@ public class PersistentDataStore {
     datastore.put(messageEntity);
   }
   
-  /** Write a Message object to the Datastore service. */
-  public void writeThrough(Video video) {
+  /** Write a VideoEvent object to the Datastore service. */
+  public void writeThrough(VideoEvent videoEvent) {
     Entity videoEntity = new Entity("chat-videos");
-    videoEntity.setProperty("uuid", video.getId().toString());
-    videoEntity.setProperty("conv_uuid", video.getConversationId().toString());
-    videoEntity.setProperty("author_uuid", video.getAuthorId().toString());
-    videoEntity.setProperty("video_id", video.getVideoId());
-    videoEntity.setProperty("creation_time", video.getCreationTime().toString());
+    videoEntity.setProperty("uuid", videoEvent.getId().toString());
+    videoEntity.setProperty("conv_uuid", videoEvent.getConversationId().toString());
+    videoEntity.setProperty("author_uuid", videoEvent.getAuthorId().toString());
+    videoEntity.setProperty("video_id", videoEvent.getVideoId());
+    videoEntity.setProperty("creation_time", videoEvent.getCreationTime().toString());
     datastore.put(videoEntity);
   }
 

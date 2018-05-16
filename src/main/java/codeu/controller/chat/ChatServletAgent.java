@@ -3,7 +3,7 @@ package codeu.controller.chat;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
-import codeu.model.store.basic.VideoStore;
+import codeu.model.store.basic.VideoEventStore;
 
 
 /* Stores all the common data used by most Chat Servlets */
@@ -15,8 +15,8 @@ class ChatServletAgent {
   /** Store class that gives access to Messages. */
   private MessageStore messageStore;
   
-  /** Store class that gives access to Messages. */
-  private VideoStore videoStore;
+  /** Store class that gives access to Video Events. */
+  private VideoEventStore videoEventStore;
 
   /** Store class that gives access to Users. */
   private UserStore userStore;
@@ -38,11 +38,11 @@ class ChatServletAgent {
   }
 
   /**
-   * Sets the VideoStore used by this servlet. This function provides a common setup method for
+   * Sets the VideoEventStore used by this servlet. This function provides a common setup method for
    * use by the test framework or the servlet's init() function.
    */
-  void setVideoStore(VideoStore videoStore) {
-    this.videoStore = videoStore;
+  void setVideoEventStore(VideoEventStore videoEventStore) {
+    this.videoEventStore = videoEventStore;
   }
 
   /**
@@ -61,8 +61,8 @@ class ChatServletAgent {
       return this.messageStore;
   }
   
-  VideoStore getVideoStore() {
-    return this.videoStore;
+  VideoEventStore getVideoEventStore() {
+    return this.videoEventStore;
   }
 
   UserStore getUserStore() {

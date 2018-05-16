@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class VideoTest {
+public class VideoEventTest {
 
   @Test
   public void testCreate() {
@@ -16,7 +16,7 @@ public class VideoTest {
     String videoId = "test video id";
     Instant creation = Instant.now();
 
-    Video video = new Video(id, conversation, author, videoId, creation);
+    VideoEvent video = new VideoEvent(id, conversation, author, videoId, creation);
 
     Assert.assertEquals(id, video.getId());
     Assert.assertEquals(conversation, video.getConversationId());

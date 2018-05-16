@@ -15,12 +15,12 @@ import codeu.model.data.Conversation;
 import codeu.model.data.User;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.UserStore;
-import codeu.model.store.basic.VideoStore;
+import codeu.model.store.basic.VideoEventStore;
 
-public class VideoPollServlet extends HttpServlet {
+public class VideoEventPollServlet extends HttpServlet {
     private ChatServletAgent chatServletAgent;
 
-    public VideoPollServlet() {
+    public VideoEventPollServlet() {
       chatServletAgent = new ChatServletAgent();
     }
 
@@ -29,7 +29,7 @@ public class VideoPollServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         chatServletAgent.setConversationStore(ConversationStore.getInstance());
-        chatServletAgent.setVideoStore(VideoStore.getInstance());
+        chatServletAgent.setVideoEventStore(VideoEventStore.getInstance());
         chatServletAgent.setUserStore(UserStore.getInstance());
     }
     
