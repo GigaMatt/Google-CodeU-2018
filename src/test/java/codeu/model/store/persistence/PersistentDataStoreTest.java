@@ -3,6 +3,8 @@ package codeu.model.store.persistence;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
+import codeu.model.data.Video;
+
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.time.Instant;
@@ -156,5 +158,46 @@ public class PersistentDataStoreTest {
     Assert.assertEquals(authorTwo, resultMessageTwo.getAuthorId());
     Assert.assertEquals(contentTwo, resultMessageTwo.getContent());
     Assert.assertEquals(creationTwo, resultMessageTwo.getCreationTime());
+  }
+  
+  @Test
+  public void testSaveAndLoadVideos() throws PersistentDataStoreException {
+    UUID idOne = UUID.randomUUID();
+    UUID conversationOne = UUID.randomUUID();
+    UUID authorOne = UUID.randomUUID();
+    String videoIdOne = "test video id one";
+    Instant creationOne = Instant.ofEpochMilli(1000);
+    Video inputVideoOne =
+        new Video(idOne, conversationOne, authorOne, videoIdOne, creationOne);
+
+    UUID idTwo = UUID.randomUUID();
+    UUID conversationTwo = UUID.randomUUID();
+    UUID authorTwo = UUID.randomUUID();
+    String videoIdTwo = "test video id two";
+    Instant creationTwo = Instant.ofEpochMilli(2000);
+    Video inputVideoTwo =
+        new Video(idTwo, conversationTwo, authorTwo, videoIdTwo, creationTwo);
+
+    // save
+    persistentDataStore.writeThrough(inputVideoOne);
+    persistentDataStore.writeThrough(inputVideoTwo);
+
+    // load
+    List<Video> resultVideos = persistentDataStore.loadVideos();
+
+    // confirm that what we saved matches what we loaded
+    Video resultVideoOne = resultVideos.get(0);
+    Assert.assertEquals(idOne, resultVideoOne.getId());
+    Assert.assertEquals(conversationOne, resultVideoOne.getConversationId());
+    Assert.assertEquals(authorOne, resultVideoOne.getAuthorId());
+    Assert.assertEquals(videoIdOne, resultVideoOne.getVideoId());
+    Assert.assertEquals(creationOne, resultVideoOne.getCreationTime());
+
+    Video resultVideoTwo = resultVideos.get(1);
+    Assert.assertEquals(idTwo, resultVideoTwo.getId());
+    Assert.assertEquals(conversationTwo, resultVideoTwo.getConversationId());
+    Assert.assertEquals(authorTwo, resultVideoTwo.getAuthorId());
+    Assert.assertEquals(videoIdTwo, resultVideoTwo.getVideoId());
+    Assert.assertEquals(creationTwo, resultVideoTwo.getCreationTime());
   }
 }
