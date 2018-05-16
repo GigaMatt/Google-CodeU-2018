@@ -69,8 +69,7 @@ public class VideoStore {
     /** Add a new video to the current set of videos known to the application. */
     public void addVideo(Video video) {
         videos.add(video);
-        // Todo (Azee): Write to persistent storage
-        // persistentStorageAgent.writeThrough(video);
+        persistentStorageAgent.writeThrough(video);
     }
 
     /** Access the current set of Videos within the given Conversation. */

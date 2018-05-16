@@ -185,15 +185,15 @@ public class PersistentDataStoreTest {
     // load
     List<Video> resultVideos = persistentDataStore.loadVideos();
 
-    // confirm that what we saved matches what we loaded
-    Video resultVideoOne = resultVideos.get(0);
+    // confirm that what we saved matches what we loaded (Descending order based on creation time)
+    Video resultVideoOne = resultVideos.get(1);
     Assert.assertEquals(idOne, resultVideoOne.getId());
     Assert.assertEquals(conversationOne, resultVideoOne.getConversationId());
     Assert.assertEquals(authorOne, resultVideoOne.getAuthorId());
     Assert.assertEquals(videoIdOne, resultVideoOne.getVideoId());
     Assert.assertEquals(creationOne, resultVideoOne.getCreationTime());
 
-    Video resultVideoTwo = resultVideos.get(1);
+    Video resultVideoTwo = resultVideos.get(0);
     Assert.assertEquals(idTwo, resultVideoTwo.getId());
     Assert.assertEquals(conversationTwo, resultVideoTwo.getConversationId());
     Assert.assertEquals(authorTwo, resultVideoTwo.getAuthorId());
