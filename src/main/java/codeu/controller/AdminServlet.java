@@ -131,7 +131,7 @@ public class AdminServlet extends HttpServlet {
       if (method.equals("rj")) {
         DataParse parsedData = new DataParse("Romeo_and_Juliet");
         parsedData.parse();
-        parsedData.allUsers.values().parallelStream().forEach(x -> userStore.addUser(x));
+        parsedData.allUsers.values().stream().forEach(x -> userStore.addUser(x));
         conversationStore.loadTestData(parsedData.allConversations);
         messageStore.loadTestData(parsedData.allMessages);
       } else {

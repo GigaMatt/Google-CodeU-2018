@@ -179,18 +179,11 @@ public class AdminServletTest {
 
     adminServlet.doPost(mockRequest, mockResponse);
 
-    DataParse dp = new DataParse("Romeo_and_Juliet");
-    dp.parse();
-    List<User> u = new ArrayList<User>(dp.allUsers.values());
-    List<Conversation> c = dp.allConversations;
-    List<Message> m = dp.allMessages;
-
     Mockito.verify(mockUserStore, times(28)).addUser(any(User.class));
     Mockito.verify(mockConversationStore).loadTestData(cArgumentCaptor.capture());
     Assert.assertEquals(22, cArgumentCaptor.getValue().size());
     Mockito.verify(mockMessageStore).loadTestData(mArgumentCaptor.capture());
-    Assert.assertEquals(698, mArgumentCaptor.getValue().size());
-
+    Assert.assertEquals(822, mArgumentCaptor.getValue().size());
     Mockito.verify(mockResponse).sendRedirect("/admin");
   }
 

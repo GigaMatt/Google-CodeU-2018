@@ -23,6 +23,7 @@
 
   <%@ include file="/include/navbar.jsp" %>
   <%@page import  = "java.util.List"%>
+  <%@page import  = "java.util.stream.Collectors"%>
   <%@page import  = "codeu.model.data.Message"%>
   <%@page import  = "codeu.model.data.User"%>
   <%@page import= "codeu.model.data.Conversation" %>
@@ -39,15 +40,33 @@
       if(conversations != null){numConvos += conversations.size();}
       List<Message> messages = (List<Message>) request.getAttribute("messages");
       if(messages != null){numMessages += messages.size();}
+
       %>
       <p> Total number of users: <%=numUsers %> </p>
       <p> Total number of conversations: <%=numConvos %> </p>
       <p> Total number of messages: <%=numMessages %> </p>
-      <p> Average number of conversations per user: <%=(double)numConvos/numUsers %> </p>
+      <p> Average number of messages per user: <%=(double)numMessages/numUsers %> </p>
+  </div>
+
+  <div id = "container">
+      <h1>Users</h1>
+      <select name="usersBox" size = "10">
+      <%
+      List<String> userNames = users.stream().map(x -> x.getName())
+        .sorted(String::compareToIgnoreCase)
+        .collect(Collectors.toList());
+      for (int i = 0; i < numUsers; i ++)
+      {
+      %>
+        <option value = <%=userNames.get(i) %> > <%=userNames.get(i)%> </option>
+      <%
+      }
+      %>
+      </select>
   </div>
 
   <div id="container">
-      <h1>Make an Admin!</h1>
+      <h1>Make Another Admin</h1>
       <p>This will create a user with administrative privileges.</p>
       <% if(request.getAttribute("admin error") != null){ %>
             <h2 style="color:red"><%= request.getAttribute("admin error") %></h2>

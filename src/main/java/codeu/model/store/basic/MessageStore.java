@@ -66,7 +66,7 @@ public class MessageStore {
   }
 
   /**
-   * Load a set of randomly-generated Message objects.
+   * Add a set of randomly-generated Message objects.
    *
    * @return false if an error occurs.
    */

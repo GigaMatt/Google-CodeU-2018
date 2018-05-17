@@ -33,8 +33,9 @@ public class DataParse {
     UUID convID = null;
     Pattern p = Pattern.compile("(\\b[A-Z]{3,}\\b\\s?)+"); //Matches all-uppercase names
 
-    String dir = System.getProperty("user.dir");
-    try (Scanner scanner = new Scanner(new File(dir + "/src/main/java/codeu/model/data/" + tf))) {
+    ClassLoader classLoader = getClass().getClassLoader();
+    File file = new File(classLoader.getResource("files/" + tf).getFile());
+    try (Scanner scanner = new Scanner(file)) {
       scanner.useDelimiter("\n");
       while (scanner.hasNext()) {
         String token = scanner.next();
@@ -71,6 +72,7 @@ public class DataParse {
               text += nextLine + "\n";
             }
           }
+          allMessages.add(new Message(UUID.randomUUID(), convID, userID, text, Instant.now()));
         }
       }
     } catch (FileNotFoundException e) {
