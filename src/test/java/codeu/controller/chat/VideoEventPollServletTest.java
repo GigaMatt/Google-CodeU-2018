@@ -70,14 +70,20 @@ public class VideoEventPollServletTest {
         Mockito.doThrow(e);
 	}
 
+
     mockConversationStore = Mockito.mock(ConversationStore.class);
-    videoEventPollServlet.getChatServletAgent().setConversationStore(mockConversationStore);
-
     mockVideoEventStore = Mockito.mock(VideoEventStore.class);
-    videoEventPollServlet.getChatServletAgent().setVideoEventStore(mockVideoEventStore);
-
     mockUserStore = Mockito.mock(UserStore.class);
-    videoEventPollServlet.getChatServletAgent().setUserStore(mockUserStore);
+
+    ChatServletAgent chatServletAgent = new ChatServletAgent();
+    chatServletAgent.setConversationStore(mockConversationStore);
+    chatServletAgent.setVideoEventStore(mockVideoEventStore);
+    chatServletAgent.setUserStore(mockUserStore);
+
+    ChatRequestValidator chatRequestValidator = new ChatRequestValidator(chatServletAgent);
+
+    videoEventPollServlet.setChatServletAgent(chatServletAgent);
+    videoEventPollServlet.setChatRequestValidator(chatRequestValidator);
   }
 
   @Test

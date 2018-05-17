@@ -37,25 +37,38 @@ import org.json.JSONObject;
 public class ChatPollServlet extends HttpServlet {
 
   private ChatServletAgent chatServletAgent;
-
-  public ChatPollServlet() {
-    chatServletAgent = new ChatServletAgent();
-  }
+  private ChatRequestValidator chatRequestValidator;
 
   /** Set up state for handling chat requests. */
   @Override
   public void init() throws ServletException {
     super.init();
+
+    ChatServletAgent chatServletAgent = new ChatServletAgent();
     chatServletAgent.setConversationStore(ConversationStore.getInstance());
     chatServletAgent.setMessageStore(MessageStore.getInstance());
     chatServletAgent.setUserStore(UserStore.getInstance());
+
+    ChatRequestValidator chatRequestValidator = new ChatRequestValidator(chatServletAgent);
+
+    setChatServletAgent(chatServletAgent);
+    setChatRequestValidator(chatRequestValidator);
   }
-  
-  /**
-   * @return the chatServletAgent
-   */
+
+  public void setChatServletAgent(ChatServletAgent chatServletAgent) {
+    this.chatServletAgent = chatServletAgent;
+  }
+
   public ChatServletAgent getChatServletAgent() {
     return chatServletAgent;
+  }
+
+  public void setChatRequestValidator(ChatRequestValidator chatRequestValidator) {
+    this.chatRequestValidator = chatRequestValidator;
+  }
+
+  public ChatRequestValidator getChatRequestValidator() {
+    return chatRequestValidator;
   }
 
   /**

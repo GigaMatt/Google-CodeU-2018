@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import codeu.model.store.basic.MessageStore;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,6 +20,7 @@ import codeu.model.store.basic.VideoEventStore;
 
 public class VideoEventPollServlet extends HttpServlet {
     private ChatServletAgent chatServletAgent;
+    private ChatRequestValidator chatRequestValidator;
 
     public VideoEventPollServlet() {
       chatServletAgent = new ChatServletAgent();
@@ -28,16 +30,32 @@ public class VideoEventPollServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
+
+        ChatServletAgent chatServletAgent = new ChatServletAgent();
         chatServletAgent.setConversationStore(ConversationStore.getInstance());
         chatServletAgent.setVideoEventStore(VideoEventStore.getInstance());
         chatServletAgent.setUserStore(UserStore.getInstance());
+
+        ChatRequestValidator chatRequestValidator = new ChatRequestValidator(chatServletAgent);
+
+        setChatServletAgent(chatServletAgent);
+        setChatRequestValidator(chatRequestValidator);
     }
-    
-    /**
-     * @return the chatServletAgent
-     */
+
+    public void setChatServletAgent(ChatServletAgent chatServletAgent) {
+        this.chatServletAgent = chatServletAgent;
+    }
+
     public ChatServletAgent getChatServletAgent() {
         return chatServletAgent;
+    }
+
+    public void setChatRequestValidator(ChatRequestValidator chatRequestValidator) {
+        this.chatRequestValidator = chatRequestValidator;
+    }
+
+    public ChatRequestValidator getChatRequestValidator() {
+        return chatRequestValidator;
     }
 
     /**

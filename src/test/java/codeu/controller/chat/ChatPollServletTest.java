@@ -69,13 +69,18 @@ public class ChatPollServletTest {
 	}
 
     mockConversationStore = Mockito.mock(ConversationStore.class);
-    chatPollServlet.getChatServletAgent().setConversationStore(mockConversationStore);
-
     mockMessageStore = Mockito.mock(MessageStore.class);
-    chatPollServlet.getChatServletAgent().setMessageStore(mockMessageStore);
-
     mockUserStore = Mockito.mock(UserStore.class);
-    chatPollServlet.getChatServletAgent().setUserStore(mockUserStore);
+
+    ChatServletAgent chatServletAgent = new ChatServletAgent();
+    chatServletAgent.setConversationStore(mockConversationStore);
+    chatServletAgent.setMessageStore(mockMessageStore);
+    chatServletAgent.setUserStore(mockUserStore);
+
+    ChatRequestValidator chatRequestValidator = new ChatRequestValidator(chatServletAgent);
+
+    chatPollServlet.setChatServletAgent(chatServletAgent);
+    chatPollServlet.setChatRequestValidator(chatRequestValidator);
   }
 
   @Test
