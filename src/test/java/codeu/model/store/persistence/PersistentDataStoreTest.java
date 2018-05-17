@@ -168,7 +168,7 @@ public class PersistentDataStoreTest {
     String videoIdOne = "test video id one";
     Instant creationOne = Instant.ofEpochMilli(1000);
     VideoEvent inputVideoEventOne =
-        new VideoEvent(idOne, conversationOne, authorOne, videoIdOne, creationOne);
+        new VideoEvent(idOne, conversationOne, authorOne, videoIdOne, creationOne, VideoEvent.getTestVideoStateJSON());
 
     UUID idTwo = UUID.randomUUID();
     UUID conversationTwo = UUID.randomUUID();
@@ -176,7 +176,7 @@ public class PersistentDataStoreTest {
     String videoIdTwo = "test video id two";
     Instant creationTwo = Instant.ofEpochMilli(2000);
     VideoEvent inputVideoEventTwo =
-        new VideoEvent(idTwo, conversationTwo, authorTwo, videoIdTwo, creationTwo);
+        new VideoEvent(idTwo, conversationTwo, authorTwo, videoIdTwo, creationTwo, VideoEvent.getTestVideoStateJSON());
 
     // save
     persistentDataStore.writeThrough(inputVideoEventOne);

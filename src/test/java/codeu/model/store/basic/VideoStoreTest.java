@@ -24,21 +24,24 @@ public class VideoStoreTest {
           CONVERSATION_ID_ONE,
           UUID.randomUUID(),
           "video id one",
-          Instant.ofEpochMilli(1000));
+          Instant.ofEpochMilli(1000),
+          VideoEvent.getTestVideoStateJSON());
   private final VideoEvent VIDEO_EVENT_TWO =
       new VideoEvent(
           UUID.randomUUID(),
           CONVERSATION_ID_ONE,
           UUID.randomUUID(),
           "video id two",
-          Instant.ofEpochMilli(2000));
+          Instant.ofEpochMilli(2000),
+          VideoEvent.getTestVideoStateJSON());
   private final VideoEvent VIDEO_EVENT_THREE =
       new VideoEvent(
           UUID.randomUUID(),
           UUID.randomUUID(),
           UUID.randomUUID(),
           "video id three",
-          Instant.ofEpochMilli(3000));
+          Instant.ofEpochMilli(3000),
+          VideoEvent.getTestVideoStateJSON());
 
   @Before
   public void setup() {
@@ -70,7 +73,8 @@ public class VideoStoreTest {
             inputConversationId,
             UUID.randomUUID(),
             "test video id",
-            Instant.now());
+            Instant.now(),
+            VideoEvent.getTestVideoStateJSON());
 
     videoEventStore.addVideoEvent(inputVideoEvent);
     VideoEvent resultVideoEvent = videoEventStore.getVideoEventInConversation(inputConversationId).get(0);

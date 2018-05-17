@@ -18,7 +18,6 @@ import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
 import codeu.model.data.VideoEvent;
-import codeu.model.store.persistence.PersistentDataStoreException;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -173,7 +172,7 @@ public class PersistentDataStore {
         UUID authorUuid = UUID.fromString((String) entity.getProperty("author_uuid"));
         Instant creationTime = Instant.parse((String) entity.getProperty("creation_time"));
         String videoId = (String) entity.getProperty("video_id");
-        VideoEvent videoEvent = new VideoEvent(uuid, conversationUuid, authorUuid, videoId, creationTime);
+        VideoEvent videoEvent = new VideoEvent(uuid, conversationUuid, authorUuid, videoId, creationTime, VideoEvent.getTestVideoStateJSON());
         videoEvents.add(videoEvent);
       } catch (Exception e) {
         // In a production environment, errors should be very rare. Errors which may
