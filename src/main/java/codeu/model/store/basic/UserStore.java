@@ -110,6 +110,7 @@ public class UserStore {
     persistentStorageAgent.writeThrough(user);
   }
 
+
   /** Return true if the given username is known to the application. */
   public boolean isUserRegistered(String username) {
     for (User user : users) {
@@ -126,6 +127,11 @@ public class UserStore {
    */
   public void setUsers(List<User> users) {
     this.users = users;
+  }
+
+  /** Method to update the User with the description. */
+  public void updateUser(User user) {
+    persistentStorageAgent.writeThrough(user);
   }
 
   /** Access all users known to the application. */

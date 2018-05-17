@@ -57,6 +57,16 @@
   </servlet-mapping>
 
   <servlet>
+    <servlet-name>LogoutServlet</servlet-name>
+    <servlet-class>codeu.controller.LogoutServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>LogoutServlet</servlet-name>
+    <url-pattern>/logout</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
     <servlet-name>ConversationServlet</servlet-name>
     <servlet-class>codeu.controller.ConversationServlet</servlet-class>
   </servlet>
@@ -68,12 +78,22 @@
 
   <servlet>
     <servlet-name>ChatServlet</servlet-name>
-    <servlet-class>codeu.controller.ChatServlet</servlet-class>
+    <servlet-class>codeu.controller.chat.ChatServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
     <servlet-name>ChatServlet</servlet-name>
     <url-pattern>/chat/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>ChatPollServlet</servlet-name>
+    <servlet-class>codeu.controller.chat.ChatPollServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>ChatPollServlet</servlet-name>
+    <url-pattern>/chat/poll/*</url-pattern>
   </servlet-mapping>
 
   <servlet>

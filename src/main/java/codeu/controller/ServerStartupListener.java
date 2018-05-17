@@ -29,7 +29,7 @@ public class ServerStartupListener implements ServletContextListener {
       List<User> users = PersistentStorageAgent.getInstance().loadUsers();
       //Always have a master administrator
       User admin = new User(UUID.randomUUID(), "admin",
-              BCrypt.hashpw("admin password", BCrypt.gensalt()), "admin", Instant.now());
+              BCrypt.hashpw("admin password", BCrypt.gensalt()), "admin", Instant.now(), "description");
       users.add(admin);
       UserStore.getInstance().setUsers(users);
 

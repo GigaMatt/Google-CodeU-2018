@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package codeu.controller;
+package codeu.controller.chat;
 
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
@@ -27,9 +27,13 @@ import java.util.List;
 import java.util.UUID;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +47,7 @@ public class ChatServletTest {
   private HttpSession mockSession;
   private HttpServletResponse mockResponse;
   private RequestDispatcher mockRequestDispatcher;
+  private ServletOutputStream mockOutputStream;
   private ConversationStore mockConversationStore;
   private MessageStore mockMessageStore;
   private UserStore mockUserStore;
@@ -58,16 +63,23 @@ public class ChatServletTest {
     mockResponse = Mockito.mock(HttpServletResponse.class);
     mockRequestDispatcher = Mockito.mock(RequestDispatcher.class);
     Mockito.when(mockRequest.getRequestDispatcher("/WEB-INF/view/chat.jsp"))
-        .thenReturn(mockRequestDispatcher);
+        .thenReturn(mockRequestDispatcher);    
+        
+    mockOutputStream = Mockito.mock(ServletOutputStream.class);
+    try {
+		Mockito.when(mockResponse.getOutputStream()).thenReturn(mockOutputStream);
+	} catch (IOException e) {
+        Mockito.doThrow(e);
+	}
 
     mockConversationStore = Mockito.mock(ConversationStore.class);
-    chatServlet.setConversationStore(mockConversationStore);
+    chatServlet.getChatServletAgent().setConversationStore(mockConversationStore);
 
     mockMessageStore = Mockito.mock(MessageStore.class);
-    chatServlet.setMessageStore(mockMessageStore);
+    chatServlet.getChatServletAgent().setMessageStore(mockMessageStore);
 
     mockUserStore = Mockito.mock(UserStore.class);
-    chatServlet.setUserStore(mockUserStore);
+    chatServlet.getChatServletAgent().setUserStore(mockUserStore);
   }
 
   @Test
@@ -116,7 +128,17 @@ public class ChatServletTest {
     chatServlet.doPost(mockRequest, mockResponse);
 
     Mockito.verify(mockMessageStore, Mockito.never()).addMessage(Mockito.any(Message.class));
-    Mockito.verify(mockResponse).sendRedirect("/login");
+    
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
+
+    try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(false, responseData.getBoolean("success"));
+        Assert.assertEquals("User not logged in!", responseData.getString("message"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+    }
   }
 
   @Test
@@ -127,7 +149,17 @@ public class ChatServletTest {
     chatServlet.doPost(mockRequest, mockResponse);
 
     Mockito.verify(mockMessageStore, Mockito.never()).addMessage(Mockito.any(Message.class));
-    Mockito.verify(mockResponse).sendRedirect("/login");
+    
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
+
+    try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(false, responseData.getBoolean("success"));
+        Assert.assertEquals("User not found!", responseData.getString("message"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+    }
   }
 
   @Test
@@ -136,7 +168,8 @@ public class ChatServletTest {
     Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
 
     User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
-            Instant.now());
+            Instant.now(), "test description");
+
     Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
 
     Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
@@ -145,7 +178,17 @@ public class ChatServletTest {
     chatServlet.doPost(mockRequest, mockResponse);
 
     Mockito.verify(mockMessageStore, Mockito.never()).addMessage(Mockito.any(Message.class));
-    Mockito.verify(mockResponse).sendRedirect("/conversations");
+    
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
+
+    try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(false, responseData.getBoolean("success"));
+        Assert.assertEquals("Conversation not found!", responseData.getString("message"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+    }
   }
 
   @Test
@@ -154,7 +197,8 @@ public class ChatServletTest {
     Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
 
     User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
-            Instant.now());
+            Instant.now(), "test description");
+
     Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
 
     Conversation fakeConversation =
@@ -169,17 +213,24 @@ public class ChatServletTest {
     ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
     Mockito.verify(mockMessageStore).addMessage(messageArgumentCaptor.capture());
     Assert.assertEquals("Test message.", messageArgumentCaptor.getValue().getContent());
+    
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
 
-    Mockito.verify(mockResponse).sendRedirect("/chat/test_conversation");
+    try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(true, responseData.getBoolean("success"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+    }
   }
 
   @Test
   public void testDoPost_CleansBadHtmlContent() throws IOException, ServletException {
     Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/test_conversation");
     Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
-
     User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
-            Instant.now());
+            Instant.now(), "test description");
     Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
 
     Conversation fakeConversation =
@@ -196,7 +247,15 @@ public class ChatServletTest {
     Mockito.verify(mockMessageStore).addMessage(messageArgumentCaptor.capture());
     Assert.assertEquals(
         "Contains bad html  and  content.", messageArgumentCaptor.getValue().getContent());
+        
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
 
-    Mockito.verify(mockResponse).sendRedirect("/chat/test_conversation");
+    try {
+		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+        Assert.assertEquals(true, responseData.getBoolean("success"));
+	} catch (JSONException e) {
+        Mockito.doThrow(e);
+    }
   }
 }
