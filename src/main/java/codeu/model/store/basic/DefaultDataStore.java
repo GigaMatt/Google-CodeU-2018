@@ -60,18 +60,14 @@ public class DefaultDataStore {
   private List<Conversation> conversations;
   private List<Message> messages;
 
+  private boolean testDataAlreadyGenerated = false;
+
   /** Creates an instance. */
   public DefaultDataStore(PersistentDataStore dataStore) {
     this.dataStore = dataStore;
     users = new ArrayList<>();
     conversations = new ArrayList<>();
     messages = new ArrayList<>();
-
-    if (USE_DEFAULT_DATA) {
-      addRandomUsers();
-      addRandomConversations();
-      addRandomMessages();
-    }
   }
 
   public boolean isValid() {
@@ -79,15 +75,32 @@ public class DefaultDataStore {
   }
 
   public List<User> getAllUsers() {
+    ensureDataAlreadyGenerated();
     return users;
   }
 
   public List<Conversation> getAllConversations() {
+    ensureDataAlreadyGenerated();
     return conversations;
   }
 
   public List<Message> getAllMessages() {
+    ensureDataAlreadyGenerated();
     return messages;
+  }
+
+  private void ensureDataAlreadyGenerated() {
+    if (testDataAlreadyGenerated) {
+      return;
+    }
+
+    if (USE_DEFAULT_DATA) {
+      addRandomUsers();
+      addRandomConversations();
+      addRandomMessages();
+    }
+
+    testDataAlreadyGenerated = true;
   }
 
   private void addRandomUsers() {
