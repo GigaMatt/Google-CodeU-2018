@@ -9,15 +9,12 @@ import java.util.*;
 
 public class DataParse {
   public HashMap<String, User> allUsers = new HashMap<>();
-  private String fileName;
   private File file;
   public List<Conversation> allConversations = new ArrayList<>();
   public List<Message> allMessages = new ArrayList<>();
 
-  public DataParse(String textFile) {
-    this.fileName = textFile;
-    ClassLoader classLoader = getClass().getClassLoader();
-    this.file = new File(classLoader.getResource("files/" + textFile).getFile());
+  public DataParse(File textFile) {
+    this.file = textFile;
   }
 
   private UUID findPerson(String name) {
@@ -27,7 +24,7 @@ public class DataParse {
     } else {
       userID = UUID.randomUUID();
       allUsers.put(name, new User(userID, name.charAt(0) + name.substring(1).toLowerCase(),
-              "password", "member", Instant.now(), fileName));
+              "password", "member", Instant.now(), "test user"));
     }
     return userID;
   }

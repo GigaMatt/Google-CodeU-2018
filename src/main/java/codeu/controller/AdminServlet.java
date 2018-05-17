@@ -23,6 +23,7 @@ import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
@@ -83,8 +84,8 @@ public class AdminServlet extends HttpServlet {
    *
    * Obtains DataParse object, which is obtained from parsing a specified file.
    */
-  public static DataParse parseFile(String fileName) {
-    DataParse parse = new DataParse(fileName);
+  public static DataParse parseFile(File file) {
+    DataParse parse = new DataParse(file);
     parse.parse();
     return parse;
   }
@@ -139,7 +140,9 @@ public class AdminServlet extends HttpServlet {
     if (request.getParameter("populate") != null) {
       String method = request.getParameter("method");
       if (method.equals("rj")) {
-        DataParse parsedData = parseFile("Romeo_and_Juliet");
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("files/Romeo_and_Juliet").getFile());
+        DataParse parsedData = parseFile(file);
         parsedData.allUsers.values().stream().forEach(x -> userStore.addUser(x));
         conversationStore.loadTestData(parsedData.allConversations);
         messageStore.loadTestData(parsedData.allMessages);
