@@ -195,7 +195,7 @@ public class AdminServletTest {
     UUID id = UUID.randomUUID();
     Instant creation = Instant.now();
     User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
-            "admin", creation);
+            "admin", creation, "");
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     adminServlet.setUserStore(mockUserStore);
 
@@ -226,7 +226,7 @@ public class AdminServletTest {
     UUID id = UUID.randomUUID();
     Instant creation = Instant.now();
     User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
-            "admin", creation);
+            "admin", creation, "");
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     adminServlet.setUserStore(mockUserStore);
 
@@ -249,7 +249,7 @@ public class AdminServletTest {
     UUID id = UUID.randomUUID();
     Instant creation = Instant.now();
     User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
-            "admin", creation);
+            "admin", creation, "");
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     adminServlet.setUserStore(mockUserStore);
 
@@ -274,7 +274,7 @@ public class AdminServletTest {
     UUID id = UUID.randomUUID();
     Instant creation = Instant.now();
     User fakeUser = new User(id, "test username", BCrypt.hashpw("test password", BCrypt.gensalt()),
-            "admin", creation);
+            "admin", creation, "");
     Mockito.when(mockUserStore.getUser("test username")).thenReturn(fakeUser);
     Mockito.when(mockUserStore.isUserRegistered("test username")).thenReturn(true);
     adminServlet.setUserStore(mockUserStore);
