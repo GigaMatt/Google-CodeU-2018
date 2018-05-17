@@ -38,26 +38,40 @@ import org.jsoup.safety.Whitelist;
 public class ChatServlet extends HttpServlet {
 
   private ChatServletAgent chatServletAgent;
-
-  public ChatServlet() {
-    chatServletAgent = new ChatServletAgent();
-  }
+  private ChatRequestValidator chatRequestValidator;
 
   /** Set up state for handling chat requests. */
   @Override
   public void init() throws ServletException {
     super.init();
+
+    ChatServletAgent chatServletAgent = new ChatServletAgent();
     chatServletAgent.setConversationStore(ConversationStore.getInstance());
     chatServletAgent.setMessageStore(MessageStore.getInstance());
     chatServletAgent.setUserStore(UserStore.getInstance());
+
+    ChatRequestValidator chatRequestValidator = new ChatRequestValidator(chatServletAgent);
+
+    setChatServletAgent(chatServletAgent);
+    setChatRequestValidator(chatRequestValidator);
   }
 
-  /**
-   * @return the chatServletAgent
-   */
+  public void setChatServletAgent(ChatServletAgent chatServletAgent) {
+    this.chatServletAgent = chatServletAgent;
+  }
+
   public ChatServletAgent getChatServletAgent() {
     return chatServletAgent;
   }
+
+  public void setChatRequestValidator(ChatRequestValidator chatRequestValidator) {
+    this.chatRequestValidator = chatRequestValidator;
+  }
+
+  public ChatRequestValidator getChatRequestValidator() {
+    return chatRequestValidator;
+  }
+
 
   /**
    * This function fires when a user navigates to the chat page. It gets the conversation title from
@@ -101,33 +115,20 @@ public class ChatServlet extends HttpServlet {
     JSONObject responseData = new JSONObject();
     
     try {
-      String username = (String) request.getSession().getAttribute("user");
-      if (username == null) {
-          // user is not logged in
-          responseData.put("success", false);
-          responseData.put("message", "User not logged in!");
-          response.getOutputStream().print(responseData.toString());
-          return;
-      }
+      chatRequestValidator.validateRequest(request, "/chat/");
 
-      User user = chatServletAgent.getUserStore().getUser(username);
-      if (user == null) {
-        // user was not found
-        responseData.put("success", false);
-        responseData.put("message", "User not found!");
-        response.getOutputStream().print(responseData.toString());
+      if (!chatRequestValidator.getUsernameOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "User not logged in!");
         return;
       }
 
-      String requestUrl = request.getRequestURI();
-      String conversationTitle = requestUrl.substring("/chat/".length());
+      if (!chatRequestValidator.getUserOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "User not found!");
+        return;
+      }
 
-      Conversation conversation = chatServletAgent.getConversationStore().getConversationWithTitle(conversationTitle);
-      if (conversation == null) {
-        // couldn't find conversation
-        responseData.put("success", false);
-        responseData.put("message", "Conversation not found!");
-        response.getOutputStream().print(responseData.toString());
+      if (!chatRequestValidator.getConversationOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "Conversation not found!");
         return;
       }
 
@@ -143,8 +144,8 @@ public class ChatServlet extends HttpServlet {
       Message message =
           new Message(
               UUID.randomUUID(),
-              conversation.getId(),
-              user.getId(),
+              chatRequestValidator.getConversationOptional().get().getId(),
+              chatRequestValidator.getUserOptional().get().getId(),
               cleanedMessageContent,
               Instant.now());
 
