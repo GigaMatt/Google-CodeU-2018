@@ -83,33 +83,20 @@ public class ChatPollServlet extends HttpServlet {
     JSONObject responseData = new JSONObject();
 
     try {
-      String username = (String) request.getSession().getAttribute("user");
-      if (username == null) {
-        // user is not logged in
-        responseData.put("success", false);
-        responseData.put("message", "User not logged in!");
-        response.getOutputStream().print(responseData.toString());
+      chatRequestValidator.validateRequest(request, "/chat/poll/");
+
+      if (!chatRequestValidator.getUsernameOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "User not logged in!");
         return;
       }
 
-      User user = chatServletAgent.getUserStore().getUser(username);
-      if (user == null) {
-        // user was not found
-        responseData.put("success", false);
-        responseData.put("message", "User not found!");
-        response.getOutputStream().print(responseData.toString());
+      if (!chatRequestValidator.getUserOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "User not found!");
         return;
       }
 
-      String requestUrl = request.getRequestURI();
-      String conversationTitle = requestUrl.substring("/chat/poll/".length());
-
-      Conversation conversation = chatServletAgent.getConversationStore().getConversationWithTitle(conversationTitle);
-      if (conversation == null) {
-        // couldn't find conversation
-        responseData.put("success", false);
-        responseData.put("message", "Conversation not found!");
-        response.getOutputStream().print(responseData.toString());
+      if (!chatRequestValidator.getConversationOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "Conversation not found!");
         return;
       }
 
@@ -123,7 +110,7 @@ public class ChatPollServlet extends HttpServlet {
         lastMessageInstant = Instant.parse(lastMessageTime);
       }
 
-      List<Message> messageList = chatServletAgent.getMessageStore().getMessagesInConversation(conversation.getId());
+      List<Message> messageList = chatServletAgent.getMessageStore().getMessagesInConversation(chatRequestValidator.getConversationOptional().get().getId());
 
       if(messageList.size() == 0) {
         // There is no message in the message store.

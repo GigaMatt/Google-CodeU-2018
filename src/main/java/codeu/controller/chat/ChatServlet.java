@@ -115,33 +115,20 @@ public class ChatServlet extends HttpServlet {
     JSONObject responseData = new JSONObject();
     
     try {
-      String username = (String) request.getSession().getAttribute("user");
-      if (username == null) {
-          // user is not logged in
-          responseData.put("success", false);
-          responseData.put("message", "User not logged in!");
-          response.getOutputStream().print(responseData.toString());
-          return;
-      }
+      chatRequestValidator.validateRequest(request, "/chat/");
 
-      User user = chatServletAgent.getUserStore().getUser(username);
-      if (user == null) {
-        // user was not found
-        responseData.put("success", false);
-        responseData.put("message", "User not found!");
-        response.getOutputStream().print(responseData.toString());
+      if (!chatRequestValidator.getUsernameOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "User not logged in!");
         return;
       }
 
-      String requestUrl = request.getRequestURI();
-      String conversationTitle = requestUrl.substring("/chat/".length());
+      if (!chatRequestValidator.getUserOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "User not found!");
+        return;
+      }
 
-      Conversation conversation = chatServletAgent.getConversationStore().getConversationWithTitle(conversationTitle);
-      if (conversation == null) {
-        // couldn't find conversation
-        responseData.put("success", false);
-        responseData.put("message", "Conversation not found!");
-        response.getOutputStream().print(responseData.toString());
+      if (!chatRequestValidator.getConversationOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "Conversation not found!");
         return;
       }
 
@@ -157,8 +144,8 @@ public class ChatServlet extends HttpServlet {
       Message message =
           new Message(
               UUID.randomUUID(),
-              conversation.getId(),
-              user.getId(),
+              chatRequestValidator.getConversationOptional().get().getId(),
+              chatRequestValidator.getUserOptional().get().getId(),
               cleanedMessageContent,
               Instant.now());
 

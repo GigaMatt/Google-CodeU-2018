@@ -40,6 +40,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 public class VideoEventPollServletTest {
@@ -80,51 +81,37 @@ public class VideoEventPollServletTest {
     chatServletAgent.setVideoEventStore(mockVideoEventStore);
     chatServletAgent.setUserStore(mockUserStore);
 
-    ChatRequestValidator chatRequestValidator = new ChatRequestValidator(chatServletAgent);
+    ChatRequestValidator chatRequestValidator = Mockito.spy(new ChatRequestValidator(chatServletAgent));
 
     videoEventPollServlet.setChatServletAgent(chatServletAgent);
     videoEventPollServlet.setChatRequestValidator(chatRequestValidator);
   }
 
   @Test
-  public void testDoPost_UserNotLoggedIn() throws IOException, ServletException {
+  public void testDoPost_UserNotLoggedIn() throws IOException, ServletException, JSONException {
+    Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/video/poll/test_conversation");
     Mockito.when(mockSession.getAttribute("user")).thenReturn(null);
 
     videoEventPollServlet.doPost(mockRequest, mockResponse);
 
-    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
-
-    try {
-		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
-        Assert.assertEquals(false, responseData.getBoolean("success"));
-        Assert.assertEquals("User not logged in!", responseData.getString("message"));
-	} catch (JSONException e) {
-        Mockito.doThrow(e);
-    }
+    Mockito.verify(videoEventPollServlet.getChatRequestValidator()).validateRequest(mockRequest, "/chat/video/poll/");
+    Mockito.verify(videoEventPollServlet.getChatRequestValidator()).respondWithErrorMessage(mockResponse, "User not logged in!");
   }
 
   @Test
-  public void testDoPost_InvalidUser() throws IOException, ServletException {
+  public void testDoPost_InvalidUser() throws IOException, ServletException, JSONException {
+    Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/video/poll/test_conversation");
     Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
     Mockito.when(mockUserStore.getUser("test_username")).thenReturn(null);
 
     videoEventPollServlet.doPost(mockRequest, mockResponse);
-    
-    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
 
-    try {
-		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
-        Assert.assertEquals(false, responseData.getBoolean("success"));
-        Assert.assertEquals("User not found!", responseData.getString("message"));
-	} catch (JSONException e) {
-        Mockito.doThrow(e);
-    }
+    Mockito.verify(videoEventPollServlet.getChatRequestValidator()).validateRequest(mockRequest, "/chat/video/poll/");
+    Mockito.verify(videoEventPollServlet.getChatRequestValidator()).respondWithErrorMessage(mockResponse, "User not found!");
   }
 
   @Test
-  public void testDoPost_ConversationNotFound() throws IOException, ServletException {
+  public void testDoPost_ConversationNotFound() throws IOException, ServletException, JSONException {
     Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/video/poll/test_conversation");
     Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
 
@@ -138,15 +125,7 @@ public class VideoEventPollServletTest {
 
     videoEventPollServlet.doPost(mockRequest, mockResponse);
 
-    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
-
-    try {
-		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
-        Assert.assertEquals(false, responseData.getBoolean("success"));
-        Assert.assertEquals("Conversation not found!", responseData.getString("message"));
-	} catch (JSONException e) {
-        Mockito.doThrow(e);
-    }
+    Mockito.verify(videoEventPollServlet.getChatRequestValidator()).validateRequest(mockRequest, "/chat/video/poll/");
+    Mockito.verify(videoEventPollServlet.getChatRequestValidator()).respondWithErrorMessage(mockResponse, "Conversation not found!");
   }
 }
