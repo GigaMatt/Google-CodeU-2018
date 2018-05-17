@@ -80,6 +80,16 @@ public class AdminServlet extends HttpServlet {
   }
 
   /**
+   *
+   * Obtains DataParse object, which is obtained from parsing a specified file.
+   */
+  public static DataParse parseFile(String fileName) {
+    DataParse parse = new DataParse(fileName);
+    parse.parse();
+    return parse;
+  }
+
+  /**
    * This function fires when a user requests the /admin URL. It simply forwards the request to
    * admin.jsp.
    */
@@ -129,8 +139,7 @@ public class AdminServlet extends HttpServlet {
     if (request.getParameter("populate") != null) {
       String method = request.getParameter("method");
       if (method.equals("rj")) {
-        DataParse parsedData = new DataParse("Romeo_and_Juliet");
-        parsedData.parse();
+        DataParse parsedData = parseFile("Romeo_and_Juliet");
         parsedData.allUsers.values().stream().forEach(x -> userStore.addUser(x));
         conversationStore.loadTestData(parsedData.allConversations);
         messageStore.loadTestData(parsedData.allMessages);

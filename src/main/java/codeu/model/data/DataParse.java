@@ -9,12 +9,15 @@ import java.util.*;
 
 public class DataParse {
   public HashMap<String, User> allUsers = new HashMap<>();
-  private String tf;
+  private String fileName;
+  private File file;
   public List<Conversation> allConversations = new ArrayList<>();
   public List<Message> allMessages = new ArrayList<>();
 
   public DataParse(String textFile) {
-    this.tf = textFile;
+    this.fileName = textFile;
+    ClassLoader classLoader = getClass().getClassLoader();
+    this.file = new File(classLoader.getResource("files/" + textFile).getFile());
   }
 
   private UUID findPerson(String name) {
@@ -24,7 +27,7 @@ public class DataParse {
     } else {
       userID = UUID.randomUUID();
       allUsers.put(name, new User(userID, name.charAt(0) + name.substring(1).toLowerCase(),
-              "password", "member", Instant.now(), tf));
+              "password", "member", Instant.now(), fileName));
     }
     return userID;
   }
@@ -33,8 +36,6 @@ public class DataParse {
     UUID convID = null;
     Pattern p = Pattern.compile("(\\b[A-Z]{3,}\\b\\s?)+"); //Matches all-uppercase names
 
-    ClassLoader classLoader = getClass().getClassLoader();
-    File file = new File(classLoader.getResource("files/" + tf).getFile());
     try (Scanner scanner = new Scanner(file)) {
       scanner.useDelimiter("\n");
       while (scanner.hasNext()) {
