@@ -22,10 +22,6 @@ public class VideoEventPollServlet extends HttpServlet {
     private ChatServletAgent chatServletAgent;
     private ChatRequestValidator chatRequestValidator;
 
-    public VideoEventPollServlet() {
-      chatServletAgent = new ChatServletAgent();
-    }
-
     /** Set up state for handling chat requests. */
     @Override
     public void init() throws ServletException {
