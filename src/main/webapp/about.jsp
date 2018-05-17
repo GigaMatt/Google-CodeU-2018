@@ -51,7 +51,7 @@
       <h1>About the Incodables Team</h1>
        <ul>
         <li><strong>Stepahnie:</strong> put description here </li>
-        <li><strong>Azee:</strong> put description here </li>
+        <li><strong>Azee:</strong> Sophomore at Southern Arkansas University. Loves everything tech! In his free time, plays Soccer and loves to travel!</li>
         <li><strong>Hannah:</strong> is a rising junior cs major at St. Olaf College. 
         In her free time she likes to bike, visit farmers markets, and start tech projects.</li>
       </ul>
