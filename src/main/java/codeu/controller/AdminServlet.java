@@ -162,7 +162,8 @@ public class AdminServlet extends HttpServlet {
       }
 
       String passwordHash = BCrypt.hashpw(adminPassword, BCrypt.gensalt());
-      User newAdmin = new User(UUID.randomUUID(), adminName, passwordHash, "admin", Instant.now());
+      User newAdmin = new User(UUID.randomUUID(), adminName, passwordHash, "admin", Instant.now(),
+              "Welcome new administrator!");
       userStore.addUser(newAdmin);
     }
 

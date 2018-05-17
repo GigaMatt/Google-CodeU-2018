@@ -9,7 +9,7 @@ import java.util.*;
 
 public class DataParse {
   public HashMap<String, User> allUsers = new HashMap<>();
-  public String tf;
+  private String tf;
   public List<Conversation> allConversations = new ArrayList<>();
   public List<Message> allMessages = new ArrayList<>();
 
@@ -17,14 +17,14 @@ public class DataParse {
     this.tf = textFile;
   }
 
-  public UUID findPerson(String name) {
+  private UUID findPerson(String name) {
     UUID userID;
     if(allUsers.containsKey(name)) {
       userID = allUsers.get(name).getId();
     } else {
       userID = UUID.randomUUID();
       allUsers.put(name, new User(userID, name.charAt(0) + name.substring(1).toLowerCase(),
-              "password", "member", Instant.now()));
+              "password", "member", Instant.now(), tf));
     }
     return userID;
   }
@@ -69,7 +69,7 @@ public class DataParse {
               break;
             } else {
               //Continue building up the message.
-              text += nextLine + "\n";
+              text = text + nextLine + "\n";
             }
           }
           allMessages.add(new Message(UUID.randomUUID(), convID, userID, text, Instant.now()));
