@@ -73,7 +73,7 @@ public class VideoEventStore {
     }
 
     /** Access the current set of Video Events within the given Conversation. */
-    public List<VideoEvent> getVideoEventInConversation(UUID conversationId) {
+    public List<VideoEvent> getVideoEventsInConversation(UUID conversationId) {
 
         List<VideoEvent> videosInConversation = new ArrayList<>();
 

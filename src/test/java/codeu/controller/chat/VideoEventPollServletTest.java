@@ -17,6 +17,7 @@ package codeu.controller.chat;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
+import codeu.model.data.VideoEvent;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
@@ -127,5 +128,82 @@ public class VideoEventPollServletTest {
 
     Mockito.verify(videoEventPollServlet.getChatRequestValidator()).validateRequest(mockRequest, "/chat/video/poll/");
     Mockito.verify(videoEventPollServlet.getChatRequestValidator()).respondWithErrorMessage(mockResponse, "Conversation not found!");
+  }
+
+  @Test
+  public void testDoPost_FoundNewVideoEvent() throws IOException, ServletException, JSONException {
+    Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/video/poll/test_conversation");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
+
+    User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
+            Instant.now(), "test description");
+
+    Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
+
+    Conversation fakeConversation = new Conversation(UUID.randomUUID(), fakeUser.getId(),
+            "test_conversation", Instant.now());
+
+    Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
+            .thenReturn(fakeConversation);
+
+
+    Mockito.when(mockRequest.getParameter("lastVideoEventTime")).thenReturn(Instant.now().minusSeconds(5).toString());
+
+    VideoEvent fakeVideoEvent = new VideoEvent(UUID.randomUUID(), fakeConversation.getId(),
+            fakeUser.getId(), "testVideoId", Instant.now(), VideoEvent.getTestVideoStateJSON());
+
+    List<VideoEvent> mockVideoEvents = new ArrayList<>();
+    mockVideoEvents.add(fakeVideoEvent);
+
+    Mockito.when(mockVideoEventStore.getVideoEventsInConversation(fakeConversation.getId())).thenReturn(mockVideoEvents);
+
+    videoEventPollServlet.doPost(mockRequest, mockResponse);
+
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
+
+    JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+    Assert.assertEquals(true, responseData.getBoolean("success"));
+    Assert.assertEquals(true, responseData.getBoolean("foundNewVideoEvent"));
+    Assert.assertEquals(fakeVideoEvent.getVideoStateJSON(), responseData.getString("newVideoState"));
+    Assert.assertEquals(fakeVideoEvent.getCreationTime().toString(), responseData.getString("newVideoEventCreationTime"));
+  }
+
+  @Test
+  public void testDoPost_NoNewVideoEventFound() throws IOException, ServletException, JSONException {
+    Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/video/poll/test_conversation");
+    Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
+
+    User fakeUser = new User(UUID.randomUUID(), "test_username", "test password", "member",
+            Instant.now(), "test description");
+
+    Mockito.when(mockUserStore.getUser("test_username")).thenReturn(fakeUser);
+
+    Conversation fakeConversation = new Conversation(UUID.randomUUID(), fakeUser.getId(),
+            "test_conversation", Instant.now());
+
+    Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
+            .thenReturn(fakeConversation);
+
+    Instant currentInstant = Instant.now();
+
+    Mockito.when(mockRequest.getParameter("lastVideoEventTime")).thenReturn(currentInstant.toString());
+
+    VideoEvent fakeVideoEvent = new VideoEvent(UUID.randomUUID(), fakeConversation.getId(),
+            fakeUser.getId(), "testVideoId", currentInstant, VideoEvent.getTestVideoStateJSON());
+
+    List<VideoEvent> mockVideoEvents = new ArrayList<>();
+    mockVideoEvents.add(fakeVideoEvent);
+
+    Mockito.when(mockVideoEventStore.getVideoEventsInConversation(fakeConversation.getId())).thenReturn(mockVideoEvents);
+
+    videoEventPollServlet.doPost(mockRequest, mockResponse);
+
+    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
+
+    JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
+    Assert.assertEquals(true, responseData.getBoolean("success"));
+    Assert.assertEquals(false, responseData.getBoolean("foundNewVideoEvent"));
   }
 }

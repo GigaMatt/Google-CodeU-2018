@@ -57,7 +57,7 @@ public class VideoStoreTest {
 
   @Test
   public void testGetVideoEventsInConversation() {
-    List<VideoEvent> resultVideoEvents = videoEventStore.getVideoEventInConversation(CONVERSATION_ID_ONE);
+    List<VideoEvent> resultVideoEvents = videoEventStore.getVideoEventsInConversation(CONVERSATION_ID_ONE);
 
     Assert.assertEquals(2, resultVideoEvents.size());
     assertEquals(VIDEO_EVENT_ONE, resultVideoEvents.get(0));
@@ -77,7 +77,7 @@ public class VideoStoreTest {
             VideoEvent.getTestVideoStateJSON());
 
     videoEventStore.addVideoEvent(inputVideoEvent);
-    VideoEvent resultVideoEvent = videoEventStore.getVideoEventInConversation(inputConversationId).get(0);
+    VideoEvent resultVideoEvent = videoEventStore.getVideoEventsInConversation(inputConversationId).get(0);
 
     assertEquals(inputVideoEvent, resultVideoEvent);
     Mockito.verify(mockPersistentStorageAgent).writeThrough(inputVideoEvent);

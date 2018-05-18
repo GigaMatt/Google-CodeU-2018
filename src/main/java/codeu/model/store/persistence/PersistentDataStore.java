@@ -162,7 +162,7 @@ public class PersistentDataStore {
     List<VideoEvent> videoEvents = new ArrayList<>();
 
     // Retrieve all video events from the datastore.
-    Query query = new Query("chat-videos").addSort("creation_time", SortDirection.DESCENDING);
+    Query query = new Query("chat-videos").addSort("creation_time", SortDirection.ASCENDING);
     PreparedQuery results = datastore.prepare(query);
 
     for (Entity entity : results.asIterable()) {
@@ -172,7 +172,8 @@ public class PersistentDataStore {
         UUID authorUuid = UUID.fromString((String) entity.getProperty("author_uuid"));
         Instant creationTime = Instant.parse((String) entity.getProperty("creation_time"));
         String videoId = (String) entity.getProperty("video_id");
-        VideoEvent videoEvent = new VideoEvent(uuid, conversationUuid, authorUuid, videoId, creationTime, VideoEvent.getTestVideoStateJSON());
+        String videoStateJSON = (String) entity.getProperty("video_state_json");
+        VideoEvent videoEvent = new VideoEvent(uuid, conversationUuid, authorUuid, videoId, creationTime, videoStateJSON);
         videoEvents.add(videoEvent);
       } catch (Exception e) {
         // In a production environment, errors should be very rare. Errors which may
@@ -216,6 +217,7 @@ public class PersistentDataStore {
     videoEntity.setProperty("author_uuid", videoEvent.getAuthorId().toString());
     videoEntity.setProperty("video_id", videoEvent.getVideoId());
     videoEntity.setProperty("creation_time", videoEvent.getCreationTime().toString());
+    videoEntity.setProperty("video_state_json", videoEvent.getVideoStateJSON());
     datastore.put(videoEntity);
   }
 

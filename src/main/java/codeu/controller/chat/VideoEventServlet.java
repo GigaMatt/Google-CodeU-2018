@@ -2,18 +2,19 @@
 package codeu.controller.chat;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import codeu.model.store.basic.MessageStore;
+import codeu.model.data.VideoEvent;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import codeu.model.data.Conversation;
-import codeu.model.data.User;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.UserStore;
 import codeu.model.store.basic.VideoEventStore;
@@ -83,7 +84,36 @@ public class VideoEventServlet extends HttpServlet {
         return;
       }
 
-      // Todo (Azee): Check the post parameters and add the video event and modify response data accordingly
+      Instant lastVideoEventInstant = Instant.MIN;
+
+      String lastVideoEventTime = request.getParameter("lastVideoEventTime");
+      if (!lastVideoEventTime.equals("-1")) {
+        lastVideoEventInstant = Instant.parse(lastVideoEventTime);
+      }
+
+      List<VideoEvent> videoEvents = chatServletAgent.getVideoEventStore().getVideoEventsInConversation(chatRequestValidator.getConversationOptional().get().getId());
+
+      if (!videoEvents.isEmpty() && videoEvents.get(videoEvents.size()-1).getCreationTime().compareTo(lastVideoEventInstant) > 0) {
+        responseData.put("success", false);
+        responseData.put("pendingSync", true);
+        response.getOutputStream().print(responseData.toString());
+        return;
+      }
+
+      String videoId = request.getParameter("videoId");
+      String videoStateJSON = request.getParameter("videoStateJSON");
+
+      VideoEvent videoEvent = new VideoEvent(UUID.randomUUID(),
+            chatRequestValidator.getConversationOptional().get().getId(),
+            chatRequestValidator.getUserOptional().get().getId(),
+            videoId,
+            Instant.now(),
+            videoStateJSON);
+
+      chatServletAgent.getVideoEventStore().addVideoEvent(videoEvent);
+
+      responseData.put("success", true);
+      responseData.put("creationTime", videoEvent.getCreationTime().toString());
 
     } catch (JSONException e) {
       response.setStatus(500);
