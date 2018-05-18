@@ -13,9 +13,9 @@ public class VideoEvent {
     private final UUID id;
     private final UUID conversation;
     private final UUID author;
-    private final String videoId;
-    private final Instant creation;
-    private final String videoStateJSON;
+    private String videoId;
+    private Instant creation;
+    private String videoStateJSON;
 
     /**
      * Constructs a new VideoEvent.
@@ -65,4 +65,16 @@ public class VideoEvent {
     public String getVideoStateJSON() {
         return videoStateJSON;
     }
+
+    public void setVideoStateJSON(String videoStateJSON) {
+      this.videoStateJSON = videoStateJSON;
+    }
+
+    public void setVideoId(String videoId) {
+      this.videoId = videoId;
+    }
+
+  public void setCreation(Instant creation) {
+    this.creation = creation;
+  }
 }

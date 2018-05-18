@@ -211,7 +211,7 @@ public class PersistentDataStore {
   
   /** Write a VideoEvent object to the Datastore service. */
   public void writeThrough(VideoEvent videoEvent) {
-    Entity videoEntity = new Entity("chat-videos");
+    Entity videoEntity = new Entity("chat-videos", videoEvent.getId().toString());
     videoEntity.setProperty("uuid", videoEvent.getId().toString());
     videoEntity.setProperty("conv_uuid", videoEvent.getConversationId().toString());
     videoEntity.setProperty("author_uuid", videoEvent.getAuthorId().toString());

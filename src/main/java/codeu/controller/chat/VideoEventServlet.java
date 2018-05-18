@@ -93,27 +93,39 @@ public class VideoEventServlet extends HttpServlet {
 
       List<VideoEvent> videoEvents = chatServletAgent.getVideoEventStore().getVideoEventsInConversation(chatRequestValidator.getConversationOptional().get().getId());
 
-      if (!videoEvents.isEmpty() && videoEvents.get(videoEvents.size()-1).getCreationTime().compareTo(lastVideoEventInstant) > 0) {
-        responseData.put("success", false);
-        responseData.put("pendingSync", true);
-        response.getOutputStream().print(responseData.toString());
-        return;
+      VideoEvent latestVideoEvent = null;
+
+      if (!videoEvents.isEmpty()) {
+        latestVideoEvent = videoEvents.get(videoEvents.size() - 1);
+
+        if (latestVideoEvent.getCreationTime().compareTo(lastVideoEventInstant) > 0) {
+          responseData.put("success", false);
+          responseData.put("pendingSync", true);
+          response.getOutputStream().print(responseData.toString());
+          return;
+        }
       }
 
       String videoId = request.getParameter("videoId");
       String videoStateJSON = request.getParameter("videoStateJSON");
 
-      VideoEvent videoEvent = new VideoEvent(UUID.randomUUID(),
-            chatRequestValidator.getConversationOptional().get().getId(),
-            chatRequestValidator.getUserOptional().get().getId(),
-            videoId,
-            Instant.now(),
-            videoStateJSON);
-
-      chatServletAgent.getVideoEventStore().addVideoEvent(videoEvent);
+      if(latestVideoEvent == null) {
+        latestVideoEvent = new VideoEvent(UUID.randomUUID(),
+                chatRequestValidator.getConversationOptional().get().getId(),
+                chatRequestValidator.getUserOptional().get().getId(),
+                videoId,
+                Instant.now(),
+                videoStateJSON);
+        chatServletAgent.getVideoEventStore().addVideoEvent(latestVideoEvent);
+      } else {
+        latestVideoEvent.setVideoId(videoId);
+        latestVideoEvent.setVideoStateJSON(videoStateJSON);
+        latestVideoEvent.setCreation(Instant.now());
+        chatServletAgent.getVideoEventStore().updateVideoEvent(latestVideoEvent);
+      }
 
       responseData.put("success", true);
-      responseData.put("creationTime", videoEvent.getCreationTime().toString());
+      responseData.put("creationTime", latestVideoEvent.getCreationTime().toString());
 
     } catch (JSONException e) {
       response.setStatus(500);

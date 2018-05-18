@@ -698,8 +698,6 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         canPollForVideoEvents = false;
         axios.post("/chat/video/poll/<%= conversation.getTitle() %>", createPostString(postData))
             .then(function (response) {
-                console.log(response);
-
                 canPollForVideoEvents = true;
 
                 if (response.data.success) {
