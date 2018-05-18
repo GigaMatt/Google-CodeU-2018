@@ -619,7 +619,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
     // Called every time the youtube player's state changes
     function onYoutubePlayerStateChange(event) {
-      console.log(event);
+//      console.log(event);
 
       let playerState = event.data;
       let videoData = event.target.getVideoData();
@@ -723,7 +723,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         canPollForVideoEvents = false;
         axios.post("/chat/video/poll/<%= conversation.getTitle() %>", createPostString(postData))
             .then(function (response) {
-                console.log(response);
+//                console.log(response);
                 canPollForVideoEvents = true;
 
                 if (response.data.success) {
@@ -746,7 +746,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
             })
             .catch(function (error) {
                 canPollForVideoEvents = true;
-                console.log(error);
+//                console.log(error);
                 alert("Unexpected error! Please try again!");
             });
     }
@@ -761,8 +761,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
             toggleYoutubePlayerDisplay();
         }
 
-        console.log("loading video state: ");
-        console.log(newVideoState);
+//        console.log("loading video state: ");
+//        console.log(newVideoState);
 
         if(newVideoState.videoId !== curVideoState.videoId) {
             videoStateChangeCallback = function () {
