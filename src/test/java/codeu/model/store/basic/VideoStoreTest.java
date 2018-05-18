@@ -97,5 +97,7 @@ public class VideoStoreTest {
     Assert.assertEquals(expectedVideoEvent.getAuthorId(), actualVideoEvent.getAuthorId());
     Assert.assertEquals(expectedVideoEvent.getVideoId(), actualVideoEvent.getVideoId());
     Assert.assertEquals(expectedVideoEvent.getCreationTime(), actualVideoEvent.getCreationTime());
+    Assert.assertEquals(expectedVideoEvent.getSeekOwnerId(), actualVideoEvent.getSeekOwnerId());
+    Assert.assertEquals(expectedVideoEvent.getSeekTime(), actualVideoEvent.getSeekTime(), 0.0001);
   }
 }

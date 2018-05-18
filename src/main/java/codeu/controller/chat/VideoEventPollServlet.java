@@ -99,10 +99,9 @@ public class VideoEventPollServlet extends HttpServlet {
                 VideoEvent latestVideoEvent = videoEvents.get(videoEvents.size() - 1);
 
                 if (latestVideoEvent.getCreationTime().compareTo(lastVideoEventInstant) > 0) {
-                    double estimatedPassTime = 2;   // A rough estimate of seconds passed between requests
-
                     if (latestVideoEvent.getSeekOwnerId().compareTo(chatRequestValidator.getUserOptional().get().getId()) == 0
                             && !curSeekStr.equals("-1")) {
+                        latestVideoEvent.setCreation(Instant.now());
                         latestVideoEvent.setSeekTime(Double.parseDouble(curSeekStr));
                         chatServletAgent.getVideoEventStore().updateVideoEvent(latestVideoEvent);
 
@@ -112,13 +111,13 @@ public class VideoEventPollServlet extends HttpServlet {
 
                         if (Math.abs(latestVideoEvent.getSeekTime() - curSeek) > SEEK_DIFF_TOLERANCE) {
                             responseData.put("forceSeek", true);
-                            responseData.put("seekTo", latestVideoEvent.getSeekTime() + estimatedPassTime);
+                            responseData.put("seekTo", latestVideoEvent.getSeekTime());
                         } else {
                             responseData.put("forceSeek", false);
                         }
                     } else {
                         responseData.put("forceSeek", true);
-                        responseData.put("seekTo", latestVideoEvent.getSeekTime() + estimatedPassTime);
+                        responseData.put("seekTo", latestVideoEvent.getSeekTime());
                     }
 
                     responseData.put("success", true);

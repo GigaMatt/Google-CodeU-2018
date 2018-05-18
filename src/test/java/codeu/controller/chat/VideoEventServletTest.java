@@ -199,6 +199,7 @@ public class VideoEventServletTest {
     Assert.assertEquals(resultVideoEvent.getAuthorId(), fakeUser.getId());
     Assert.assertEquals(resultVideoEvent.getVideoId(), "testVideoId");
     Assert.assertEquals(resultVideoEvent.getVideoStateJSON(), VideoEvent.getTestVideoStateJSON());
+    Assert.assertEquals(resultVideoEvent.getSeekTime(), 6, 0.0001);
 
     ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
@@ -228,8 +229,12 @@ public class VideoEventServletTest {
 
     Mockito.when(mockRequest.getParameter("lastVideoEventTime")).thenReturn(currentInstant.toString());
 
+
+    User fakeSeekUser = new User(UUID.randomUUID(), "seek_username", "seek password", "member",
+            Instant.now(), "seeker");
+
     VideoEvent fakeVideoEvent = new VideoEvent(UUID.randomUUID(), fakeConversation.getId(),
-            fakeUser.getId(), "testVideoId", currentInstant, VideoEvent.getTestVideoStateJSON(), fakeUser.getId(), 5);
+            fakeUser.getId(), "testVideoId", currentInstant, VideoEvent.getTestVideoStateJSON(), fakeSeekUser.getId(), 5);
 
     List<VideoEvent> fakeVideoEvents = new ArrayList<>();
     fakeVideoEvents.add(fakeVideoEvent);
@@ -238,7 +243,7 @@ public class VideoEventServletTest {
 
     Mockito.when(mockRequest.getParameter("videoId")).thenReturn("testVideoId");
     Mockito.when(mockRequest.getParameter("videoStateJSON")).thenReturn(VideoEvent.getTestVideoStateJSON());
-    Mockito.when(mockRequest.getParameter("curSeek")).thenReturn("6");
+    Mockito.when(mockRequest.getParameter("curSeek")).thenReturn("20");
 
     videoEventServlet.doPost(mockRequest, mockResponse);
 
@@ -251,6 +256,8 @@ public class VideoEventServletTest {
     Assert.assertEquals(fakeUser.getId(), resultVideoEvent.getAuthorId());
     Assert.assertEquals("testVideoId", resultVideoEvent.getVideoId());
     Assert.assertEquals(VideoEvent.getTestVideoStateJSON(), resultVideoEvent.getVideoStateJSON());
+    Assert.assertEquals(fakeUser.getId(), resultVideoEvent.getSeekOwnerId());
+    Assert.assertEquals(20, resultVideoEvent.getSeekTime(), 0.0001);
 
     ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());

@@ -220,6 +220,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       bottom: 100,
     };
 
+    const FORCE_SEEK_ADJUSTMENT = 1; // A rough estimate to account for the seconds passed between requests
+
     // Controls message polling (Only one active poll at a time). Will be set to false when a poll is in progress, and back to true when the poll has ended.
     let canPollForMessages = true;
     // Controls video event polling (Only one active poll at a time). Will be set to false when a poll is in progress, and back to true when the poll has ended.
@@ -634,11 +636,11 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
             // To account for multiple state changes in quick succession (eg. during seeking)
             setTimeout(function() {
-                sendVideoEvent();
-
                 if (videoStateChangeCallback) {
                     videoStateChangeCallback();
                     videoStateChangeCallback = null;
+                } else {
+                    sendVideoEvent();
                 }
             }, 500);
             break;
@@ -721,6 +723,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         canPollForVideoEvents = false;
         axios.post("/chat/video/poll/<%= conversation.getTitle() %>", createPostString(postData))
             .then(function (response) {
+                console.log(response);
                 canPollForVideoEvents = true;
 
                 if (response.data.success) {
@@ -728,6 +731,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
                         let seekTo = null;
                         if (response.data.forceSeek) {
                             seekTo = +response.data.seekTo;
+                            seekTo += FORCE_SEEK_ADJUSTMENT;
                         }
 
                         onNewVideoStateReceived(JSON.parse(response.data.newVideoState), seekTo);
@@ -796,6 +800,9 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
                         //youtubePlayer.stopVideo();
                         break;
                 }
+            } else {
+                videoStateChangeCallback();
+                videoStateChangeCallback = null;
             }
         }
 
