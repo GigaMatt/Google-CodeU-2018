@@ -150,12 +150,14 @@ public class VideoEventPollServletTest {
     Mockito.when(mockRequest.getParameter("lastVideoEventTime")).thenReturn(Instant.now().minusSeconds(5).toString());
 
     VideoEvent fakeVideoEvent = new VideoEvent(UUID.randomUUID(), fakeConversation.getId(),
-            fakeUser.getId(), "testVideoId", Instant.now(), VideoEvent.getTestVideoStateJSON());
+            fakeUser.getId(), "testVideoId", Instant.now(), VideoEvent.getTestVideoStateJSON(), fakeUser.getId(), 5);
 
     List<VideoEvent> mockVideoEvents = new ArrayList<>();
     mockVideoEvents.add(fakeVideoEvent);
 
     Mockito.when(mockVideoEventStore.getVideoEventsInConversation(fakeConversation.getId())).thenReturn(mockVideoEvents);
+
+    Mockito.when(mockRequest.getParameter("curSeek")).thenReturn("6");
 
     videoEventPollServlet.doPost(mockRequest, mockResponse);
 
@@ -190,12 +192,14 @@ public class VideoEventPollServletTest {
     Mockito.when(mockRequest.getParameter("lastVideoEventTime")).thenReturn(currentInstant.toString());
 
     VideoEvent fakeVideoEvent = new VideoEvent(UUID.randomUUID(), fakeConversation.getId(),
-            fakeUser.getId(), "testVideoId", currentInstant, VideoEvent.getTestVideoStateJSON());
+            fakeUser.getId(), "testVideoId", currentInstant, VideoEvent.getTestVideoStateJSON(), fakeUser.getId(), 5);
 
     List<VideoEvent> mockVideoEvents = new ArrayList<>();
     mockVideoEvents.add(fakeVideoEvent);
 
     Mockito.when(mockVideoEventStore.getVideoEventsInConversation(fakeConversation.getId())).thenReturn(mockVideoEvents);
+
+    Mockito.when(mockRequest.getParameter("curSeek")).thenReturn("6");
 
     videoEventPollServlet.doPost(mockRequest, mockResponse);
 

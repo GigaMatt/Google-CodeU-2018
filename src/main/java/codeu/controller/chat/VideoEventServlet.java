@@ -108,16 +108,30 @@ public class VideoEventServlet extends HttpServlet {
 
       String videoId = request.getParameter("videoId");
       String videoStateJSON = request.getParameter("videoStateJSON");
+      String curSeekStr = request.getParameter("curSeek");
 
       if(latestVideoEvent == null) {
+        double curSeek = 0;
+
+        if (!curSeekStr.equals("-1")) {
+          curSeek = Double.parseDouble(curSeekStr);
+        }
+
         latestVideoEvent = new VideoEvent(UUID.randomUUID(),
                 chatRequestValidator.getConversationOptional().get().getId(),
                 chatRequestValidator.getUserOptional().get().getId(),
                 videoId,
                 Instant.now(),
-                videoStateJSON);
+                videoStateJSON,
+                chatRequestValidator.getUserOptional().get().getId(),
+                curSeek);
         chatServletAgent.getVideoEventStore().addVideoEvent(latestVideoEvent);
       } else {
+        if (!curSeekStr.equals("-1")) {
+          latestVideoEvent.setSeekOwner(chatRequestValidator.getUserOptional().get().getId());
+          latestVideoEvent.setSeekTime(Double.parseDouble(curSeekStr));
+        }
+
         latestVideoEvent.setVideoId(videoId);
         latestVideoEvent.setVideoStateJSON(videoStateJSON);
         latestVideoEvent.setCreation(Instant.now());

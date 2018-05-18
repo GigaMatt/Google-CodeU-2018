@@ -580,6 +580,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
     let lastVideoEventTime = -1;
 
+    let videoStateChangeCallback = null;
+
     // Called automatically by the Youtube API once it is loaded
     function onYouTubeIframeAPIReady() {
 
@@ -633,6 +635,11 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
             // To account for multiple state changes in quick succession (eg. during seeking)
             setTimeout(function() {
                 sendVideoEvent();
+
+                if (videoStateChangeCallback) {
+                    videoStateChangeCallback();
+                    videoStateChangeCallback = null;
+                }
             }, 500);
             break;
       }
@@ -650,10 +657,18 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     }
 
     function sendVideoEvent() {
+        let curSeek = -1;
+
+        if (curVideoState.playerState === VIDEO_PLAYER_STATE.PLAYING
+            || curVideoState.playerState === VIDEO_PLAYER_STATE.PAUSED) {
+            curSeek = youtubePlayer.getCurrentTime();
+        }
+
         let postData = {
             videoId: curVideoState.videoId,
             videoStateJSON: JSON.stringify(curVideoState),
             lastVideoEventTime: lastVideoEventTime,
+            curSeek: curSeek,
         };
 
         canPollForVideoEvents = false;
@@ -691,8 +706,16 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
             return;
         }
 
+        let curSeek = -1;
+
+        if (curVideoState.playerState === VIDEO_PLAYER_STATE.PLAYING
+            || curVideoState.playerState === VIDEO_PLAYER_STATE.PAUSED) {
+            curSeek = youtubePlayer.getCurrentTime();
+        }
+
         let postData = {
             lastVideoEventTime: lastVideoEventTime,
+            curSeek: curSeek,
         };
 
         canPollForVideoEvents = false;
@@ -702,7 +725,12 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
                 if (response.data.success) {
                     if(response.data.foundNewVideoEvent) {
-                        onNewVideoStateReceived(JSON.parse(response.data.newVideoState));
+                        let seekTo = null;
+                        if (response.data.forceSeek) {
+                            seekTo = +response.data.seekTo;
+                        }
+
+                        onNewVideoStateReceived(JSON.parse(response.data.newVideoState), seekTo);
                         lastVideoEventTime = response.data.newVideoEventCreationTime;
                     }
 
@@ -719,7 +747,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
             });
     }
 
-    function onNewVideoStateReceived(newVideoState) {
+    function onNewVideoStateReceived(newVideoState, seekTo) {
 
         if (newVideoState.playerState === VIDEO_PLAYER_STATE.ENDED) {
             return;
@@ -733,8 +761,28 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         console.log(newVideoState);
 
         if(newVideoState.videoId !== curVideoState.videoId) {
+            videoStateChangeCallback = function () {
+                if (seekTo) {
+                    switch(newVideoState.playerState) {
+                        case VIDEO_PLAYER_STATE.PLAYING:
+                            youtubePlayer.playVideo();
+                            break;
+                        case VIDEO_PLAYER_STATE.PAUSED:
+                            youtubePlayer.pauseVideo();
+                            break;
+                    }
+                    youtubePlayer.seekTo(seekTo, true);
+                }
+            };
+
             youtubePlayer.loadVideoById(newVideoState.videoId);
         } else {
+            videoStateChangeCallback = function () {
+                if (seekTo) {
+                    youtubePlayer.seekTo(seekTo, true);
+                }
+            };
+
             if (newVideoState.playerState !== curVideoState.playerState) {
                 switch(newVideoState.playerState) {
                     case VIDEO_PLAYER_STATE.PLAYING:

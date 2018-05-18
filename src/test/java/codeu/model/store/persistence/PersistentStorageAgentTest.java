@@ -82,7 +82,7 @@ public class PersistentStorageAgentTest {
   public void testWriteThroughVideoEvent() {
     VideoEvent videoEvent =
         new VideoEvent(
-            UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "test video id", Instant.now(), VideoEvent.getTestVideoStateJSON());
+            UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "test video id", Instant.now(), VideoEvent.getTestVideoStateJSON(), UUID.randomUUID(), 5.0);
     persistentStorageAgent.writeThrough(videoEvent);
     Mockito.verify(mockPersistentDataStore).writeThrough(videoEvent);
   }

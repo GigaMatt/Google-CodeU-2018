@@ -186,6 +186,7 @@ public class VideoEventServletTest {
 
     Mockito.when(mockRequest.getParameter("videoId")).thenReturn("testVideoId");
     Mockito.when(mockRequest.getParameter("videoStateJSON")).thenReturn(VideoEvent.getTestVideoStateJSON());
+    Mockito.when(mockRequest.getParameter("curSeek")).thenReturn("6");
 
     videoEventServlet.doPost(mockRequest, mockResponse);
 
@@ -228,7 +229,7 @@ public class VideoEventServletTest {
     Mockito.when(mockRequest.getParameter("lastVideoEventTime")).thenReturn(currentInstant.toString());
 
     VideoEvent fakeVideoEvent = new VideoEvent(UUID.randomUUID(), fakeConversation.getId(),
-            fakeUser.getId(), "testVideoId", currentInstant, VideoEvent.getTestVideoStateJSON());
+            fakeUser.getId(), "testVideoId", currentInstant, VideoEvent.getTestVideoStateJSON(), fakeUser.getId(), 5);
 
     List<VideoEvent> fakeVideoEvents = new ArrayList<>();
     fakeVideoEvents.add(fakeVideoEvent);
@@ -237,6 +238,7 @@ public class VideoEventServletTest {
 
     Mockito.when(mockRequest.getParameter("videoId")).thenReturn("testVideoId");
     Mockito.when(mockRequest.getParameter("videoStateJSON")).thenReturn(VideoEvent.getTestVideoStateJSON());
+    Mockito.when(mockRequest.getParameter("curSeek")).thenReturn("6");
 
     videoEventServlet.doPost(mockRequest, mockResponse);
 

@@ -16,8 +16,10 @@ public class VideoEventTest {
     String videoId = "test video id";
     Instant creation = Instant.now();
     String videoStateJSON = VideoEvent.getTestVideoStateJSON();
+    UUID seekOwner = UUID.randomUUID();
+    double seekTime = 5;
 
-    VideoEvent video = new VideoEvent(id, conversation, author, videoId, creation, videoStateJSON);
+    VideoEvent video = new VideoEvent(id, conversation, author, videoId, creation, videoStateJSON, seekOwner, seekTime);
 
     Assert.assertEquals(id, video.getId());
     Assert.assertEquals(conversation, video.getConversationId());

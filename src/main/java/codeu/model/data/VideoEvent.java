@@ -15,7 +15,10 @@ public class VideoEvent {
     private final UUID author;
     private String videoId;
     private Instant creation;
-    private String videoStateJSON;
+    private String videoStateJSON;  // Only used by the front end
+
+    private UUID seekOwner;
+    private double seekTime;
 
     /**
      * Constructs a new VideoEvent.
@@ -27,13 +30,15 @@ public class VideoEvent {
      * @param creation the creation time of this VideoEvent
      * @param videoStateJSON the state of the video after this VideoEvent in JSON format
      */
-    public VideoEvent(UUID id, UUID conversation, UUID author, String videoId, Instant creation, String videoStateJSON) {
+    public VideoEvent(UUID id, UUID conversation, UUID author, String videoId, Instant creation, String videoStateJSON, UUID seekOwner, double seekTime) {
         this.id = id;
         this.conversation = conversation;
         this.author = author;
         this.videoId = videoId;
         this.creation = creation;
         this.videoStateJSON = videoStateJSON;
+        this.seekOwner = seekOwner;
+        this.seekTime = seekTime;
     }
 
     /** Returns the ID of this VideoEvent. */
@@ -66,6 +71,14 @@ public class VideoEvent {
         return videoStateJSON;
     }
 
+    public UUID getSeekOwnerId() {
+      return seekOwner;
+    }
+
+    public double getSeekTime() {
+      return seekTime;
+    }
+
     public void setVideoStateJSON(String videoStateJSON) {
       this.videoStateJSON = videoStateJSON;
     }
@@ -74,7 +87,15 @@ public class VideoEvent {
       this.videoId = videoId;
     }
 
-  public void setCreation(Instant creation) {
-    this.creation = creation;
-  }
+    public void setCreation(Instant creation) {
+      this.creation = creation;
+    }
+
+    public void setSeekOwner(UUID seekOwner) {
+      this.seekOwner = seekOwner;
+    }
+
+    public void setSeekTime(double seekTime) {
+      this.seekTime = seekTime;
+    }
 }
