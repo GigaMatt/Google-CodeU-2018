@@ -628,12 +628,6 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         case VIDEO_PLAYER_STATE.PLAYING:
         case VIDEO_PLAYER_STATE.PAUSED:
         case VIDEO_PLAYER_STATE.ENDED:
-            curVideoState.videoId = videoData.video_id;
-            curVideoState.videoTitle = videoData.title;
-            curVideoState.videoAuthor = videoData.author;
-            curVideoState.playerState = playerState;
-            curVideoState.lastModifiedBy = "<%= username %>";
-
             // To account for multiple state changes in quick succession (eg. during seeking)
             setTimeout(function() {
                 if (videoStateChangeCallback) {
@@ -643,6 +637,12 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
                     sendVideoEvent();
                 }
             }, 500);
+
+            curVideoState.videoId = videoData.video_id;
+            curVideoState.videoTitle = videoData.title;
+            curVideoState.videoAuthor = videoData.author;
+            curVideoState.playerState = playerState;
+            curVideoState.lastModifiedBy = "<%= username %>";
             break;
       }
     }
@@ -764,17 +764,23 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 //        console.log("loading video state: ");
 //        console.log(newVideoState);
 
+        let newPlayerState = newVideoState.playerState;
+
         if(newVideoState.videoId !== curVideoState.videoId) {
             videoStateChangeCallback = function () {
+//                console.log("Calling callback.. with state: " + newPlayerState);
+
+                switch(newPlayerState) {
+                    case VIDEO_PLAYER_STATE.PLAYING:
+                        youtubePlayer.playVideo();
+                        break;
+                    case VIDEO_PLAYER_STATE.PAUSED:
+//                        console.log("Pausing video in callback");
+                        youtubePlayer.pauseVideo();
+                        break;
+                }
+
                 if (seekTo) {
-                    switch(newVideoState.playerState) {
-                        case VIDEO_PLAYER_STATE.PLAYING:
-                            youtubePlayer.playVideo();
-                            break;
-                        case VIDEO_PLAYER_STATE.PAUSED:
-                            youtubePlayer.pauseVideo();
-                            break;
-                    }
                     youtubePlayer.seekTo(seekTo, true);
                 }
             };
@@ -787,8 +793,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
                 }
             };
 
-            if (newVideoState.playerState !== curVideoState.playerState) {
-                switch(newVideoState.playerState) {
+            if (newPlayerState !== curVideoState.playerState) {
+                switch(newPlayerState) {
                     case VIDEO_PLAYER_STATE.PLAYING:
                         youtubePlayer.playVideo();
                         break;
