@@ -65,7 +65,7 @@ public class ConversationStore {
   }
 
   /**
-   * Load a set of randomly-generated Conversation objects.
+   * Add a set of randomly-generated Conversation objects.
    *
    * @return false if a error occurs.
    */
@@ -73,6 +73,19 @@ public class ConversationStore {
     boolean loaded = false;
     try {
       conversations.addAll(DefaultDataStore.getInstance().getAllConversations());
+      loaded = true;
+    } catch (Exception e) {
+      loaded = false;
+      System.err.println("ERROR: Unable to establish initial store (conversations).");
+    }
+    return loaded;
+  }
+
+  /** Load a set of given Conversation objects. */
+  public boolean loadTestData(List<Conversation> convoList) {
+    boolean loaded = false;
+    try {
+      conversations.addAll(convoList);
       loaded = true;
     } catch (Exception e) {
       loaded = false;

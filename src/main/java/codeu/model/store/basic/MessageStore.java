@@ -66,7 +66,7 @@ public class MessageStore {
   }
 
   /**
-   * Load a set of randomly-generated Message objects.
+   * Add a set of randomly-generated Message objects.
    *
    * @return false if an error occurs.
    */
@@ -74,6 +74,19 @@ public class MessageStore {
     boolean loaded = false;
     try {
       messages.addAll(DefaultDataStore.getInstance().getAllMessages());
+      loaded = true;
+    } catch (Exception e) {
+      loaded = false;
+      System.out.println("ERROR: Unable to establish initial store (messages).");
+    }
+    return loaded;
+  }
+
+  /** Load a set of given Message objects. */
+  public boolean loadTestData(List<Message> messageList) {
+    boolean loaded = false;
+    try {
+      messages.addAll(messageList);
       loaded = true;
     } catch (Exception e) {
       loaded = false;

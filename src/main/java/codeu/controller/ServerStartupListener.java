@@ -31,7 +31,8 @@ public class ServerStartupListener implements ServletContextListener {
       List<User> users = PersistentStorageAgent.getInstance().loadUsers();
       //Always have a master administrator
       User admin = new User(UUID.randomUUID(), "admin",
-              BCrypt.hashpw("admin password", BCrypt.gensalt()), "admin", Instant.now(), "description");
+              BCrypt.hashpw("admin password", BCrypt.gensalt()), "admin", Instant.now(),
+              "Master Administrator");
       users.add(admin);
       UserStore.getInstance().setUsers(users);
 
@@ -45,7 +46,7 @@ public class ServerStartupListener implements ServletContextListener {
       VideoEventStore.getInstance().setVideoEvents(videos);
 
     } catch (PersistentDataStoreException e) {
-      System.err.println("Server didn't start correctly. An error occurred during Datastore load!");
+      System.err.println("Server didn't start correctly. An error occurred during Datastore load.");
       System.err.println("This is usually caused by loading data that's in an invalid format.");
       System.err.println("Check the stack trace to see exactly what went wrong.");
       throw new RuntimeException(e);

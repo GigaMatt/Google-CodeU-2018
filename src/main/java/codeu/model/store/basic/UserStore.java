@@ -64,9 +64,15 @@ public class UserStore {
     users = new ArrayList<>();
   }
 
-  /** Load a set of randomly-generated Message objects. */
+  /** Add a set of randomly-generated User objects. */
   public void loadTestData() {
     users.addAll(DefaultDataStore.getInstance().getAllUsers());
+  }
+
+  /** Load a set of given User objects. */
+  public void loadTestData(List<User> userList) {
+    //Make sure master admin remains.
+    users.addAll(userList);
   }
 
   /**
