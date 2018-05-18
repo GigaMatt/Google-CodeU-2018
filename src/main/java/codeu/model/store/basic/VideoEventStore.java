@@ -72,8 +72,13 @@ public class VideoEventStore {
         persistentStorageAgent.writeThrough(videoEvent);
     }
 
+    /** Updates the existing video event. */
+    public void updateVideoEvent(VideoEvent videoEvent) {
+        persistentStorageAgent.writeThrough(videoEvent);
+    }
+
     /** Access the current set of Video Events within the given Conversation. */
-    public List<VideoEvent> getVideoEventInConversation(UUID conversationId) {
+    public List<VideoEvent> getVideoEventsInConversation(UUID conversationId) {
 
         List<VideoEvent> videosInConversation = new ArrayList<>();
 

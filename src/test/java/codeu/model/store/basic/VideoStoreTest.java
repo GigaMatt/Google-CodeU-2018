@@ -24,21 +24,24 @@ public class VideoStoreTest {
           CONVERSATION_ID_ONE,
           UUID.randomUUID(),
           "video id one",
-          Instant.ofEpochMilli(1000));
+          Instant.ofEpochMilli(1000),
+          VideoEvent.getTestVideoStateJSON());
   private final VideoEvent VIDEO_EVENT_TWO =
       new VideoEvent(
           UUID.randomUUID(),
           CONVERSATION_ID_ONE,
           UUID.randomUUID(),
           "video id two",
-          Instant.ofEpochMilli(2000));
+          Instant.ofEpochMilli(2000),
+          VideoEvent.getTestVideoStateJSON());
   private final VideoEvent VIDEO_EVENT_THREE =
       new VideoEvent(
           UUID.randomUUID(),
           UUID.randomUUID(),
           UUID.randomUUID(),
           "video id three",
-          Instant.ofEpochMilli(3000));
+          Instant.ofEpochMilli(3000),
+          VideoEvent.getTestVideoStateJSON());
 
   @Before
   public void setup() {
@@ -54,7 +57,7 @@ public class VideoStoreTest {
 
   @Test
   public void testGetVideoEventsInConversation() {
-    List<VideoEvent> resultVideoEvents = videoEventStore.getVideoEventInConversation(CONVERSATION_ID_ONE);
+    List<VideoEvent> resultVideoEvents = videoEventStore.getVideoEventsInConversation(CONVERSATION_ID_ONE);
 
     Assert.assertEquals(2, resultVideoEvents.size());
     assertEquals(VIDEO_EVENT_ONE, resultVideoEvents.get(0));
@@ -70,10 +73,11 @@ public class VideoStoreTest {
             inputConversationId,
             UUID.randomUUID(),
             "test video id",
-            Instant.now());
+            Instant.now(),
+            VideoEvent.getTestVideoStateJSON());
 
     videoEventStore.addVideoEvent(inputVideoEvent);
-    VideoEvent resultVideoEvent = videoEventStore.getVideoEventInConversation(inputConversationId).get(0);
+    VideoEvent resultVideoEvent = videoEventStore.getVideoEventsInConversation(inputConversationId).get(0);
 
     assertEquals(inputVideoEvent, resultVideoEvent);
     Mockito.verify(mockPersistentStorageAgent).writeThrough(inputVideoEvent);

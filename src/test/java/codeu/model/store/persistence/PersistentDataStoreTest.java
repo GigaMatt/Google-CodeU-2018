@@ -167,16 +167,18 @@ public class PersistentDataStoreTest {
     UUID authorOne = UUID.randomUUID();
     String videoIdOne = "test video id one";
     Instant creationOne = Instant.ofEpochMilli(1000);
+    String videoStateOne = "{playerState: 1}";
     VideoEvent inputVideoEventOne =
-        new VideoEvent(idOne, conversationOne, authorOne, videoIdOne, creationOne);
+        new VideoEvent(idOne, conversationOne, authorOne, videoIdOne, creationOne, videoStateOne);
 
     UUID idTwo = UUID.randomUUID();
     UUID conversationTwo = UUID.randomUUID();
     UUID authorTwo = UUID.randomUUID();
     String videoIdTwo = "test video id two";
     Instant creationTwo = Instant.ofEpochMilli(2000);
+    String videoStateTwo = "{playerState: 0}";
     VideoEvent inputVideoEventTwo =
-        new VideoEvent(idTwo, conversationTwo, authorTwo, videoIdTwo, creationTwo);
+        new VideoEvent(idTwo, conversationTwo, authorTwo, videoIdTwo, creationTwo, videoStateTwo);
 
     // save
     persistentDataStore.writeThrough(inputVideoEventOne);
@@ -185,19 +187,21 @@ public class PersistentDataStoreTest {
     // load
     List<VideoEvent> resultVideoEvents = persistentDataStore.loadVideoEvents();
 
-    // confirm that what we saved matches what we loaded (Descending order based on creation time)
-    VideoEvent resultVideoEventOne = resultVideoEvents.get(1);
+    // confirm that what we saved matches what we loaded (Ascending order based on creation time)
+    VideoEvent resultVideoEventOne = resultVideoEvents.get(0);
     Assert.assertEquals(idOne, resultVideoEventOne.getId());
     Assert.assertEquals(conversationOne, resultVideoEventOne.getConversationId());
     Assert.assertEquals(authorOne, resultVideoEventOne.getAuthorId());
     Assert.assertEquals(videoIdOne, resultVideoEventOne.getVideoId());
     Assert.assertEquals(creationOne, resultVideoEventOne.getCreationTime());
+    Assert.assertEquals(videoStateOne, resultVideoEventOne.getVideoStateJSON());
 
-    VideoEvent resultVideoEventTwo = resultVideoEvents.get(0);
+    VideoEvent resultVideoEventTwo = resultVideoEvents.get(1);
     Assert.assertEquals(idTwo, resultVideoEventTwo.getId());
     Assert.assertEquals(conversationTwo, resultVideoEventTwo.getConversationId());
     Assert.assertEquals(authorTwo, resultVideoEventTwo.getAuthorId());
     Assert.assertEquals(videoIdTwo, resultVideoEventTwo.getVideoId());
     Assert.assertEquals(creationTwo, resultVideoEventTwo.getCreationTime());
+    Assert.assertEquals(videoStateTwo, resultVideoEventTwo.getVideoStateJSON());
   }
 }

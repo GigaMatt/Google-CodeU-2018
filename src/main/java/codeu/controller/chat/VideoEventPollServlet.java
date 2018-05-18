@@ -2,18 +2,18 @@
 package codeu.controller.chat;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import codeu.model.store.basic.MessageStore;
+import codeu.model.data.VideoEvent;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import codeu.model.data.Conversation;
-import codeu.model.data.User;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.UserStore;
 import codeu.model.store.basic.VideoEventStore;
@@ -21,10 +21,6 @@ import codeu.model.store.basic.VideoEventStore;
 public class VideoEventPollServlet extends HttpServlet {
     private ChatServletAgent chatServletAgent;
     private ChatRequestValidator chatRequestValidator;
-
-    public VideoEventPollServlet() {
-      chatServletAgent = new ChatServletAgent();
-    }
 
     /** Set up state for handling chat requests. */
     @Override
@@ -86,7 +82,29 @@ public class VideoEventPollServlet extends HttpServlet {
                 return;
             }
 
-            // Todo (Azee): Check for new video events and modify response dataaccordingly
+            Instant lastVideoEventInstant = Instant.MIN;
+
+            String lastVideoEventTime = request.getParameter("lastVideoEventTime");
+            if (!lastVideoEventTime.equals("-1")) {
+                lastVideoEventInstant = Instant.parse(lastVideoEventTime);
+            }
+
+            List<VideoEvent> videoEvents = chatServletAgent.getVideoEventStore().getVideoEventsInConversation(chatRequestValidator.getConversationOptional().get().getId());
+
+            if (!videoEvents.isEmpty()) {
+                VideoEvent latestVideoEvent = videoEvents.get(videoEvents.size() - 1);
+                if (latestVideoEvent.getCreationTime().compareTo(lastVideoEventInstant) > 0) {
+                    responseData.put("success", true);
+                    responseData.put("foundNewVideoEvent", true);
+                    responseData.put("newVideoState", latestVideoEvent.getVideoStateJSON());
+                    responseData.put("newVideoEventCreationTime", latestVideoEvent.getCreationTime().toString());
+                    response.getOutputStream().print(responseData.toString());
+                    return;
+                }
+            }
+
+            responseData.put("success", true);
+            responseData.put("foundNewVideoEvent", false);
             
         } catch (JSONException e) {
             response.setStatus(500);
