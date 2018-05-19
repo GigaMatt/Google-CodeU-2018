@@ -127,6 +127,14 @@ public class VideoEventPollServlet extends HttpServlet {
 
                     response.getOutputStream().print(responseData.toString());
                     return;
+                } else {
+                    if (latestVideoEvent.getSeekOwnerId().compareTo(chatRequestValidator.getUserOptional().get().getId()) == 0
+                            && !curSeekStr.equals("-1")) {
+                        latestVideoEvent.setSeekTime(Double.parseDouble(curSeekStr));
+                        chatServletAgent.getVideoEventStore().updateVideoEvent(latestVideoEvent);
+
+                        responseData.put("forceSeek", false);
+                    }
                 }
             }
 
