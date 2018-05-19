@@ -1,4 +1,5 @@
 package codeu.controller;
+import codeu.injection.AppInjector;
 import java.io.IOException;
 import codeu.model.data.User;
 import codeu.model.store.basic.UserStore;
@@ -19,30 +20,18 @@ public class ProfileServlet extends HttpServlet {
 	/**Store class that gives access to Users.*/
 	private UserStore userStore;
 
-
-//  private User user;
-
-   /**
-   * The PersistentStorageAgent responsible for loading Users from and saving Users to Datastore.
-   */
-//private PersistentStorageAgent persistentStorageAgent;
-
-	  /** Store class that gives access to Conversations. */
- 	private ConversationStore conversationStore; 
-
      /**
    * Sets the UserStore used by this servlet. This function provides a common setup method for use
    * by the test framework or the servlet's init() function.
    */
-  void setUserStore(UserStore userStore) {
+  public void setUserStore(UserStore userStore) {
     this.userStore = userStore;
   }
 
 @Override
   public void init() throws ServletException {
     super.init();
-    setUserStore(UserStore.getInstance());
-
+    AppInjector.getInstance().inject(this);
   }
 
  @Override

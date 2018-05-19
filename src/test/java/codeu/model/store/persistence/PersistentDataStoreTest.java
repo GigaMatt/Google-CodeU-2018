@@ -4,7 +4,7 @@ import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
 import codeu.model.data.VideoEvent;
-
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.time.Instant;
@@ -30,7 +30,8 @@ public class PersistentDataStoreTest {
   @Before
   public void setup() {
     appEngineTestHelper.setUp();
-    persistentDataStore = new PersistentDataStore();
+    persistentDataStore =
+        new PersistentDataStoreImpl(DatastoreServiceFactory.getDatastoreService());
   }
 
   @After
@@ -159,7 +160,7 @@ public class PersistentDataStoreTest {
     Assert.assertEquals(contentTwo, resultMessageTwo.getContent());
     Assert.assertEquals(creationTwo, resultMessageTwo.getCreationTime());
   }
-  
+
   @Test
   public void testSaveAndLoadVideoEvents() throws PersistentDataStoreException {
     UUID idOne = UUID.randomUUID();

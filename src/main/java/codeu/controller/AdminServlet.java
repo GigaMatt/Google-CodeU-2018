@@ -14,6 +14,7 @@
 
 package codeu.controller;
 
+import codeu.injection.AppInjector;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
@@ -51,16 +52,14 @@ public class AdminServlet extends HttpServlet {
   @Override
   public void init() throws ServletException {
     super.init();
-    setConversationStore(ConversationStore.getInstance());
-    setMessageStore(MessageStore.getInstance());
-    setUserStore(UserStore.getInstance());
+    AppInjector.getInstance().inject(this);
   }
 
   /**
    * Sets the ConversationStore used by this servlet. This function provides a common setup method
    * for use by the test framework or the servlet's init() function.
    */
-  void setConversationStore(ConversationStore conversationStore) {
+  public void setConversationStore(ConversationStore conversationStore) {
     this.conversationStore = conversationStore;
   }
 
@@ -68,7 +67,7 @@ public class AdminServlet extends HttpServlet {
    * Sets the MessageStore used by this servlet. This function provides a common setup method for
    * use by the test framework or the servlet's init() function.
    */
-  void setMessageStore(MessageStore messageStore) {
+  public void setMessageStore(MessageStore messageStore) {
     this.messageStore = messageStore;
   }
 
@@ -76,7 +75,7 @@ public class AdminServlet extends HttpServlet {
    * Sets the UserStore used by this servlet. This function provides a common setup method for use
    * by the test framework or the servlet's init() function.
    */
-  void setUserStore(UserStore userStore) {
+  public void setUserStore(UserStore userStore) {
     this.userStore = userStore;
   }
 

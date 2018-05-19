@@ -1,7 +1,7 @@
 package codeu.model.store.basic;
 
 import codeu.model.data.Message;
-import codeu.model.store.persistence.PersistentStorageAgent;
+import codeu.model.store.persistence.PersistentDataStore;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import org.mockito.Mockito;
 public class MessageStoreTest {
 
   private MessageStore messageStore;
-  private PersistentStorageAgent mockPersistentStorageAgent;
+  private PersistentDataStore mockPersistentStorageAgent;
 
   private final UUID CONVERSATION_ID_ONE = UUID.randomUUID();
   private final Message MESSAGE_ONE =
@@ -42,8 +42,9 @@ public class MessageStoreTest {
 
   @Before
   public void setup() {
-    mockPersistentStorageAgent = Mockito.mock(PersistentStorageAgent.class);
-    messageStore = MessageStore.getTestInstance(mockPersistentStorageAgent);
+    mockPersistentStorageAgent = Mockito.mock(PersistentDataStore.class);
+    messageStore = new MessageStore(mockPersistentStorageAgent,
+        Mockito.mock(DefaultDataStore.class));
 
     final List<Message> messageList = new ArrayList<>();
     messageList.add(MESSAGE_ONE);

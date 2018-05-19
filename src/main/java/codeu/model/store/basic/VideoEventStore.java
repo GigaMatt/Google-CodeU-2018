@@ -1,11 +1,11 @@
 package codeu.model.store.basic;
 
+import codeu.model.store.persistence.PersistentDataStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import codeu.model.data.VideoEvent;
-import codeu.model.store.persistence.PersistentStorageAgent;
 
 /**
  * Store class that uses in-memory data structures to hold values and automatically loads from and
@@ -13,40 +13,17 @@ import codeu.model.store.persistence.PersistentStorageAgent;
  * instance.
  */
 public class VideoEventStore {
-    /** Singleton instance of VideoEventStore. */
-    private static VideoEventStore instance;
-
-    /**
-     * Returns the singleton instance of VideoEventStore that should be shared between all servlet
-     * classes. Do not call this function from a test; use getTestInstance() instead.
-     */
-    public static VideoEventStore getInstance() {
-        if (instance == null) {
-            instance = new VideoEventStore(PersistentStorageAgent.getInstance());
-        }
-        return instance;
-    }
-
-    /**
-     * Instance getter function used for testing. Supply a mock for PersistentStorageAgent.
-     *
-     * @param persistentStorageAgent a mock used for testing
-     */
-    public static VideoEventStore getTestInstance(PersistentStorageAgent persistentStorageAgent) {
-        return new VideoEventStore(persistentStorageAgent);
-    }
-
     /**
      * The PersistentStorageAgent responsible for loading VideoEvents from and saving VideoEvents to
      * Datastore.
      */
-    private PersistentStorageAgent persistentStorageAgent;
+    private final PersistentDataStore persistentStorageAgent;
 
     /** The in-memory list of VideoEvents. */
     private List<VideoEvent> videoEvents;
 
     /** This class is a singleton, so its constructor is private. Call getInstance() instead. */
-    private VideoEventStore(PersistentStorageAgent persistentStorageAgent) {
+    public VideoEventStore(PersistentDataStore persistentStorageAgent) {
         this.persistentStorageAgent = persistentStorageAgent;
         videoEvents = new ArrayList<>();
     }

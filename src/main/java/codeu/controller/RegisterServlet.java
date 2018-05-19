@@ -1,4 +1,5 @@
 package codeu.controller;
+import codeu.injection.AppInjector;
 import java.io.IOException;
 import codeu.model.store.basic.UserStore;
 import codeu.model.data.User;
@@ -25,14 +26,14 @@ public class RegisterServlet extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 	  super.init();
-	  setUserStore(UserStore.getInstance());
+		AppInjector.getInstance().inject(this);
 	}
 	 
 	/**
 	 * Sets the UserStore used by this servlet. This function provides a common setup method
 	 * for use by the test framework or the servlet's init() function.
 	 */
-	void setUserStore(UserStore userStore) {
+	public void setUserStore(UserStore userStore) {
 	  this.userStore = userStore;
 	}
 

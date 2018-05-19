@@ -1,6 +1,7 @@
 
 package codeu.controller.chat;
 
+import codeu.injection.AppInjector;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
@@ -29,16 +30,7 @@ public class VideoEventServlet extends HttpServlet {
   @Override
   public void init() throws ServletException {
     super.init();
-
-    ChatServletAgent chatServletAgent = new ChatServletAgent();
-    chatServletAgent.setConversationStore(ConversationStore.getInstance());
-    chatServletAgent.setVideoEventStore(VideoEventStore.getInstance());
-    chatServletAgent.setUserStore(UserStore.getInstance());
-
-    ChatRequestValidator chatRequestValidator = new ChatRequestValidator(chatServletAgent);
-
-    setChatServletAgent(chatServletAgent);
-    setChatRequestValidator(chatRequestValidator);
+    AppInjector.getInstance().inject(this);
   }
 
   public void setChatServletAgent(ChatServletAgent chatServletAgent) {

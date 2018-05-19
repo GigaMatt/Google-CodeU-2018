@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.print.DocFlavor.CHAR_ARRAY;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -63,8 +64,8 @@ public class ChatServletTest {
     mockResponse = Mockito.mock(HttpServletResponse.class);
     mockRequestDispatcher = Mockito.mock(RequestDispatcher.class);
     Mockito.when(mockRequest.getRequestDispatcher("/WEB-INF/view/chat.jsp"))
-        .thenReturn(mockRequestDispatcher);    
-        
+        .thenReturn(mockRequestDispatcher);
+
     mockOutputStream = Mockito.mock(ServletOutputStream.class);
     try {
 		Mockito.when(mockResponse.getOutputStream()).thenReturn(mockOutputStream);
@@ -76,14 +77,13 @@ public class ChatServletTest {
     mockMessageStore = Mockito.mock(MessageStore.class);
     mockUserStore = Mockito.mock(UserStore.class);
 
-    ChatServletAgent chatServletAgent = new ChatServletAgent();
-    chatServletAgent.setConversationStore(mockConversationStore);
-    chatServletAgent.setMessageStore(mockMessageStore);
-    chatServletAgent.setUserStore(mockUserStore);
+	  ChatServletAgent agent = new ChatServletAgent();
+    agent.setConversationStore(mockConversationStore);
+    agent.setMessageStore(mockMessageStore);
+    agent.setUserStore(mockUserStore);
 
-    ChatRequestValidator chatRequestValidator = Mockito.spy(new ChatRequestValidator(chatServletAgent));
-
-    chatServlet.setChatServletAgent(chatServletAgent);
+    chatServlet.setChatServletAgent(agent);
+    ChatRequestValidator chatRequestValidator = Mockito.spy(new ChatRequestValidator(agent));
     chatServlet.setChatRequestValidator(chatRequestValidator);
   }
 
@@ -198,7 +198,7 @@ public class ChatServletTest {
     ArgumentCaptor<Message> messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
     Mockito.verify(mockMessageStore).addMessage(messageArgumentCaptor.capture());
     Assert.assertEquals("Test message.", messageArgumentCaptor.getValue().getContent());
-    
+
     ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
 
@@ -234,7 +234,7 @@ public class ChatServletTest {
     Mockito.verify(mockMessageStore).addMessage(messageArgumentCaptor.capture());
     Assert.assertEquals(
         "Contains bad html  and  content.", messageArgumentCaptor.getValue().getContent());
-        
+
     ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
 
