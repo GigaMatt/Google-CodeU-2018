@@ -50,7 +50,6 @@ public class ChatPollServletTest {
   private ConversationStore mockConversationStore;
   private MessageStore mockMessageStore;
   private UserStore mockUserStore;
-  private ChatRequestValidator mockValidator;
 
   @Before
   public void setup() {
@@ -72,15 +71,15 @@ public class ChatPollServletTest {
     mockMessageStore = Mockito.mock(MessageStore.class);
     mockUserStore = Mockito.mock(UserStore.class);
 
-    mockValidator = Mockito.mock(ChatRequestValidator.class);
-
     ChatServletAgent agent = new ChatServletAgent();
     agent.setConversationStore(mockConversationStore);
     agent.setMessageStore(mockMessageStore);
     agent.setUserStore(mockUserStore);
 
     chatPollServlet.setChatServletAgent(agent);
-    chatPollServlet.setChatRequestValidator(mockValidator);
+
+    ChatRequestValidator chatRequestValidator = Mockito.spy(new ChatRequestValidator(agent));
+    chatPollServlet.setChatRequestValidator(chatRequestValidator);
   }
 
   @Test

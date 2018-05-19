@@ -120,6 +120,7 @@ public class AppInjector {
       chatServletAgent.setConversationStore(makeConversationStore());
       chatServletAgent.setUserStore(makeUserStore());
       chatServletAgent.setMessageStore(makeMessageStore());
+      chatServletAgent.setVideoEventStore(makeVideoEventStore());
     }
     return chatServletAgent;
   }
