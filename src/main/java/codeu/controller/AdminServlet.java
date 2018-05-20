@@ -14,14 +14,21 @@
 
 package codeu.controller;
 
+import codeu.injection.AppInjector;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
+import codeu.model.data.DataParse;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
+import org.mindrot.jbcrypt.BCrypt;
+
+import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -45,16 +52,14 @@ public class AdminServlet extends HttpServlet {
   @Override
   public void init() throws ServletException {
     super.init();
-    setConversationStore(ConversationStore.getInstance());
-    setMessageStore(MessageStore.getInstance());
-    setUserStore(UserStore.getInstance());
+    AppInjector.getInstance().inject(this);
   }
 
   /**
    * Sets the ConversationStore used by this servlet. This function provides a common setup method
    * for use by the test framework or the servlet's init() function.
    */
-  void setConversationStore(ConversationStore conversationStore) {
+  public void setConversationStore(ConversationStore conversationStore) {
     this.conversationStore = conversationStore;
   }
 
@@ -62,7 +67,7 @@ public class AdminServlet extends HttpServlet {
    * Sets the MessageStore used by this servlet. This function provides a common setup method for
    * use by the test framework or the servlet's init() function.
    */
-  void setMessageStore(MessageStore messageStore) {
+  public void setMessageStore(MessageStore messageStore) {
     this.messageStore = messageStore;
   }
 
@@ -70,8 +75,18 @@ public class AdminServlet extends HttpServlet {
    * Sets the UserStore used by this servlet. This function provides a common setup method for use
    * by the test framework or the servlet's init() function.
    */
-  void setUserStore(UserStore userStore) {
+  public void setUserStore(UserStore userStore) {
     this.userStore = userStore;
+  }
+
+  /**
+   *
+   * Obtains DataParse object, which is obtained from parsing a specified file.
+   */
+  public static DataParse parseFile(File file) {
+    DataParse parse = new DataParse(file);
+    parse.parse();
+    return parse;
   }
 
   /**
@@ -121,14 +136,48 @@ public class AdminServlet extends HttpServlet {
       return;
     }
 
-    String confirmButton = request.getParameter("confirm");
+    if (request.getParameter("populate") != null) {
+      String method = request.getParameter("method");
+      if (method.equals("rj")) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("files/Romeo_and_Juliet").getFile());
+        DataParse parsedData = parseFile(file);
+        parsedData.allUsers.values().stream().forEach(x -> userStore.addUser(x));
+        conversationStore.loadTestData(parsedData.allConversations);
+        messageStore.loadTestData(parsedData.allMessages);
+      } else {
+        userStore.loadTestData();
+        conversationStore.loadTestData();
+        messageStore.loadTestData();
+      }
+    } else if (request.getParameter("create") != null){
+      String adminName = request.getParameter("admin name");
+      String adminPassword = request.getParameter("admin password");
 
-    if (confirmButton != null) {
-      userStore.loadTestData();
-      conversationStore.loadTestData();
-      messageStore.loadTestData();
+      if (adminName == null || adminPassword == null) {
+        request.setAttribute("admin error", "Incomplete request: missing fields.");
+        request.getRequestDispatcher("/WEB-INF/view/admin.jsp").forward(request, response);
+        return;
+      }
+
+      if(!adminName.matches("[\\w*\\s*]*")) {
+        request.setAttribute("admin error", "Please enter only letters, numbers, and spaces for the username.");
+        request.getRequestDispatcher("/WEB-INF/view/admin.jsp").forward(request,response);
+        return;
+      }
+
+      if(userStore.isUserRegistered(adminName)) {
+        request.setAttribute("admin error", "That username is already taken.");
+        request.getRequestDispatcher("/WEB-INF/view/admin.jsp").forward(request, response);
+        return;
+      }
+
+      String passwordHash = BCrypt.hashpw(adminPassword, BCrypt.gensalt());
+      User newAdmin = new User(UUID.randomUUID(), adminName, passwordHash, "admin", Instant.now(),
+              "Welcome new administrator!");
+      userStore.addUser(newAdmin);
     }
 
-    response.sendRedirect("/");
+    response.sendRedirect("/admin");
   }
 }

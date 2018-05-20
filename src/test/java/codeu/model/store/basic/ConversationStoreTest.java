@@ -1,7 +1,7 @@
 package codeu.model.store.basic;
 
 import codeu.model.data.Conversation;
-import codeu.model.store.persistence.PersistentStorageAgent;
+import codeu.model.store.persistence.PersistentDataStore;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 public class ConversationStoreTest {
 
   private ConversationStore conversationStore;
-  private PersistentStorageAgent mockPersistentStorageAgent;
+  private PersistentDataStore mockPersistentStorage;
 
   private final Conversation CONVERSATION_ONE =
       new Conversation(
@@ -22,8 +22,9 @@ public class ConversationStoreTest {
 
   @Before
   public void setup() {
-    mockPersistentStorageAgent = Mockito.mock(PersistentStorageAgent.class);
-    conversationStore = ConversationStore.getTestInstance(mockPersistentStorageAgent);
+    mockPersistentStorage = Mockito.mock(PersistentDataStore.class);
+    conversationStore = new ConversationStore(mockPersistentStorage,
+        Mockito.mock(DefaultDataStore.class));
 
     final List<Conversation> conversationList = new ArrayList<>();
     conversationList.add(CONVERSATION_ONE);
@@ -69,7 +70,7 @@ public class ConversationStoreTest {
         conversationStore.getConversationWithTitle("test_conversation");
 
     assertEquals(inputConversation, resultConversation);
-    Mockito.verify(mockPersistentStorageAgent).writeThrough(inputConversation);
+    Mockito.verify(mockPersistentStorage).writeThrough(inputConversation);
   }
 
   private void assertEquals(Conversation expectedConversation, Conversation actualConversation) {

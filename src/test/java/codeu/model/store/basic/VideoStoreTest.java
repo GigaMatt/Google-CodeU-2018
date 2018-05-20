@@ -1,7 +1,7 @@
 package codeu.model.store.basic;
 
 import codeu.model.data.VideoEvent;
-import codeu.model.store.persistence.PersistentStorageAgent;
+import codeu.model.store.persistence.PersistentDataStore;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import org.mockito.Mockito;
 public class VideoStoreTest {
 
   private VideoEventStore videoEventStore;
-  private PersistentStorageAgent mockPersistentStorageAgent;
+  private PersistentDataStore mockPersistentStorageAgent;
 
   private final UUID CONVERSATION_ID_ONE = UUID.randomUUID();
   private final VideoEvent VIDEO_EVENT_ONE =
@@ -51,8 +51,8 @@ public class VideoStoreTest {
 
   @Before
   public void setup() {
-    mockPersistentStorageAgent = Mockito.mock(PersistentStorageAgent.class);
-    videoEventStore = VideoEventStore.getTestInstance(mockPersistentStorageAgent);
+    mockPersistentStorageAgent = Mockito.mock(PersistentDataStore.class);
+    videoEventStore = new VideoEventStore(mockPersistentStorageAgent);
 
     final List<VideoEvent> videoEventList = new ArrayList<>();
     videoEventList.add(VIDEO_EVENT_ONE);

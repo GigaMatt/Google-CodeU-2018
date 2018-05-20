@@ -1,7 +1,7 @@
 package codeu.model.store.basic;
 
 import codeu.model.data.User;
-import codeu.model.store.persistence.PersistentStorageAgent;
+import codeu.model.store.persistence.PersistentDataStore;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 public class UserStoreTest {
 
   private UserStore userStore;
-  private PersistentStorageAgent mockPersistentStorageAgent;
+  private PersistentDataStore mockPersistentStorageAgent;
 
   private final User USER_ONE =
       new User(UUID.randomUUID(), "test_username_one", "password one", "member",
@@ -28,8 +28,9 @@ public class UserStoreTest {
 
   @Before
   public void setup() {
-    mockPersistentStorageAgent = Mockito.mock(PersistentStorageAgent.class);
-    userStore = UserStore.getTestInstance(mockPersistentStorageAgent);
+    mockPersistentStorageAgent = Mockito.mock(PersistentDataStore.class);
+    userStore = new UserStore(mockPersistentStorageAgent,
+        Mockito.mock(DefaultDataStore.class));
 
     final List<User> userList = new ArrayList<>();
     userList.add(USER_ONE);

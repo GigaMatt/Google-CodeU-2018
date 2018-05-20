@@ -757,16 +757,16 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
             return;
         }
 
-        if (!isYoutubePlayerVisible()) {
-            toggleYoutubePlayerDisplay();
-        }
-
 //        console.log("loading video state: ");
 //        console.log(newVideoState);
 
         let newPlayerState = newVideoState.playerState;
 
         if(newVideoState.videoId !== curVideoState.videoId) {
+            if (!isYoutubePlayerVisible()) {
+                toggleYoutubePlayerDisplay();
+            }
+
             videoStateChangeCallback = function () {
 //                console.log("Calling callback.. with state: " + newPlayerState);
 

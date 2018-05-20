@@ -15,7 +15,7 @@
 package codeu.model.store.basic;
 
 import codeu.model.data.Conversation;
-import codeu.model.store.persistence.PersistentStorageAgent;
+import codeu.model.store.persistence.PersistentDataStore;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,54 +25,47 @@ import java.util.List;
  * instance.
  */
 public class ConversationStore {
-
-  /** Singleton instance of ConversationStore. */
-  private static ConversationStore instance;
-
-  /**
-   * Returns the singleton instance of ConversationStore that should be shared between all servlet
-   * classes. Do not call this function from a test; use getTestInstance() instead.
-   */
-  public static ConversationStore getInstance() {
-    if (instance == null) {
-      instance = new ConversationStore(PersistentStorageAgent.getInstance());
-    }
-    return instance;
-  }
-
-  /**
-   * Instance getter function used for testing. Supply a mock for PersistentStorageAgent.
-   *
-   * @param persistentStorageAgent a mock used for testing
-   */
-  public static ConversationStore getTestInstance(PersistentStorageAgent persistentStorageAgent) {
-    return new ConversationStore(persistentStorageAgent);
-  }
-
   /**
    * The PersistentStorageAgent responsible for loading Conversations from and saving Conversations
    * to Datastore.
    */
-  private PersistentStorageAgent persistentStorageAgent;
+  private PersistentDataStore persistentStorageAgent;
+  private DefaultDataStore defaultDataStore;
 
   /** The in-memory list of Conversations. */
   private List<Conversation> conversations;
 
   /** This class is a singleton, so its constructor is private. Call getInstance() instead. */
-  private ConversationStore(PersistentStorageAgent persistentStorageAgent) {
+  public ConversationStore(
+      PersistentDataStore persistentStorageAgent,
+      DefaultDataStore defaultDataStore) {
     this.persistentStorageAgent = persistentStorageAgent;
+    this.defaultDataStore = defaultDataStore;
     conversations = new ArrayList<>();
   }
 
   /**
-   * Load a set of randomly-generated Conversation objects.
+   * Add a set of randomly-generated Conversation objects.
    *
    * @return false if a error occurs.
    */
   public boolean loadTestData() {
     boolean loaded = false;
     try {
-      conversations.addAll(DefaultDataStore.getInstance().getAllConversations());
+      conversations.addAll(defaultDataStore.getAllConversations());
+      loaded = true;
+    } catch (Exception e) {
+      loaded = false;
+      System.err.println("ERROR: Unable to establish initial store (conversations).");
+    }
+    return loaded;
+  }
+
+  /** Load a set of given Conversation objects. */
+  public boolean loadTestData(List<Conversation> convoList) {
+    boolean loaded = false;
+    try {
+      conversations.addAll(convoList);
       loaded = true;
     } catch (Exception e) {
       loaded = false;

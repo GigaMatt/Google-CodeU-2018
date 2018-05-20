@@ -15,7 +15,7 @@
 package codeu.model.store.basic;
 
 import codeu.model.data.Message;
-import codeu.model.store.persistence.PersistentStorageAgent;
+import codeu.model.store.persistence.PersistentDataStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,54 +26,47 @@ import java.util.UUID;
  * instance.
  */
 public class MessageStore {
-
-  /** Singleton instance of MessageStore. */
-  private static MessageStore instance;
-
-  /**
-   * Returns the singleton instance of MessageStore that should be shared between all servlet
-   * classes. Do not call this function from a test; use getTestInstance() instead.
-   */
-  public static MessageStore getInstance() {
-    if (instance == null) {
-      instance = new MessageStore(PersistentStorageAgent.getInstance());
-    }
-    return instance;
-  }
-
-  /**
-   * Instance getter function used for testing. Supply a mock for PersistentStorageAgent.
-   *
-   * @param persistentStorageAgent a mock used for testing
-   */
-  public static MessageStore getTestInstance(PersistentStorageAgent persistentStorageAgent) {
-    return new MessageStore(persistentStorageAgent);
-  }
-
   /**
    * The PersistentStorageAgent responsible for loading Messages from and saving Messages to
    * Datastore.
    */
-  private PersistentStorageAgent persistentStorageAgent;
+  private PersistentDataStore persistentStorageAgent;
+  private DefaultDataStore defaultDataStore;
 
   /** The in-memory list of Messages. */
   private List<Message> messages;
 
-  /** This class is a singleton, so its constructor is private. Call getInstance() instead. */
-  private MessageStore(PersistentStorageAgent persistentStorageAgent) {
+  /** Creates an instance. */
+  public MessageStore(
+      PersistentDataStore persistentStorageAgent,
+      DefaultDataStore defaultDataStore) {
     this.persistentStorageAgent = persistentStorageAgent;
+    this.defaultDataStore = defaultDataStore;
     messages = new ArrayList<>();
   }
 
   /**
-   * Load a set of randomly-generated Message objects.
+   * Add a set of randomly-generated Message objects.
    *
    * @return false if an error occurs.
    */
   public boolean loadTestData() {
     boolean loaded = false;
     try {
-      messages.addAll(DefaultDataStore.getInstance().getAllMessages());
+      messages.addAll(defaultDataStore.getAllMessages());
+      loaded = true;
+    } catch (Exception e) {
+      loaded = false;
+      System.out.println("ERROR: Unable to establish initial store (messages).");
+    }
+    return loaded;
+  }
+
+  /** Load a set of given Message objects. */
+  public boolean loadTestData(List<Message> messageList) {
+    boolean loaded = false;
+    try {
+      messages.addAll(messageList);
       loaded = true;
     } catch (Exception e) {
       loaded = false;
