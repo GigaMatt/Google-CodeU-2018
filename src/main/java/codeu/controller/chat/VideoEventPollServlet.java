@@ -20,6 +20,8 @@ import codeu.model.store.basic.UserStore;
 import codeu.model.store.basic.VideoEventStore;
 
 public class VideoEventPollServlet extends HttpServlet {
+    private final double SEEK_DIFF_TOLERANCE = 5;
+
     private ChatServletAgent chatServletAgent;
     private ChatRequestValidator chatRequestValidator;
 
@@ -81,17 +83,50 @@ public class VideoEventPollServlet extends HttpServlet {
                 lastVideoEventInstant = Instant.parse(lastVideoEventTime);
             }
 
+            String curSeekStr = request.getParameter("curSeek");
+
             List<VideoEvent> videoEvents = chatServletAgent.getVideoEventStore().getVideoEventsInConversation(chatRequestValidator.getConversationOptional().get().getId());
 
             if (!videoEvents.isEmpty()) {
                 VideoEvent latestVideoEvent = videoEvents.get(videoEvents.size() - 1);
+
                 if (latestVideoEvent.getCreationTime().compareTo(lastVideoEventInstant) > 0) {
+                    if (latestVideoEvent.getSeekOwnerId().compareTo(chatRequestValidator.getUserOptional().get().getId()) == 0
+                            && !curSeekStr.equals("-1")) {
+                        latestVideoEvent.setCreation(Instant.now());
+                        latestVideoEvent.setSeekTime(Double.parseDouble(curSeekStr));
+                        chatServletAgent.getVideoEventStore().updateVideoEvent(latestVideoEvent);
+
+                        responseData.put("forceSeek", false);
+                    } else if (!curSeekStr.equals("-1")){
+                        double curSeek = Double.parseDouble(curSeekStr);
+
+                        if (Math.abs(latestVideoEvent.getSeekTime() - curSeek) > SEEK_DIFF_TOLERANCE) {
+                            responseData.put("forceSeek", true);
+                            responseData.put("seekTo", latestVideoEvent.getSeekTime());
+                        } else {
+                            responseData.put("forceSeek", false);
+                        }
+                    } else {
+                        responseData.put("forceSeek", true);
+                        responseData.put("seekTo", latestVideoEvent.getSeekTime());
+                    }
+
                     responseData.put("success", true);
                     responseData.put("foundNewVideoEvent", true);
                     responseData.put("newVideoState", latestVideoEvent.getVideoStateJSON());
                     responseData.put("newVideoEventCreationTime", latestVideoEvent.getCreationTime().toString());
+
                     response.getOutputStream().print(responseData.toString());
                     return;
+                } else {
+                    if (latestVideoEvent.getSeekOwnerId().compareTo(chatRequestValidator.getUserOptional().get().getId()) == 0
+                            && !curSeekStr.equals("-1")) {
+                        latestVideoEvent.setSeekTime(Double.parseDouble(curSeekStr));
+                        chatServletAgent.getVideoEventStore().updateVideoEvent(latestVideoEvent);
+
+                        responseData.put("forceSeek", false);
+                    }
                 }
             }
 

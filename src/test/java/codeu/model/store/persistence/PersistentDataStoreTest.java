@@ -169,8 +169,10 @@ public class PersistentDataStoreTest {
     String videoIdOne = "test video id one";
     Instant creationOne = Instant.ofEpochMilli(1000);
     String videoStateOne = "{playerState: 1}";
+    UUID seekOwnerOne = UUID.randomUUID();
+    double seekTimeOne = 5;
     VideoEvent inputVideoEventOne =
-        new VideoEvent(idOne, conversationOne, authorOne, videoIdOne, creationOne, videoStateOne);
+        new VideoEvent(idOne, conversationOne, authorOne, videoIdOne, creationOne, videoStateOne, seekOwnerOne, seekTimeOne);
 
     UUID idTwo = UUID.randomUUID();
     UUID conversationTwo = UUID.randomUUID();
@@ -178,8 +180,10 @@ public class PersistentDataStoreTest {
     String videoIdTwo = "test video id two";
     Instant creationTwo = Instant.ofEpochMilli(2000);
     String videoStateTwo = "{playerState: 0}";
+    UUID seekOwnerTwo = UUID.randomUUID();
+    double seekTimeTwo = 10;
     VideoEvent inputVideoEventTwo =
-        new VideoEvent(idTwo, conversationTwo, authorTwo, videoIdTwo, creationTwo, videoStateTwo);
+        new VideoEvent(idTwo, conversationTwo, authorTwo, videoIdTwo, creationTwo, videoStateTwo, seekOwnerTwo, seekTimeTwo);
 
     // save
     persistentDataStore.writeThrough(inputVideoEventOne);
@@ -196,6 +200,8 @@ public class PersistentDataStoreTest {
     Assert.assertEquals(videoIdOne, resultVideoEventOne.getVideoId());
     Assert.assertEquals(creationOne, resultVideoEventOne.getCreationTime());
     Assert.assertEquals(videoStateOne, resultVideoEventOne.getVideoStateJSON());
+    Assert.assertEquals(seekOwnerOne, resultVideoEventOne.getSeekOwnerId());
+    Assert.assertEquals(seekTimeOne, resultVideoEventOne.getSeekTime(), 0.0001);
 
     VideoEvent resultVideoEventTwo = resultVideoEvents.get(1);
     Assert.assertEquals(idTwo, resultVideoEventTwo.getId());
@@ -204,5 +210,7 @@ public class PersistentDataStoreTest {
     Assert.assertEquals(videoIdTwo, resultVideoEventTwo.getVideoId());
     Assert.assertEquals(creationTwo, resultVideoEventTwo.getCreationTime());
     Assert.assertEquals(videoStateTwo, resultVideoEventTwo.getVideoStateJSON());
+    Assert.assertEquals(seekOwnerTwo, resultVideoEventTwo.getSeekOwnerId());
+    Assert.assertEquals(seekTimeTwo, resultVideoEventTwo.getSeekTime(), 0.0001);
   }
 }

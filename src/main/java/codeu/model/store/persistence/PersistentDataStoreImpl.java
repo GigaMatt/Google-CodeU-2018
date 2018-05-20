@@ -153,7 +153,9 @@ public class PersistentDataStoreImpl implements PersistentDataStore {
         Instant creationTime = Instant.parse((String) entity.getProperty("creation_time"));
         String videoId = (String) entity.getProperty("video_id");
         String videoStateJSON = (String) entity.getProperty("video_state_json");
-        VideoEvent videoEvent = new VideoEvent(uuid, conversationUuid, authorUuid, videoId, creationTime, videoStateJSON);
+        UUID seekOwnerUuid = UUID.fromString((String) entity.getProperty("seek_owner_uuid"));
+        double seekTime = (double) entity.getProperty("seek_time");
+        VideoEvent videoEvent = new VideoEvent(uuid, conversationUuid, authorUuid, videoId, creationTime, videoStateJSON, seekOwnerUuid, seekTime);
         videoEvents.add(videoEvent);
       } catch (Exception e) {
         // In a production environment, errors should be very rare. Errors which may
@@ -209,6 +211,8 @@ public class PersistentDataStoreImpl implements PersistentDataStore {
     videoEntity.setProperty("video_id", videoEvent.getVideoId());
     videoEntity.setProperty("creation_time", videoEvent.getCreationTime().toString());
     videoEntity.setProperty("video_state_json", videoEvent.getVideoStateJSON());
+    videoEntity.setProperty("seek_owner_uuid", videoEvent.getSeekOwnerId().toString());
+    videoEntity.setProperty("seek_time", videoEvent.getSeekTime());
     datastore.put(videoEntity);
   }
 }

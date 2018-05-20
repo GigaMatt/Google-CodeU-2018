@@ -179,6 +179,7 @@ public class AppInjector {
 
   public void inject(ChatServlet chatServlet) {
     chatServlet.setChatServletAgent(makeChatServletAgent());
+    chatServlet.setChatRequestValidator(makeChatRequestValidator());
   }
 
   public void inject(RegisterServlet registerServlet) {

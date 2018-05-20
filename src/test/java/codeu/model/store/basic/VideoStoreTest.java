@@ -25,7 +25,9 @@ public class VideoStoreTest {
           UUID.randomUUID(),
           "video id one",
           Instant.ofEpochMilli(1000),
-          VideoEvent.getTestVideoStateJSON());
+          VideoEvent.getTestVideoStateJSON(),
+          UUID.randomUUID(),
+          1);
   private final VideoEvent VIDEO_EVENT_TWO =
       new VideoEvent(
           UUID.randomUUID(),
@@ -33,7 +35,9 @@ public class VideoStoreTest {
           UUID.randomUUID(),
           "video id two",
           Instant.ofEpochMilli(2000),
-          VideoEvent.getTestVideoStateJSON());
+          VideoEvent.getTestVideoStateJSON(),
+          UUID.randomUUID(),
+          2);
   private final VideoEvent VIDEO_EVENT_THREE =
       new VideoEvent(
           UUID.randomUUID(),
@@ -41,7 +45,9 @@ public class VideoStoreTest {
           UUID.randomUUID(),
           "video id three",
           Instant.ofEpochMilli(3000),
-          VideoEvent.getTestVideoStateJSON());
+          VideoEvent.getTestVideoStateJSON(),
+          UUID.randomUUID(),
+          3);
 
   @Before
   public void setup() {
@@ -74,7 +80,9 @@ public class VideoStoreTest {
             UUID.randomUUID(),
             "test video id",
             Instant.now(),
-            VideoEvent.getTestVideoStateJSON());
+            VideoEvent.getTestVideoStateJSON(),
+            UUID.randomUUID(),
+            6);
 
     videoEventStore.addVideoEvent(inputVideoEvent);
     VideoEvent resultVideoEvent = videoEventStore.getVideoEventsInConversation(inputConversationId).get(0);
@@ -89,5 +97,7 @@ public class VideoStoreTest {
     Assert.assertEquals(expectedVideoEvent.getAuthorId(), actualVideoEvent.getAuthorId());
     Assert.assertEquals(expectedVideoEvent.getVideoId(), actualVideoEvent.getVideoId());
     Assert.assertEquals(expectedVideoEvent.getCreationTime(), actualVideoEvent.getCreationTime());
+    Assert.assertEquals(expectedVideoEvent.getSeekOwnerId(), actualVideoEvent.getSeekOwnerId());
+    Assert.assertEquals(expectedVideoEvent.getSeekTime(), actualVideoEvent.getSeekTime(), 0.0001);
   }
 }

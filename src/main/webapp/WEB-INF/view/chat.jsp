@@ -220,6 +220,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
       bottom: 100,
     };
 
+    const FORCE_SEEK_ADJUSTMENT = 1; // A rough estimate to account for the seconds passed between requests
+
     // Controls message polling (Only one active poll at a time). Will be set to false when a poll is in progress, and back to true when the poll has ended.
     let canPollForMessages = true;
     // Controls video event polling (Only one active poll at a time). Will be set to false when a poll is in progress, and back to true when the poll has ended.
@@ -580,6 +582,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
     let lastVideoEventTime = -1;
 
+    let videoStateChangeCallback = null;
+
     // Called automatically by the Youtube API once it is loaded
     function onYouTubeIframeAPIReady() {
 
@@ -615,7 +619,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
 
     // Called every time the youtube player's state changes
     function onYoutubePlayerStateChange(event) {
-      console.log(event);
+//      console.log(event);
 
       let playerState = event.data;
       let videoData = event.target.getVideoData();
@@ -624,16 +628,21 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         case VIDEO_PLAYER_STATE.PLAYING:
         case VIDEO_PLAYER_STATE.PAUSED:
         case VIDEO_PLAYER_STATE.ENDED:
+            // To account for multiple state changes in quick succession (eg. during seeking)
+            setTimeout(function() {
+                if (videoStateChangeCallback) {
+                    videoStateChangeCallback();
+                    videoStateChangeCallback = null;
+                } else {
+                    sendVideoEvent();
+                }
+            }, 500);
+
             curVideoState.videoId = videoData.video_id;
             curVideoState.videoTitle = videoData.title;
             curVideoState.videoAuthor = videoData.author;
             curVideoState.playerState = playerState;
             curVideoState.lastModifiedBy = "<%= username %>";
-
-            // To account for multiple state changes in quick succession (eg. during seeking)
-            setTimeout(function() {
-                sendVideoEvent();
-            }, 500);
             break;
       }
     }
@@ -650,10 +659,18 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     }
 
     function sendVideoEvent() {
+        let curSeek = -1;
+
+        if (curVideoState.playerState === VIDEO_PLAYER_STATE.PLAYING
+            || curVideoState.playerState === VIDEO_PLAYER_STATE.PAUSED) {
+            curSeek = youtubePlayer.getCurrentTime();
+        }
+
         let postData = {
             videoId: curVideoState.videoId,
             videoStateJSON: JSON.stringify(curVideoState),
             lastVideoEventTime: lastVideoEventTime,
+            curSeek: curSeek,
         };
 
         canPollForVideoEvents = false;
@@ -691,18 +708,33 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
             return;
         }
 
+        let curSeek = -1;
+
+        if (curVideoState.playerState === VIDEO_PLAYER_STATE.PLAYING
+            || curVideoState.playerState === VIDEO_PLAYER_STATE.PAUSED) {
+            curSeek = youtubePlayer.getCurrentTime();
+        }
+
         let postData = {
             lastVideoEventTime: lastVideoEventTime,
+            curSeek: curSeek,
         };
 
         canPollForVideoEvents = false;
         axios.post("/chat/video/poll/<%= conversation.getTitle() %>", createPostString(postData))
             .then(function (response) {
+//                console.log(response);
                 canPollForVideoEvents = true;
 
                 if (response.data.success) {
                     if(response.data.foundNewVideoEvent) {
-                        onNewVideoStateReceived(JSON.parse(response.data.newVideoState));
+                        let seekTo = null;
+                        if (response.data.forceSeek) {
+                            seekTo = +response.data.seekTo;
+                            seekTo += FORCE_SEEK_ADJUSTMENT;
+                        }
+
+                        onNewVideoStateReceived(JSON.parse(response.data.newVideoState), seekTo);
                         lastVideoEventTime = response.data.newVideoEventCreationTime;
                     }
 
@@ -714,29 +746,55 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
             })
             .catch(function (error) {
                 canPollForVideoEvents = true;
-                console.log(error);
+//                console.log(error);
                 alert("Unexpected error! Please try again!");
             });
     }
 
-    function onNewVideoStateReceived(newVideoState) {
+    function onNewVideoStateReceived(newVideoState, seekTo) {
 
         if (newVideoState.playerState === VIDEO_PLAYER_STATE.ENDED) {
             return;
         }
 
-        if (!isYoutubePlayerVisible()) {
-            toggleYoutubePlayerDisplay();
-        }
+//        console.log("loading video state: ");
+//        console.log(newVideoState);
 
-        console.log("loading video state: ");
-        console.log(newVideoState);
+        let newPlayerState = newVideoState.playerState;
 
         if(newVideoState.videoId !== curVideoState.videoId) {
+            if (!isYoutubePlayerVisible()) {
+                toggleYoutubePlayerDisplay();
+            }
+
+            videoStateChangeCallback = function () {
+//                console.log("Calling callback.. with state: " + newPlayerState);
+
+                switch(newPlayerState) {
+                    case VIDEO_PLAYER_STATE.PLAYING:
+                        youtubePlayer.playVideo();
+                        break;
+                    case VIDEO_PLAYER_STATE.PAUSED:
+//                        console.log("Pausing video in callback");
+                        youtubePlayer.pauseVideo();
+                        break;
+                }
+
+                if (seekTo) {
+                    youtubePlayer.seekTo(seekTo, true);
+                }
+            };
+
             youtubePlayer.loadVideoById(newVideoState.videoId);
         } else {
-            if (newVideoState.playerState !== curVideoState.playerState) {
-                switch(newVideoState.playerState) {
+            videoStateChangeCallback = function () {
+                if (seekTo) {
+                    youtubePlayer.seekTo(seekTo, true);
+                }
+            };
+
+            if (newPlayerState !== curVideoState.playerState) {
+                switch(newPlayerState) {
                     case VIDEO_PLAYER_STATE.PLAYING:
                         youtubePlayer.playVideo();
                         break;
@@ -748,6 +806,9 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
                         //youtubePlayer.stopVideo();
                         break;
                 }
+            } else {
+                videoStateChangeCallback();
+                videoStateChangeCallback = null;
             }
         }
 
