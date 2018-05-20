@@ -227,6 +227,8 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     // Controls video event polling (Only one active poll at a time). Will be set to false when a poll is in progress, and back to true when the poll has ended.
     let canPollForVideoEvents = true;
 
+    let ignorePolledVideoEvent = false;
+
     let youtubePlayer;
 
     // This function is called when the page had finished loading
@@ -674,8 +676,10 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         };
 
         canPollForVideoEvents = false;
+        ignorePolledVideoEvent = true;
         axios.post("/chat/video/<%= conversation.getTitle() %>", createPostString(postData))
             .then(function (response) {
+                ignorePolledVideoEvent = false;
                 canPollForVideoEvents = true;
 
                 if (response.data.success) {
@@ -689,6 +693,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
                 }
             })
             .catch(function (error) {
+                ignorePolledVideoEvent = false;
                 canPollForVideoEvents = true;
 
                 alert("Unexpected error! Please try again!");
@@ -724,6 +729,10 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         axios.post("/chat/video/poll/<%= conversation.getTitle() %>", createPostString(postData))
             .then(function (response) {
 //                console.log(response);
+                if (ignorePolledVideoEvent) {
+                    return;
+                }
+
                 canPollForVideoEvents = true;
 
                 if (response.data.success) {
@@ -745,6 +754,10 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
                 }
             })
             .catch(function (error) {
+                if (ignorePolledVideoEvent) {
+                    return;
+                }
+
                 canPollForVideoEvents = true;
 //                console.log(error);
                 alert("Unexpected error! Please try again!");
