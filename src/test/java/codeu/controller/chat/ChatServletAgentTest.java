@@ -8,12 +8,14 @@ import org.mockito.Mockito;
 import codeu.model.store.basic.ConversationStore;
 import codeu.model.store.basic.MessageStore;
 import codeu.model.store.basic.UserStore;
+import codeu.model.store.basic.VideoEventStore;
 
 public class ChatServletAgentTest {
     private ChatServletAgent chatServletAgent;
     
     private ConversationStore conversationStore;
     private MessageStore messageStore;
+    private VideoEventStore videoEventStore;
     private UserStore userStore;
 
     @Before
@@ -22,6 +24,7 @@ public class ChatServletAgentTest {
 
         conversationStore = Mockito.mock(ConversationStore.class);
         messageStore = Mockito.mock(MessageStore.class);
+        videoEventStore = Mockito.mock(VideoEventStore.class);
         userStore = Mockito.mock(UserStore.class);
     }
 
@@ -35,6 +38,12 @@ public class ChatServletAgentTest {
     public void testMessageStore() {
         chatServletAgent.setMessageStore(messageStore);
         Assert.assertEquals(messageStore, chatServletAgent.getMessageStore());
+    }
+      
+    @Test
+    public void testVideoEventStore() {
+        chatServletAgent.setVideoEventStore(videoEventStore);
+        Assert.assertEquals(videoEventStore, chatServletAgent.getVideoEventStore());
     }
     
     @Test

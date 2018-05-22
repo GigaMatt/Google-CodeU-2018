@@ -14,6 +14,7 @@
 
 package codeu.controller.chat;
 
+import codeu.injection.AppInjector;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
@@ -37,28 +38,24 @@ import org.jsoup.safety.Whitelist;
 
 /** Servlet class responsible for the chat page. */
 public class ChatServlet extends HttpServlet {
-
   private ChatServletAgent chatServletAgent;
-
-  public ChatServlet() {
-    chatServletAgent = new ChatServletAgent();
-  }
+  private ChatRequestValidator chatRequestValidator;
 
   /** Set up state for handling chat requests. */
   @Override
   public void init() throws ServletException {
     super.init();
-    chatServletAgent.setConversationStore(ConversationStore.getInstance());
-    chatServletAgent.setMessageStore(MessageStore.getInstance());
-    chatServletAgent.setUserStore(UserStore.getInstance());
+    AppInjector.getInstance().inject(this);
   }
 
-  /**
-   * @return the chatServletAgent
-   */
-  public ChatServletAgent getChatServletAgent() {
-    return chatServletAgent;
+  public void setChatRequestValidator(ChatRequestValidator chatRequestValidator) {
+    this.chatRequestValidator = chatRequestValidator;
   }
+
+  public ChatRequestValidator getChatRequestValidator() {
+    return chatRequestValidator;
+  }
+
 
   /**
    * This function fires when a user navigates to the chat page. It gets the conversation title from
@@ -100,35 +97,22 @@ public class ChatServlet extends HttpServlet {
 
     // This will represent the data being sent in the response
     JSONObject responseData = new JSONObject();
-    
-    try {
-      String username = (String) request.getSession().getAttribute("user");
-      if (username == null) {
-          // user is not logged in
-          responseData.put("success", false);
-          responseData.put("message", "User not logged in!");
-          response.getOutputStream().print(responseData.toString());
-          return;
-      }
 
-      User user = chatServletAgent.getUserStore().getUser(username);
-      if (user == null) {
-        // user was not found
-        responseData.put("success", false);
-        responseData.put("message", "User not found!");
-        response.getOutputStream().print(responseData.toString());
+    try {
+      chatRequestValidator.validateRequest(request, "/chat/");
+
+      if (!chatRequestValidator.getUsernameOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "User not logged in!");
         return;
       }
 
-      String requestUrl = request.getRequestURI();
-      String conversationTitle = requestUrl.substring("/chat/".length());
+      if (!chatRequestValidator.getUserOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "User not found!");
+        return;
+      }
 
-      Conversation conversation = chatServletAgent.getConversationStore().getConversationWithTitle(conversationTitle);
-      if (conversation == null) {
-        // couldn't find conversation
-        responseData.put("success", false);
-        responseData.put("message", "Conversation not found!");
-        response.getOutputStream().print(responseData.toString());
+      if (!chatRequestValidator.getConversationOptional().isPresent()) {
+        chatRequestValidator.respondWithErrorMessage(response, "Conversation not found!");
         return;
       }
 
@@ -144,22 +128,26 @@ public class ChatServlet extends HttpServlet {
       Message message =
           new Message(
               UUID.randomUUID(),
-              conversation.getId(),
-              user.getId(),
+              chatRequestValidator.getConversationOptional().get().getId(),
+              chatRequestValidator.getUserOptional().get().getId(),
               cleanedMessageContent,
               Instant.now());
 
       chatServletAgent.getMessageStore().addMessage(message);
 
       responseData.put("success", true);
-      
+
     } catch (JSONException e) {
       response.setStatus(500);
       response.getOutputStream().print("Unexpected JSONException Occurred");
       return;
     }
-    
+
     // This will send the data back in JSON format
     response.getOutputStream().print(responseData.toString());
+  }
+
+  public void setChatServletAgent(ChatServletAgent chatServletAgent) {
+    this.chatServletAgent = chatServletAgent;
   }
 }

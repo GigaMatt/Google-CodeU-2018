@@ -35,8 +35,6 @@ public class LogoutServlet extends HttpServlet {
     
   }
 
-
-
   /**
    * This function fires when a user requests to logout. It simply forwards the request to
    * index.jsp.

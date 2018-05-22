@@ -14,6 +14,7 @@
 
 package codeu.controller;
 
+import codeu.injection.AppInjector;
 import codeu.model.data.Conversation;
 import codeu.model.data.User;
 import codeu.model.store.basic.ConversationStore;
@@ -43,15 +44,14 @@ public class ConversationServlet extends HttpServlet {
   @Override
   public void init() throws ServletException {
     super.init();
-    setUserStore(UserStore.getInstance());
-    setConversationStore(ConversationStore.getInstance());
+    AppInjector.getInstance().inject(this);
   }
 
   /**
    * Sets the UserStore used by this servlet. This function provides a common setup method for use
    * by the test framework or the servlet's init() function.
    */
-  void setUserStore(UserStore userStore) {
+  public void setUserStore(UserStore userStore) {
     this.userStore = userStore;
   }
 
@@ -59,7 +59,7 @@ public class ConversationServlet extends HttpServlet {
    * Sets the ConversationStore used by this servlet. This function provides a common setup method
    * for use by the test framework or the servlet's init() function.
    */
-  void setConversationStore(ConversationStore conversationStore) {
+  public void setConversationStore(ConversationStore conversationStore) {
     this.conversationStore = conversationStore;
   }
 

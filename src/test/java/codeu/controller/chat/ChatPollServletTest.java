@@ -60,7 +60,6 @@ public class ChatPollServletTest {
     Mockito.when(mockRequest.getSession()).thenReturn(mockSession);
 
     mockResponse = Mockito.mock(HttpServletResponse.class);
-
     mockOutputStream = Mockito.mock(ServletOutputStream.class);
     try {
 		Mockito.when(mockResponse.getOutputStream()).thenReturn(mockOutputStream);
@@ -69,54 +68,45 @@ public class ChatPollServletTest {
 	}
 
     mockConversationStore = Mockito.mock(ConversationStore.class);
-    chatPollServlet.getChatServletAgent().setConversationStore(mockConversationStore);
-
     mockMessageStore = Mockito.mock(MessageStore.class);
-    chatPollServlet.getChatServletAgent().setMessageStore(mockMessageStore);
-
     mockUserStore = Mockito.mock(UserStore.class);
-    chatPollServlet.getChatServletAgent().setUserStore(mockUserStore);
+
+    ChatServletAgent agent = new ChatServletAgent();
+    agent.setConversationStore(mockConversationStore);
+    agent.setMessageStore(mockMessageStore);
+    agent.setUserStore(mockUserStore);
+
+    chatPollServlet.setChatServletAgent(agent);
+
+    ChatRequestValidator chatRequestValidator = Mockito.spy(new ChatRequestValidator(agent));
+    chatPollServlet.setChatRequestValidator(chatRequestValidator);
   }
 
   @Test
-  public void testDoPost_UserNotLoggedIn() throws IOException, ServletException {
+  public void testDoPost_UserNotLoggedIn() throws IOException, ServletException, JSONException {
+    Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/poll/test_conversation");
     Mockito.when(mockSession.getAttribute("user")).thenReturn(null);
 
     chatPollServlet.doPost(mockRequest, mockResponse);
 
-    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
-
-    try {
-		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
-        Assert.assertEquals(false, responseData.getBoolean("success"));
-        Assert.assertEquals("User not logged in!", responseData.getString("message"));
-	} catch (JSONException e) {
-        Mockito.doThrow(e);
-    }
+    Mockito.verify(chatPollServlet.getChatRequestValidator()).validateRequest(mockRequest, "/chat/poll/");
+    Mockito.verify(chatPollServlet.getChatRequestValidator()).respondWithErrorMessage(mockResponse, "User not logged in!");
   }
 
   @Test
-  public void testDoPost_InvalidUser() throws IOException, ServletException {
+  public void testDoPost_InvalidUser() throws IOException, ServletException, JSONException {
+    Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/poll/test_conversation");
     Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
     Mockito.when(mockUserStore.getUser("test_username")).thenReturn(null);
 
     chatPollServlet.doPost(mockRequest, mockResponse);
-    
-    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
 
-    try {
-		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
-        Assert.assertEquals(false, responseData.getBoolean("success"));
-        Assert.assertEquals("User not found!", responseData.getString("message"));
-	} catch (JSONException e) {
-        Mockito.doThrow(e);
-    }
+    Mockito.verify(chatPollServlet.getChatRequestValidator()).validateRequest(mockRequest, "/chat/poll/");
+    Mockito.verify(chatPollServlet.getChatRequestValidator()).respondWithErrorMessage(mockResponse, "User not found!");
   }
 
   @Test
-  public void testDoPost_ConversationNotFound() throws IOException, ServletException {
+  public void testDoPost_ConversationNotFound() throws IOException, ServletException, JSONException {
     Mockito.when(mockRequest.getRequestURI()).thenReturn("/chat/poll/test_conversation");
     Mockito.when(mockSession.getAttribute("user")).thenReturn("test_username");
 
@@ -130,16 +120,8 @@ public class ChatPollServletTest {
 
     chatPollServlet.doPost(mockRequest, mockResponse);
 
-    ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
-    Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
-
-    try {
-		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
-        Assert.assertEquals(false, responseData.getBoolean("success"));
-        Assert.assertEquals("Conversation not found!", responseData.getString("message"));
-	} catch (JSONException e) {
-        Mockito.doThrow(e);
-    }
+    Mockito.verify(chatPollServlet.getChatRequestValidator()).validateRequest(mockRequest, "/chat/poll/");
+    Mockito.verify(chatPollServlet.getChatRequestValidator()).respondWithErrorMessage(mockResponse, "Conversation not found!");
   }
 
   @Test
@@ -161,16 +143,18 @@ public class ChatPollServletTest {
 
     chatPollServlet.doPost(mockRequest, mockResponse);
 
+    Mockito.verify(chatPollServlet.getChatRequestValidator()).validateRequest(mockRequest, "/chat/poll/");
+
     ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
-    
+
 	try {
 		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
         Assert.assertEquals(true, responseData.getBoolean("success"));
         Assert.assertEquals(false, responseData.getBoolean("foundNewMessages"));
 	} catch (JSONException e) {
         Mockito.doThrow(e);
-	} 
+	}
   }
 
   @Test
@@ -192,7 +176,7 @@ public class ChatPollServletTest {
     Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(currentInstant.minusSeconds(10).toString());
 
     List<Message> fakeMessageList = new ArrayList<>();
-    
+
     // Should not be added in the response
     Message actualMessage0 = new Message(
         UUID.randomUUID(),
@@ -200,7 +184,7 @@ public class ChatPollServletTest {
         fakeUser.getId(),
         "test message 0",
         currentInstant.minusSeconds(10));
-                                
+
     // Should be added in the response
     Message actualMessage1 = new Message(
         UUID.randomUUID(),
@@ -208,7 +192,7 @@ public class ChatPollServletTest {
         fakeUser.getId(),
         "test message 1",
         currentInstant.minusSeconds(5));
-        
+
     // Should be added in the response
     Message actualMessage2 = new Message(
         UUID.randomUUID(),
@@ -216,7 +200,7 @@ public class ChatPollServletTest {
         fakeUser.getId(),
         "test message 2",
         currentInstant);
-    
+
     fakeMessageList.add(actualMessage0);
     fakeMessageList.add(actualMessage1);
     fakeMessageList.add(actualMessage2);
@@ -226,14 +210,16 @@ public class ChatPollServletTest {
 
     chatPollServlet.doPost(mockRequest, mockResponse);
 
+    Mockito.verify(chatPollServlet.getChatRequestValidator()).validateRequest(mockRequest, "/chat/poll/");
+
     ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
-    
+
 	try {
 		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
         Assert.assertEquals(true, responseData.getBoolean("success"));
         Assert.assertEquals(true, responseData.getBoolean("foundNewMessages"));
-        
+
         JSONArray messageJsonArray = responseData.getJSONArray("messages");
         JSONObject messageJsonObject1 = messageJsonArray.getJSONObject(0);
         JSONObject messageJsonObject2 = messageJsonArray.getJSONObject(1);
@@ -244,14 +230,14 @@ public class ChatPollServletTest {
         Assert.assertEquals(mockUserStore.getUser(actualMessage1.getAuthorId()).getName(), messageJsonObject1.getJSONObject("author").getString("name"));
         Assert.assertEquals(actualMessage1.getCreationTime().toString(), messageJsonObject1.getString("creationTime"));
         Assert.assertEquals(actualMessage1.getContent(), messageJsonObject1.getString("content"));
-        
+
         Assert.assertEquals(actualMessage2.getAuthorId().toString(), messageJsonObject2.getJSONObject("author").getString("id"));
         Assert.assertEquals(mockUserStore.getUser(actualMessage2.getAuthorId()).getName(), messageJsonObject2.getJSONObject("author").getString("name"));
         Assert.assertEquals(actualMessage2.getCreationTime().toString(), messageJsonObject2.getString("creationTime"));
         Assert.assertEquals(actualMessage2.getContent(), messageJsonObject2.getString("content"));
 	} catch (JSONException e) {
         Mockito.doThrow(e);
-	} 
+	}
   }
 
   @Test
@@ -267,7 +253,7 @@ public class ChatPollServletTest {
         new Conversation(UUID.randomUUID(), UUID.randomUUID(), "test_conversation", Instant.now());
     Mockito.when(mockConversationStore.getConversationWithTitle("test_conversation"))
         .thenReturn(fakeConversation);
-        
+
     Instant currentInstant = Instant.now();
 
     Mockito.when(mockRequest.getParameter("lastMessageTime")).thenReturn(currentInstant.toString());
@@ -285,15 +271,17 @@ public class ChatPollServletTest {
 
     chatPollServlet.doPost(mockRequest, mockResponse);
 
+    Mockito.verify(chatPollServlet.getChatRequestValidator()).validateRequest(mockRequest, "/chat/poll/");
+
     ArgumentCaptor<String> responseDataStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(mockResponse.getOutputStream()).print(responseDataStringArgumentCaptor.capture());
-    
+
 	try {
 		JSONObject responseData = new JSONObject(responseDataStringArgumentCaptor.getValue());
         Assert.assertEquals(true, responseData.getBoolean("success"));
         Assert.assertEquals(false, responseData.getBoolean("foundNewMessages"));
 	} catch (JSONException e) {
         Mockito.doThrow(e);
-	} 
+	}
   }
 }

@@ -3,6 +3,8 @@ package codeu.model.store.persistence;
 import codeu.model.data.Conversation;
 import codeu.model.data.Message;
 import codeu.model.data.User;
+import codeu.model.data.VideoEvent;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import java.time.Instant;
@@ -28,7 +30,8 @@ public class PersistentDataStoreTest {
   @Before
   public void setup() {
     appEngineTestHelper.setUp();
-    persistentDataStore = new PersistentDataStore();
+    persistentDataStore =
+        new PersistentDataStoreImpl(DatastoreServiceFactory.getDatastoreService());
   }
 
   @After
@@ -156,5 +159,58 @@ public class PersistentDataStoreTest {
     Assert.assertEquals(authorTwo, resultMessageTwo.getAuthorId());
     Assert.assertEquals(contentTwo, resultMessageTwo.getContent());
     Assert.assertEquals(creationTwo, resultMessageTwo.getCreationTime());
+  }
+
+  @Test
+  public void testSaveAndLoadVideoEvents() throws PersistentDataStoreException {
+    UUID idOne = UUID.randomUUID();
+    UUID conversationOne = UUID.randomUUID();
+    UUID authorOne = UUID.randomUUID();
+    String videoIdOne = "test video id one";
+    Instant creationOne = Instant.ofEpochMilli(1000);
+    String videoStateOne = "{playerState: 1}";
+    UUID seekOwnerOne = UUID.randomUUID();
+    double seekTimeOne = 5;
+    VideoEvent inputVideoEventOne =
+        new VideoEvent(idOne, conversationOne, authorOne, videoIdOne, creationOne, videoStateOne, seekOwnerOne, seekTimeOne);
+
+    UUID idTwo = UUID.randomUUID();
+    UUID conversationTwo = UUID.randomUUID();
+    UUID authorTwo = UUID.randomUUID();
+    String videoIdTwo = "test video id two";
+    Instant creationTwo = Instant.ofEpochMilli(2000);
+    String videoStateTwo = "{playerState: 0}";
+    UUID seekOwnerTwo = UUID.randomUUID();
+    double seekTimeTwo = 10;
+    VideoEvent inputVideoEventTwo =
+        new VideoEvent(idTwo, conversationTwo, authorTwo, videoIdTwo, creationTwo, videoStateTwo, seekOwnerTwo, seekTimeTwo);
+
+    // save
+    persistentDataStore.writeThrough(inputVideoEventOne);
+    persistentDataStore.writeThrough(inputVideoEventTwo);
+
+    // load
+    List<VideoEvent> resultVideoEvents = persistentDataStore.loadVideoEvents();
+
+    // confirm that what we saved matches what we loaded (Ascending order based on creation time)
+    VideoEvent resultVideoEventOne = resultVideoEvents.get(0);
+    Assert.assertEquals(idOne, resultVideoEventOne.getId());
+    Assert.assertEquals(conversationOne, resultVideoEventOne.getConversationId());
+    Assert.assertEquals(authorOne, resultVideoEventOne.getAuthorId());
+    Assert.assertEquals(videoIdOne, resultVideoEventOne.getVideoId());
+    Assert.assertEquals(creationOne, resultVideoEventOne.getCreationTime());
+    Assert.assertEquals(videoStateOne, resultVideoEventOne.getVideoStateJSON());
+    Assert.assertEquals(seekOwnerOne, resultVideoEventOne.getSeekOwnerId());
+    Assert.assertEquals(seekTimeOne, resultVideoEventOne.getSeekTime(), 0.0001);
+
+    VideoEvent resultVideoEventTwo = resultVideoEvents.get(1);
+    Assert.assertEquals(idTwo, resultVideoEventTwo.getId());
+    Assert.assertEquals(conversationTwo, resultVideoEventTwo.getConversationId());
+    Assert.assertEquals(authorTwo, resultVideoEventTwo.getAuthorId());
+    Assert.assertEquals(videoIdTwo, resultVideoEventTwo.getVideoId());
+    Assert.assertEquals(creationTwo, resultVideoEventTwo.getCreationTime());
+    Assert.assertEquals(videoStateTwo, resultVideoEventTwo.getVideoStateJSON());
+    Assert.assertEquals(seekOwnerTwo, resultVideoEventTwo.getSeekOwnerId());
+    Assert.assertEquals(seekTimeTwo, resultVideoEventTwo.getSeekTime(), 0.0001);
   }
 }

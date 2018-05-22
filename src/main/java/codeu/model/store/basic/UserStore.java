@@ -15,7 +15,7 @@
 package codeu.model.store.basic;
 
 import codeu.model.data.User;
-import codeu.model.store.persistence.PersistentStorageAgent;
+import codeu.model.store.persistence.PersistentDataStore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,47 +26,27 @@ import java.util.UUID;
  * instance.
  */
 public class UserStore {
-
-  /** Singleton instance of UserStore. */
-  private static UserStore instance;
-
-  /**
-   * Returns the singleton instance of UserStore that should be shared between all servlet classes.
-   * Do not call this function from a test; use getTestInstance() instead.
-   */
-  public static UserStore getInstance() {
-    if (instance == null) {
-      instance = new UserStore(PersistentStorageAgent.getInstance());
-    }
-    return instance;
-  }
-
-  /**
-   * Instance getter function used for testing. Supply a mock for PersistentStorageAgent.
-   *
-   * @param persistentStorageAgent a mock used for testing
-   */
-  public static UserStore getTestInstance(PersistentStorageAgent persistentStorageAgent) {
-    return new UserStore(persistentStorageAgent);
-  }
-
   /**
    * The PersistentStorageAgent responsible for loading Users from and saving Users to Datastore.
    */
-  private PersistentStorageAgent persistentStorageAgent;
+  private PersistentDataStore persistentStorageAgent;
+  private DefaultDataStore defaultDataStore;
 
   /** The in-memory list of Users. */
   private List<User> users;
 
   /** This class is a singleton, so its constructor is private. Call getInstance() instead. */
-  private UserStore(PersistentStorageAgent persistentStorageAgent) {
+  public UserStore(
+      PersistentDataStore persistentStorageAgent,
+      DefaultDataStore defaultDataStore) {
     this.persistentStorageAgent = persistentStorageAgent;
+    this.defaultDataStore = defaultDataStore;
     users = new ArrayList<>();
   }
 
   /** Add a set of randomly-generated User objects. */
   public void loadTestData() {
-    users.addAll(DefaultDataStore.getInstance().getAllUsers());
+    users.addAll(defaultDataStore.getAllUsers());
   }
 
   /** Load a set of given User objects. */

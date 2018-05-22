@@ -1,24 +1,18 @@
 package codeu.controller;
 
-import static org.junit.Assume.assumeNoException;
-
-import java.io.IOException;
-import java.time.Instant;
-import java.util.UUID;
 import codeu.model.data.User;
 import codeu.model.store.basic.UserStore;
-
+import java.io.IOException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mindrot.jbcrypt.BCrypt;
 
 public class RegisterServletTest {
 

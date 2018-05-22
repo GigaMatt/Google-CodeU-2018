@@ -54,13 +54,6 @@ public class AdminServletTest {
   private MessageStore mockMessageStore;
   private UserStore mockUserStore;
 
-  @Captor
-  ArgumentCaptor<ArrayList<Conversation>> cArgumentCaptor;
-
-  @Captor
-  ArgumentCaptor<ArrayList<Message>> mArgumentCaptor;
-
-
   @Before
   public void setup() {
     adminServlet = new AdminServlet();
@@ -178,11 +171,9 @@ public class AdminServletTest {
 
     adminServlet.doPost(mockRequest, mockResponse);
 
-    Mockito.verify(mockUserStore, times(28)).addUser(any(User.class));
-    Mockito.verify(mockConversationStore).loadTestData(cArgumentCaptor.capture());
-    Assert.assertEquals(22, cArgumentCaptor.getValue().size());
-    Mockito.verify(mockMessageStore).loadTestData(mArgumentCaptor.capture());
-    Assert.assertEquals(822, mArgumentCaptor.getValue().size());
+    Mockito.verify(mockUserStore, times(22)).addUser(any(User.class));
+    Mockito.verify(mockConversationStore, times(22)).addConversation(any(Conversation.class));
+    Mockito.verify(mockMessageStore, times(822)).addMessage(any(Message.class));
     Mockito.verify(mockResponse).sendRedirect("/admin");
   }
 
