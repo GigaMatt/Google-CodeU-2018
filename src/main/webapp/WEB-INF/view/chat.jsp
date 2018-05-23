@@ -405,7 +405,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         let messageItem = document.createElement("li");
         messageItem.classList.add('message-item');
         messageItem.setAttribute('creation-time', newMessage.creationTime);
-        messageItem.innerHTML = '<strong>' + newMessage.author.name + ': </strong>' + newMessage.content;
+        messageItem.innerHTML = '<a href = "/users/' + newMessage.author.name + '"><strong>' + newMessage.author.name + '</a>: </strong>' + newMessage.content;
 
         chatList.appendChild(messageItem);
       });
