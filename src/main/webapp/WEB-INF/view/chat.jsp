@@ -206,6 +206,26 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
   <!-- Includes the Interact Library  -->
   <script src="/js/interact.min.js"></script>
 
-  <%@ include file="/include/chat/chatJavaScript.jsp" %>
+  <script>
+    const CONVERSATION_TITLE = "<%= conversation.getTitle() %>";
+  </script>
+
+  <%-- Includes the main chat js file --%>
+  <script src="/js/chat/chat.js"></script>
+
+  <%
+      if (request.getSession().getAttribute("user") != null) {
+          String username = (String) request.getSession().getAttribute("user");
+  %>
+
+    <script>
+        const LOGGED_IN_USERNAME = "<%= username %>";
+    </script>
+
+    <%-- Includes the video player script --%>
+    <script src="/js/chat/videoPlayerAddon.js"></script>
+
+  <% } %>
+
 </body>
 </html>
