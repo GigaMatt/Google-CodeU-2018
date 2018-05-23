@@ -75,6 +75,6 @@ public class ProfileServlet extends HttpServlet {
       //user1.setDescription(descript);
       //persistentStorageAgent.writeThrough(user);
       //userStore.writeThrough(user);
-  		response.sendRedirect("/users/");
+  		response.sendRedirect("/users/" + request.getSession().getAttribute("user"));
 	} 
 }
