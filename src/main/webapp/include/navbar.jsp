@@ -2,7 +2,7 @@
     <a id="navTitle" href="/">CodeU Chat App</a>
     <a href="/conversations">Conversations</a>
     <% if(request.getSession().getAttribute("user") != null){ %>
-        <a href="/users">Hello <%= request.getSession().getAttribute("user") %>!</a>
+        <a href="/users/<%= request.getSession().getAttribute("user") %>">Hello <%= request.getSession().getAttribute("user") %>!</a>
         <a href="/logout">Log Out</a>
         <%
       if(request.getSession().getAttribute("role").equals("admin"))  {
