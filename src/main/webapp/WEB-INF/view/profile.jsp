@@ -32,7 +32,7 @@
 
     <!-- prints the name of the user logged in, or an error message-->
     <% if(request.getSession().getAttribute("user") != null){ %>
-        <h1><a><%= request.getSession().getAttribute("user") %>'s Profile Page</a></h1>
+        <h1><a><%= request.getAttribute("user") %>'s Profile Page</a></h1>
     <% } else{ %>
         <h1>You are not logged in!</h1>
     <% } %>
@@ -40,7 +40,7 @@
     <br>
 
      <!-- about section --> 
-     <h3>About  <%= request.getSession().getAttribute("user") %> </h3>
+     <h3>About  <%= request.getAttribute("user") %> </h3>
      
      <!-- info from datastore -->
      <p><%=request.getAttribute("description")%></p>
