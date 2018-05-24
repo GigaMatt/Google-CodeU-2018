@@ -118,7 +118,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
         <div id="youtube-player"></div>
         <br/>
         <div id="youtube-player-tools">
-          <input id="youtube-player-videoid-input" type="url" placeholder="Enter a Youtube Video's ID" onkeypress="onEnterPressed(event, onYoutubeVideoIdSubmitted)"/>
+          <input id="youtube-player-videoid-input" type="url" placeholder="Enter a Youtube Video's URL (or) ID" onkeypress="onEnterPressed(event, onYoutubeVideoIdSubmitted)"/>
           <input id="youtube-player-videoid-input-submit" type="button" value="Load" onclick="onYoutubeVideoIdSubmitted()" />
         </div>
       </div>

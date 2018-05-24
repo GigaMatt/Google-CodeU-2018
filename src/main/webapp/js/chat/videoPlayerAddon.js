@@ -86,11 +86,42 @@ function onYoutubePlayerStateChange(event) {
     }
 }
 
+function removePrefix(str, prefix) {
+    if (str.startsWith(prefix)) {
+        return str.replace(prefix, '');
+    }
+
+    return str;
+}
+
 // Loads a youtube video using the entered videoId
 function onYoutubeVideoIdSubmitted() {
     //console.log(youtubePlayer);
     let videoIdInput = document.querySelector("#youtube-player-videoid-input");
     let videoId = videoIdInput.value.trim();
+
+    // Getting VideoId from URL
+    videoId = removePrefix(videoId, 'https://');
+    videoId = removePrefix(videoId, 'http://');
+    videoId = removePrefix(videoId, 'www.');
+
+    videoId = removePrefix(videoId, 'youtu.be/');
+    videoId = removePrefix(videoId, 'youtube.com/embed/');
+
+    if(videoId.startsWith('youtube.com/watch?')) {
+        videoId = videoId.replace('youtube.com/watch?', '');
+
+        let urlParams = videoId.split('&');
+        urlParams.forEach(function (param) {
+           let keyVal = param.split('=');
+           if (keyVal.length === 2) {
+               if (keyVal[0] === 'v') {
+                   videoId = keyVal[1];
+               }
+           }
+        });
+    }
+
     if(videoId !== "") {
         youtubePlayer.loadVideoById(videoId);
         videoIdInput.value = "";
