@@ -59,6 +59,6 @@ public class ProfileServlet extends HttpServlet {
       User user =  userStore.getUser(username);
       user.setDescription(descript);
       userStore.updateUser(user);
-  		response.sendRedirect("/users/" + request.getSession().getAttribute("user"));
+      response.sendRedirect("/users/" + request.getSession().getAttribute("user"));
 	} 
 }
