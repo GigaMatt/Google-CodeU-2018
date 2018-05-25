@@ -111,7 +111,7 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
   <!-- Navigation Bar -->
     <header>
         <a href="/">
-    	    <img src="images/chatapp-logo.png" class="logo_header" alt="Incodable Logo">
+    	    <img src="/images/chatapp-logo.png" class="logo_header" alt="Incodable Logo">
     	</a>
     	<% if(request.getSession().getAttribute("user") != null){ %>
             <p class="greeting"> Hello, <%= request.getSession().getAttribute("user") %>!</p>
