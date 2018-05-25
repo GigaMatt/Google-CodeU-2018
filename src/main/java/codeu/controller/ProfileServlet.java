@@ -37,8 +37,6 @@ public class ProfileServlet extends HttpServlet {
  @Override
  public void doGet(HttpServletRequest request, HttpServletResponse response)
      throws IOException, ServletException {
-    //User user = request.getSession().getAttribute("user");
-    //String username = (String)request.getSession().getAttribute("user");
     String requestUrl = request.getRequestURI();
     String username = requestUrl.substring("/users/".length());
     if(username == null){
@@ -61,9 +59,6 @@ public class ProfileServlet extends HttpServlet {
       User user =  userStore.getUser(username);
       user.setDescription(descript);
       userStore.updateUser(user);
-      //user1.setDescription(descript);
-      //persistentStorageAgent.writeThrough(user);
-      //userStore.writeThrough(user);
   		response.sendRedirect("/users/" + request.getSession().getAttribute("user"));
 	} 
 }
