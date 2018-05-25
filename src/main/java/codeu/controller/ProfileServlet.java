@@ -37,15 +37,15 @@ public class ProfileServlet extends HttpServlet {
  @Override
  public void doGet(HttpServletRequest request, HttpServletResponse response)
      throws IOException, ServletException {
-    //User user = request.getSession().getAttribute("user");
-    String username = (String)request.getSession().getAttribute("user");
+    String requestUrl = request.getRequestURI();
+    String username = requestUrl.substring("/users/".length());
     if(username == null){
       response.sendRedirect("/login");
     }else {
       User user =  userStore.getUser(username);
       String descript = user.getDescription();
-      //request.getSession().setAttribute("description", descript);
       request.setAttribute("description", descript);
+      request.setAttribute("user", username);
       request.getRequestDispatcher("/WEB-INF/view/profile.jsp").forward(request, response);
   }
  }
@@ -59,9 +59,6 @@ public class ProfileServlet extends HttpServlet {
       User user =  userStore.getUser(username);
       user.setDescription(descript);
       userStore.updateUser(user);
-      //user1.setDescription(descript);
-      //persistentStorageAgent.writeThrough(user);
-      //userStore.writeThrough(user);
-  		response.sendRedirect("/users/");
+      response.sendRedirect("/users/" + request.getSession().getAttribute("user"));
 	} 
 }

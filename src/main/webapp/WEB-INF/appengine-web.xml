@@ -18,10 +18,6 @@
     <application>incodables-chat-app</application>
     <version>1</version>
     <threadsafe>false</threadsafe>
-    <static-files>
-        <include path="/images/**.png" >
-        </include>
-    </static-files>
     <sessions-enabled>true</sessions-enabled>
     <runtime>java8</runtime>
 </appengine-web-app>

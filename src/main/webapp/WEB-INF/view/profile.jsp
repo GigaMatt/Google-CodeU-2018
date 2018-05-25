@@ -13,50 +13,67 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 --%>
-<!DOCTYPE html>
-<html>
-  <head>
-   <title>Profile Page</title>
-   <link rel="stylesheet" href="/css/main.css">
-   <style>
-     label {
-       display: inline-block;
-       width: 100px;
-     }
-   </style>
-  </head>
-  <body>
+<!doctype html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profile</title>
+<link href="/css/main.css" rel="stylesheet" type="text/css">
+</head>
 
-  <%@ include file="/include/navbar.jsp" %>
-   <div id="container">
+<body>
+<!-- Main Body -->
+<div class="container">
+<!-- Navigation Bar -->
+  <header>
+    <a href="/">
+	    <img src="/images/chatapp-logo.png" class="logo_header" alt="Incodable Logo">
+	</a>
+	<% if(request.getSession().getAttribute("user") != null){ %>
+        <p class="greeting"> Hello, <%=request.getSession().getAttribute("user") %>!</p>
+        <nav>
+              <ul>
+                <li><a href="/conversations"> Conversations </a></li>
+                <% if(request.getSession().getAttribute("role").equals("admin"))  {%>
+                    <li><a href="/admin"> Admin </a></li>
+                <% } %>
+                <li style="text-decoration: underline;"><div id="diamond" style="background-color: blue;"></div>
+                <a href="/users/<%=request.getSession().getAttribute("user") %>"> Profile </a></li>
+                <li><a href="/logout"> Log Out </a></li>
+              </ul>
+        </nav>
+     <% } else { %>
+     <nav>
+        <ul>
+            <li><a href="/">Back to Home</a></li>
+        </ul>
+     </nav>
+     <% } %>
+  </header>
+    <div class="content2">
+        <p class="heading" style="text-align:center;">[ <%= request.getAttribute("user") %>'s Profile Page ]</p>
+    	  <div style="text-align: center;">
+    			 <p style="display: inline-block; vertical-align: top; margin-right: 40px; font-size:20px; font-weight:lighter;"> About </p>
+    		     <div class="textblock" style="display: inline-block;">
+                    <p style="text-align:left;"><%=request.getAttribute("description")%></p>
+    		     </div>
+    	   </div>
 
-    <!-- prints the name of the user logged in, or an error message-->
-    <% if(request.getSession().getAttribute("user") != null){ %>
-        <h1><a><%= request.getSession().getAttribute("user") %>'s Profile Page</a></h1>
-    <% } else{ %>
-        <h1>You are not logged in!</h1>
-    <% } %>
-    <hr>
-    <br>
-
-     <!-- about section --> 
-     <h3>About  <%= request.getSession().getAttribute("user") %> </h3>
-     
-     <!-- info from datastore -->
-     <p><%=request.getAttribute("description")%></p>
-     <br>
-     <h3> Edit your About Me (only you can see this)</h3>
-     
-     <form action="" method="POST">
-       <textarea cols="100" id="description" name="description"><%=request.getAttribute("description")%></textarea>
-       <br>
-       <button type="submit">Submit</button>
-     </form>
-     <hr>
-
-     <!-- messages section 
-     <h3><%= request.getSession().getAttribute("user") %>'s Sent Messages</h3>
-      -->
-   </div>
-  </body>
+        <% if(request.getSession().getAttribute("user").equals(request.getAttribute("user"))){ %>
+              <br>
+        	  <p class="heading"> Edit Your About Me (only you can see this)</p>
+        	  <form action="" method="POST">
+                  <textarea cols="100" id="description" name="description"></textarea>
+                  <br>
+                  <button type="submit">Submit</button>
+              </form>
+        <% } %>
+    </div>
+    <footer>
+    	<h4 class="codeu">Google CodeU Chat App</h4>
+    </footer>
+</div>
+</body>
 </html>

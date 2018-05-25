@@ -28,7 +28,9 @@
 <div class="container">
     <!-- Navigation Bar -->
     <header>
-	    <img src="images/chatapp-logo.png" class="logo_header" alt="Incodable Logo">
+        <a href="/">
+	        <img src="images/chatapp-logo.png" class="logo_header" alt="Incodable Logo">
+        </a>
         <nav>
             <ul>
                 <li><a href="/">Back to Home</a></li>
@@ -48,11 +50,11 @@
                 <input type="password" name="password" id="password">
                 <br/><br/>
                 <button type="submit">Login</button>
-                <% if(request.getAttribute("error") != null){ %>
-                    <h4 style="color:red"><%= request.getAttribute("error") %></h4>
-                <% } %>
        	    </div>
         </form>
+        <% if(request.getAttribute("error") != null){ %>
+                            <h4 style="color:red"><%= request.getAttribute("error") %></h4>
+                        <% } %>
     </div>
     <footer>
 	<h4 class="codeu">Google CodeU Chat App</h4>
