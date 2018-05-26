@@ -66,12 +66,12 @@
                 <form action="/conversations" method="POST">
                     <label>Title:</label>
                     <input type="text" name="conversationTitle">
-                    <button type="submit" style="margin-left: 15px;">Create</button>
+                    <button type="submit" style="margin-left: 54px;">Create</button>
                 </form>
             </div>
             <br>
             <p class="heading"> Current Conversations</p>
-            <div style="width:50%; padding: 20px; border: 1px solid #BEBEBE">
+            <div style="width:50%; padding: 20px; border: 1px solid #BEBEBE; overflow:auto;">
                     <%
                       List<Conversation> conversations =
                         (List<Conversation>) request.getAttribute("conversations");

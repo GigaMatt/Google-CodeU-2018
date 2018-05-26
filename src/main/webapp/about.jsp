@@ -19,8 +19,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Registration</title>
-<link href="css/singlePageTemplate.css" rel="stylesheet" type="text/css">
+<title>About</title>
+<link href="css/main.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
@@ -29,7 +29,7 @@
 <!-- Navigation Bar -->
   <header>
     <a href="/index.jsp">
-	    <img src="chatapp-logo.png" class="logo_header" alt="Incodable Logo">
+	    <img src="images/chatapp-logo.png" class="logo_header" alt="Incodable Logo">
 	</a>
     <nav>
       <ul>

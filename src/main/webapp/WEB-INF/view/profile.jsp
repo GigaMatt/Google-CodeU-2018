@@ -55,7 +55,7 @@
     <div class="content2">
         <p class="heading" style="text-align:center;">[ <%= request.getAttribute("user") %>'s Profile Page ]</p>
     	  <div style="text-align: center;">
-    			 <p style="display: inline-block; vertical-align: top; margin-right: 40px; font-size:20px; font-weight:lighter;"> About </p>
+    			 <p style="display: inline-block; vertical-align: top; margin-right: 40px; font-size:20px; font-weight:lighter;"> About: </p>
     		     <div class="textblock" style="display: inline-block;">
                     <p style="text-align:left;"><%=request.getAttribute("description")%></p>
     		     </div>
