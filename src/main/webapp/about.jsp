@@ -43,30 +43,22 @@
 	 <div style ="margin-left:25px;">
 	<p class="heading" style="text-align:center;">Project Spec</p>
 	  <p>
-        This is an example chat application designed to be a starting point
-        for your CodeU project team work. Here's some stuff to think about:
+        Our chat application has some awesome features such as:
       </p>
 
       <ul>
-        <li><strong>Algorithms and data structures:</strong> We've made the app
-            and the code as simple as possible. You will have to extend the
-            existing data structures to support your enhancements to the app,
-            and also make changes for performance and scalability as your app
-            increases in complexity.</li>
-        <li><strong>Look and feel:</strong> The focus of CodeU is on the Java
-          side of things, but if you're particularly interested you might use
-          HTML, CSS, and JavaScript to make the chat app prettier.</li>
-        <li><strong>Customization:</strong> Think about a group you care about.
-          What needs do they have? How could you help? Think about technical
-          requirements, privacy concerns, and accessibility and
-          internationalization.</li>
+        <li><strong>In-App Video Synchronization:</strong> Stream videos together right from the chat screen. Play, Pause, Stop or Seek, and the video stays synced for all users in real time.</li>
+        <li><strong>Profile Pages:</strong> Write a little something about yourself, and let others get to know you.</li>
+        <li><strong>Stylized Chat:</strong> Why send plain old text when you can customize the look and feel of each message? Make the font bigger/smaller, change colors, and express yourself with the way you chat!</li>
+        <li><strong>Admin Area:</strong> Wanna know the app stats? Number of users, messages, and conversations??? Try the admin mode. Login with the following credentials, <i>username: <b>admin</b></i> and <i>password: <b>admin password</b></i></li>
+        <li><strong>Fresh Design:</strong> Who doesn't love a fresh UI?</li>
       </ul>
 	  </div>
 	  <div style ="margin-left:25px;">
 	<p class="heading" style="text-align:center;">About the Incodables Team</p>
 	<ul>
         <li><strong>Stephanie Yang:</strong> Rising senior at Rice University. Loves to eat sweets and learn about everything.</li>
-        <li><strong>Azee Murugan:</strong> Sophomore at Southern Arkansas University. Loves everything tech! In his free time he plays soccer and loves to travel!</li>
+        <li><strong>Azee Murugan:</strong> Rising Sophomore at Southern Arkansas University. Loves everything tech! In his free time, plays soccer and loves to travel!</li>
         <li><strong>Hannah Dettmann:</strong> Rising junior CS major at St. Olaf College.
         In her free time she likes to bike, visit farmers markets, and start tech projects.</li>
     </ul>
