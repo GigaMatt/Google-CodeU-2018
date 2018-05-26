@@ -107,9 +107,34 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
   </style>
 </head>
 <body onload="onBodyLoaded();">
-
-
-  <%@ include file="/include/navbar.jsp" %>
+  <div class="container">
+  <!-- Navigation Bar -->
+    <header>
+        <a href="/">
+    	    <img src="/images/chatapp-logo.png" class="logo_header" alt="Incodable Logo">
+    	</a>
+    	<% if(request.getSession().getAttribute("user") != null){ %>
+            <p class="greeting"> Hello, <%= request.getSession().getAttribute("user") %>!</p>
+              <nav>
+                  <ul>
+                    <li style="text-decoration: underline;"><div id="diamond" style="background-color: green;"></div>
+                        <a href="/conversations"> Conversations </a></li>
+                    <% if(request.getSession().getAttribute("role").equals("admin"))  {%>
+                        <li><a href="/admin"> Admin </a></li>
+                    <% } %>
+                    <li><a href="/users/<%= request.getSession().getAttribute("user") %>"> Profile </a></li>
+                    <li><a href="/logout"> Log Out </a></li>
+                  </ul>
+              </nav>
+         <% } else { %>
+              <nav>
+                <ul>
+                    <li><a href="/">Back to Home</a></li>
+                </ul>
+              </nav>
+         <% } %>
+     </header>
+     <div class="content2">
 
   <div id="youtube-player-container">
     <div style="position: relative; width: 100%; height:100%">
@@ -131,11 +156,9 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     </div>
   </div>
 
-  <div id="container">
-
-    <h1><%= conversation.getTitle() %>
+    <p class="heading" style="text-align:center;"><%= conversation.getTitle() %>
       <a style="float: right; cursor: pointer; background: blue; padding: 0 15px; border-radius: 50px; color: white;" onclick="checkForNewMessages()">&#8635;</a>
-    </h1>
+    </p>
 
     <hr/>
 
@@ -189,10 +212,11 @@ List<Message> messages = (List<Message>) request.getAttribute("messages");
     </form>
 
     <% } else { %>
-      <p><a href="/login">Login</a> to send a message.</p>
+      <p class="heading red" style="text-align:center;"><a href="/login">Login</a> to send a message.</p>
     <% } %>
 
     <hr/>
+    </div>
 
   </div>
 

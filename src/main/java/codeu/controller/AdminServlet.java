@@ -143,8 +143,8 @@ public class AdminServlet extends HttpServlet {
         File file = new File(classLoader.getResource("files/Romeo_and_Juliet").getFile());
         DataParse parsedData = parseFile(file);
         parsedData.allUsers.values().stream().forEach(x -> userStore.addUser(x));
-        conversationStore.loadTestData(parsedData.allConversations);
-        messageStore.loadTestData(parsedData.allMessages);
+        parsedData.allConversations.stream().forEach(x-> conversationStore.addConversation(x));
+        parsedData.allMessages.stream().forEach(x -> messageStore.addMessage(x));
       } else {
         userStore.loadTestData();
         conversationStore.loadTestData();

@@ -13,33 +13,44 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 --%>
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en-US">
 <head>
-  <title>CodeU Chat App</title>
-  <link rel="stylesheet" href="/css/main.css">
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Incodable CodeU Chat App</title>
+<link href="css/main.css" rel="stylesheet" type="text/css">
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
 </head>
 <body>
-
-  <%@ include file="/include/navbar.jsp" %>
-
-  <div id="container">
-    <div
-      style="width:75%; margin-left:auto; margin-right:auto; margin-top: 50px;">
-
-      <h1>CodeU Chat App</h1>
-      <h2>Welcome!</h2>
-
+<!-- Main Body -->
+<div class="container">
+<!-- Navigation Bar -->
+  <header>
+    <nav>
       <ul>
-        <li><a href="/login">Login</a> to get started.</li>
-        <li>Go to the <a href="/conversations">conversations</a> page to
-            create or join a conversation.</li>
-        <li>View the <a href="/about.jsp">about</a> page to learn more about the
-            project.</li>
-        <li>You can <a href="/testdata">load test data</a> to fill the site with
-            example data.</li>
+        <li><a href="/about.jsp">About Us</a></li>
+        <li><a href="/login">Log In</a> or <a href="/register">Register</a></li>
       </ul>
-    </div>
-  </div>
+    </nav>
+  </header>
+	<!-- Content -->
+  <section class="content" id="welcome">
+    <p class="title">Welcome!</p>
+    <p class="tagline">Why wait? Start an incodable chat experience now.</p>
+	<img src="images/chatapp-logo.png" class="logo_display" alt="Incodable Logo">
+	<h2 class="tagline red">F E A T U R E S</h2>
+	<p class="tagline">In-App Video Synchronization - Profile Pages - Stylized Text - Administrator Privileges</p>
+	</section>
+<footer>
+	<h4 class="codeu">Google CodeU Chat App</h4>
+	</footer>
+</div>
 </body>
 </html>

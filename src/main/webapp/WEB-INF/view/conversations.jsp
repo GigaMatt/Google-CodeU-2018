@@ -16,62 +16,87 @@
 <%@ page import="java.util.List" %>
 <%@ page import="codeu.model.data.Conversation" %>
 
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en-US">
 <head>
-  <title>Conversations</title>
-  <link rel="stylesheet" href="/css/main.css">
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conversations</title>
+<link href="/css/main.css" rel="stylesheet" type="text/css">
 </head>
+
 <body>
-  
-  <%@ include file="/include/navbar.jsp" %>
+<!-- Main Body -->
+<div class="container">
+<!-- Navigation Bar -->
+  <header>
+    <a href="/">
+	    <img src="/images/chatapp-logo.png" class="logo_header" alt="Incodable Logo">
+	</a>
+	<% if(request.getSession().getAttribute("user") != null){ %>
+        <p class="greeting"> Hello, <%= request.getSession().getAttribute("user") %>!</p>
+          <nav>
+              <ul>
+                <li style="text-decoration: underline;"><div id="diamond" style="background-color: green;"></div>
+                    <a href="/conversations"> Conversations </a></li>
+                <% if(request.getSession().getAttribute("role").equals("admin"))  {%>
+                    <li><a href="/admin"> Admin </a></li>
+                <% } %>
+                <li><a href="/users/<%= request.getSession().getAttribute("user") %>"> Profile </a></li>
+                <li><a href="/logout"> Log Out </a></li>
+              </ul>
+          </nav>
+     <% } else { %>
+          <nav>
+            <ul>
+                <li><a href="/">Back to Home</a></li>
+            </ul>
+          </nav>
+     <% } %>
+  </header>
+  <!-- Content -->
+	<% if(request.getSession().getAttribute("user") != null){ %>
+        <div class="content2">
+          <% if(request.getAttribute("error") != null){ %>
+                <h2 style="color:red; text-align:center;"><%= request.getAttribute("error") %></h2>
+          <% } %>
+            <p class="heading">New Conversation</p>
+            <div style="width:260px; padding: 20px; border: 1px solid #BEBEBE">
+                <form action="/conversations" method="POST">
+                    <label>Title:</label>
+                    <input type="text" name="conversationTitle">
+                    <button type="submit" style="margin-left: 54px;">Create</button>
+                </form>
+            </div>
+            <br>
+            <p class="heading"> Current Conversations</p>
+            <div style="width:50%; padding: 20px; border: 1px solid #BEBEBE; overflow:auto;">
+                    <%
+                      List<Conversation> conversations =
+                        (List<Conversation>) request.getAttribute("conversations");
+                      if(conversations == null || conversations.isEmpty()){
+                    %>
+                        <p style="text-align:center;">Create a conversation to get started.</p>
+                    <%} else { %>
+                        <ul>
+                    <%
+                        for(Conversation conversation : conversations) {
+                    %>
+                        <li><a href="/chat/<%= conversation.getTitle() %>">
+                          <%= conversation.getTitle() %></a></li>
+                    <% } %>
+                        </ul>
+                    <% }%>
+            </div>
+          </div>
+     <% } else { %>
+           <p class="heading red" style ="text-align:center;"><a href="/login">Login</a> to view conversations.</p>
+     <% } %>
+     <footer>
+            <h4 class="codeu">Google CodeU Chat App</h4>
+     </footer>
+    </div>
+    </body>
+    </html>
 
-  <div id="container">
-
-    <% if(request.getAttribute("error") != null){ %>
-        <h2 style="color:red"><%= request.getAttribute("error") %></h2>
-    <% } %>
-
-    <% if(request.getSession().getAttribute("user") != null){ %>
-      <h1>New Conversation</h1>
-      <form action="/conversations" method="POST">
-          <div class="form-group">
-            <label class="form-control-label">Title:</label>
-          <input type="text" name="conversationTitle">
-        </div>
-
-        <button type="submit">Create</button>
-      </form>
-
-      <hr/>
-    <% } %>
-
-    <h1>Conversations</h1>
-
-    <%
-    List<Conversation> conversations =
-      (List<Conversation>) request.getAttribute("conversations");
-    if(conversations == null || conversations.isEmpty()){
-    %>
-      <p>Create a conversation to get started.</p>
-    <%
-    }
-    else{
-    %>
-      <ul class="mdl-list">
-    <%
-      for(Conversation conversation : conversations){
-    %>
-      <li><a href="/chat/<%= conversation.getTitle() %>">
-        <%= conversation.getTitle() %></a></li>
-    <%
-      }
-    %>
-      </ul>
-    <%
-    }
-    %>
-    <hr/>
-  </div>
-</body>
-</html>

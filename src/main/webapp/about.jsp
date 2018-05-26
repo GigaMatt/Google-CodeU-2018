@@ -13,22 +13,36 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 --%>
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en-US">
 <head>
-  <title>CodeU Chat App</title>
-  <link rel="stylesheet" href="/css/main.css">
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About</title>
+<link href="css/main.css" rel="stylesheet" type="text/css">
 </head>
+
 <body>
-  
-  <%@ include file="/include/navbar.jsp" %>
-
-  <div id="container">
-    <div
-      style="width:75%; margin-left:auto; margin-right:auto; margin-top: 50px;">
-
-      <h1>About the Incodables CodeU Chat App</h1>
-      <p>
+	<!-- Main Body -->
+<div class="container">
+<!-- Navigation Bar -->
+  <header>
+    <a href="/index.jsp">
+	    <img src="images/chatapp-logo.png" class="logo_header" alt="Incodable Logo">
+	</a>
+    <nav>
+      <ul>
+        <li><a href="/login">Log In</a> or <a href="/register">Register</a></li>
+      </ul>
+    </nav>
+  </header>
+	<!-- Content -->
+  <div class="content">
+    <p class="title"  style="text-align:center; font-size: 45px;">About the Incodables App</p>
+	 <div style ="margin-left:25px;">
+	<p class="heading" style="text-align:center;">Project Spec</p>
+	  <p>
         This is an example chat application designed to be a starting point
         for your CodeU project team work. Here's some stuff to think about:
       </p>
@@ -47,15 +61,22 @@
           requirements, privacy concerns, and accessibility and
           internationalization.</li>
       </ul>
-
-      <h1>About the Incodables Team</h1>
-       <ul>
-        <li><strong>Stepahnie:</strong> put description here </li>
-        <li><strong>Azee:</strong> Sophomore at Southern Arkansas University. Loves everything tech! In his free time, plays Soccer and loves to travel!</li>
-        <li><strong>Hannah:</strong> is a rising junior cs major at St. Olaf College. 
+	  </div>
+	  <div style ="margin-left:25px;">
+	<p class="heading" style="text-align:center;">About the Incodables Team</p>
+	<ul>
+        <li><strong>Stephanie Yang:</strong> Rising senior at Rice University. Loves to eat sweets and learn about everything.</li>
+        <li><strong>Azee Murugan:</strong> Sophomore at Southern Arkansas University. Loves everything tech! In his free time he plays soccer and loves to travel!</li>
+        <li><strong>Hannah Dettmann:</strong> Rising junior CS major at St. Olaf College.
         In her free time she likes to bike, visit farmers markets, and start tech projects.</li>
-      </ul>
-    </div>
-  </div>
+    </ul>
+	<p> Google Mentor: Simon Safar</p>
+	   </div>
+	</div>
+
+<footer>
+	<h4 class="codeu">Google CodeU Chat App</h4>
+</footer>
+</div>
 </body>
 </html>

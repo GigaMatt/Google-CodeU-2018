@@ -18,12 +18,13 @@ public class DataParse {
   }
 
   private UUID findPerson(String name) {
+    String cleanedName = name.trim();
     UUID userID;
-    if(allUsers.containsKey(name)) {
-      userID = allUsers.get(name).getId();
+    if(allUsers.containsKey(cleanedName)) {
+      userID = allUsers.get(cleanedName).getId();
     } else {
       userID = UUID.randomUUID();
-      allUsers.put(name, new User(userID, name.charAt(0) + name.substring(1).toLowerCase(),
+      allUsers.put(cleanedName, new User(userID, cleanedName.charAt(0) + cleanedName.substring(1).toLowerCase(),
               "password", "member", Instant.now(), "test user"));
     }
     return userID;
@@ -48,7 +49,9 @@ public class DataParse {
             String userName = m.group(1);
             UUID userID = findPerson(userName);
             convID = UUID.randomUUID();
-            allConversations.add(new Conversation(convID, userID, token, Instant.now()));
+            allConversations.add(new Conversation(convID, userID,
+                    token.replaceAll("[^a-zA-Z\\d\\s]",  "").replaceAll("\\s", "_"),
+                    Instant.now()));
           }
         } else if (token.matches("(\\b[A-Z]{3,}\\b\\s?)+") && !token.equals("PROLOGUE")) {
           //Meaning a person is talking.
